@@ -92,6 +92,7 @@
 #include "yaesu/FT450.h"
 #include "yaesu/FT450D.h"
 #include "yaesu/FT710.h"
+#include "yaesu/FTX1.h"
 #include "yaesu/FT736R.h"
 #include "yaesu/FT747.h"
 #include "yaesu/FT747GX.h"
@@ -168,6 +169,7 @@ extern RIG_FTdx1200		rig_FTdx1200;	// 32
 extern RIG_FTdx3000		rig_FTdx3000;	// 33
 extern RIG_FT5000		rig_FT5000;		// 34
 extern RIG_FTdx9000		rig_FTdx9000;	// 35
+extern RIG_FTX1  		rig_FTX1;		// 35a
 extern RIG_IC703		rig_IC703;		// 36
 extern RIG_IC705		rig_IC705;		// 37
 extern RIG_IC706MKIIG	rig_IC706MKIIG;	// 38

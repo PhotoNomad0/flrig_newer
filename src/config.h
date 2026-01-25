@@ -2,40 +2,40 @@
 /* src/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Build platform */
-#define BUILD_BUILD_PLATFORM "x86_64-pc-linux-gnu"
+#define BUILD_BUILD_PLATFORM "x86_64-apple-darwin23.6.0"
 
 /* Compiler */
-#define BUILD_COMPILER "gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04.2) "
+#define BUILD_COMPILER "clang: warning: argument unused during compilation: '-std=gnu++11' [-Wunused-command-line-argument]"
 
 /* Configure arguments */
 #define BUILD_CONFIGURE_ARGS ""
 
 /* Build date */
-#define BUILD_DATE "Wed Dec 17 10:02:34 CST 2025"
+#define BUILD_DATE "Sun Jan 25 08:05:36 EST 2026"
 
 /* Build host */
-#define BUILD_HOST "tk7"
+#define BUILD_HOST "SunshineGirl.local"
 
 /* Host platform */
-#define BUILD_HOST_PLATFORM "x86_64-pc-linux-gnu"
+#define BUILD_HOST_PLATFORM "x86_64-apple-darwin23.6.0"
 
 /* Target platform */
-#define BUILD_TARGET_PLATFORM "x86_64-pc-linux-gnu"
+#define BUILD_TARGET_PLATFORM "x86_64-apple-darwin23.6.0"
 
 /* Build user */
-#define BUILD_USER "dave"
+#define BUILD_USER "blm"
 
 /* FLRIG compiler flags */
-#define FLRIG_BUILD_CXXFLAGS "-I$(srcdir) -I$(srcdir)/include -I$(srcdir)/xmlrpcpp -I$(srcdir)/xmlrpcpp -I/usr/local/include -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_THREAD_SAFE -D_REENTRANT -I$(srcdir) -I$(srcdir)/include -pipe -Wall -fexceptions -O2 -DNDEBUG"
+#define FLRIG_BUILD_CXXFLAGS "-I$(srcdir) -I$(srcdir)/include -I$(srcdir)/xmlrpcpp -fno-stack-check -mmacosx-version-min=10.11 -I$(srcdir)/xmlrpcpp -I/usr/local/include -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT -I$(srcdir) -I$(srcdir)/include -pipe -Wall -fexceptions -O2 -fno-stack-check -mmacosx-version-min=10.11 -DNDEBUG"
 
 /* FLRIG linker flags */
-#define FLRIG_BUILD_LDFLAGS "-L/usr/local/lib -lfltk_images /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/x86_64-linux-gnu/libpng.so /usr/lib/x86_64-linux-gnu/libz.so -lfltk -lm -lpthread -lXinerama -lXfixes -lXcursor -L/usr/lib/x86_64-linux-gnu -lpangoxft-1.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lharfbuzz -lfontconfig -lfreetype -lXft -lpangocairo-1.0 -lcairo -lgtk-3 -lgdk-3 -lgio-2.0 -lX11 -lXrender -lwayland-cursor -lwayland-client -lxkbcommon -ldbus-1 -ldl -lX11 -L/usr/local/lib -lgpiod -ludev"
+#define FLRIG_BUILD_LDFLAGS "-L/usr/local/lib -lfltk_images -lpng -lz -ljpeg -lfltk -lpthread -framework Cocoa -framework IOKit -framework CoreFoundation"
 
 /* FLTK API major version */
 #define FLRIG_FLTK_API_MAJOR 1
 
 /* FLTK API minor version */
-#define FLRIG_FLTK_API_MINOR 4
+#define FLRIG_FLTK_API_MINOR 3
 
 /* version string */
 #define FLRIG_VERSION "2.0.10"
@@ -50,7 +50,7 @@
 #define FLRIG_VERSION_PATCH ".10"
 
 /* FLTK version */
-#define FLTK_BUILD_VERSION "1.4.4"
+#define FLTK_BUILD_VERSION "1.3.8"
 
 /* flxmlrpc version */
 #define FLXMLRPC_BUILD_VERSION ""
@@ -64,55 +64,55 @@
 /* Define to 1 if we have dlopen */
 #define HAVE_DLOPEN 1
 
-/* Define to 1 if you have the `getaddrinfo' function. */
+/* Define to 1 if you have the 'getaddrinfo' function. */
 #define HAVE_GETADDRINFO 1
 
-/* Define to 1 if you have the `gethostbyname' function. */
+/* Define to 1 if you have the 'gethostbyname' function. */
 #define HAVE_GETHOSTBYNAME 1
 
-/* Define to 1 if you have the `gmtime_r' function. */
+/* Define to 1 if you have the 'gmtime_r' function. */
 #define HAVE_GMTIME_R 1
 
-/* Define to 1 if you have the `hstrerror' function. */
+/* Define to 1 if you have the 'hstrerror' function. */
 #define HAVE_HSTRERROR 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* Define to 1 if you have the `localtime_r' function. */
+/* Define to 1 if you have the 'localtime_r' function. */
 #define HAVE_LOCALTIME_R 1
 
-/* Define to 1 if you have the `memmove' function. */
+/* Define to 1 if you have the 'memmove' function. */
 #define HAVE_MEMMOVE 1
 
-/* Define to 1 if you have the `memset' function. */
+/* Define to 1 if you have the 'memset' function. */
 #define HAVE_MEMSET 1
 
 /* Define to 1 if you have the <minix/config.h> header file. */
 /* #undef HAVE_MINIX_CONFIG_H */
 
-/* Define to 1 if you have the `mkdir' function. */
+/* Define to 1 if you have the 'mkdir' function. */
 #define HAVE_MKDIR 1
 
-/* Define to 1 if you have the `select' function. */
+/* Define to 1 if you have the 'select' function. */
 #define HAVE_SELECT 1
 
 /* Define to 1 if we have sem_timedwait */
-#define HAVE_SEM_TIMEDWAIT 1
+#define HAVE_SEM_TIMEDWAIT 0
 
 /* Define to 1 if we have sem_unlink */
 #define HAVE_SEM_UNLINK 1
 
-/* Define to 1 if you have the `setenv' function. */
+/* Define to 1 if you have the 'setenv' function. */
 #define HAVE_SETENV 1
 
-/* Define to 1 if you have the `snprintf' function. */
+/* Define to 1 if you have the 'snprintf' function. */
 #define HAVE_SNPRINTF 1
 
-/* Define to 1 if you have the `socket' function. */
+/* Define to 1 if you have the 'socket' function. */
 #define HAVE_SOCKET 1
 
-/* Define to 1 if you have the `socketpair' function. */
+/* Define to 1 if you have the 'socketpair' function. */
 #define HAVE_SOCKETPAIR 1
 
 /* Define to 1 if stdbool.h conforms to C99. */
@@ -127,19 +127,19 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
 
-/* Define to 1 if you have the `strcasecmp' function. */
+/* Define to 1 if you have the 'strcasecmp' function. */
 #define HAVE_STRCASECMP 1
 
-/* Define to 1 if you have the `strcasestr' function. */
+/* Define to 1 if you have the 'strcasestr' function. */
 #define HAVE_STRCASESTR 1
 
-/* Define to 1 if you have the `strchr' function. */
+/* Define to 1 if you have the 'strchr' function. */
 #define HAVE_STRCHR 1
 
-/* Define to 1 if you have the `strdup' function. */
+/* Define to 1 if you have the 'strdup' function. */
 #define HAVE_STRDUP 1
 
-/* Define to 1 if you have the `strerror' function. */
+/* Define to 1 if you have the 'strerror' function. */
 #define HAVE_STRERROR 1
 
 /* Define to 1 if you have the <strings.h> header file. */
@@ -148,19 +148,19 @@
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
 
-/* Define to 1 if you have the `strlcpy' function. */
-/* #undef HAVE_STRLCPY */
+/* Define to 1 if you have the 'strlcpy' function. */
+#define HAVE_STRLCPY 1
 
-/* Define to 1 if you have the `strncasecmp' function. */
+/* Define to 1 if you have the 'strncasecmp' function. */
 #define HAVE_STRNCASECMP 1
 
-/* Define to 1 if you have the `strrchr' function. */
+/* Define to 1 if you have the 'strrchr' function. */
 #define HAVE_STRRCHR 1
 
-/* Define to 1 if you have the `strstr' function. */
+/* Define to 1 if you have the 'strstr' function. */
 #define HAVE_STRSTR 1
 
-/* Define to 1 if you have the `strtol' function. */
+/* Define to 1 if you have the 'strtol' function. */
 #define HAVE_STRTOL 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
@@ -169,26 +169,26 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 
-/* Define to 1 if you have the `uname' function. */
+/* Define to 1 if you have the 'uname' function. */
 #define HAVE_UNAME 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
-/* Define to 1 if you have the `unsetenv' function. */
+/* Define to 1 if you have the 'unsetenv' function. */
 #define HAVE_UNSETENV 1
 
-/* Define to 1 if you have the `vsnprintf' function. */
+/* Define to 1 if you have the 'vsnprintf' function. */
 #define HAVE_VSNPRINTF 1
 
 /* Define to 1 if you have the <wchar.h> header file. */
 #define HAVE_WCHAR_H 1
 
-/* Define to 1 if the system has the type `_Bool'. */
+/* Define to 1 if the system has the type '_Bool'. */
 #define HAVE__BOOL 1
 
 /* libgpiod version */
-#define LIBGPIOD_BUILD_VERSION "2.2.1"
+#define LIBGPIOD_BUILD_VERSION ""
 
 /* Name of package */
 #define PACKAGE "flrig"
@@ -211,7 +211,7 @@
 /* Define to the version of this package. */
 #define PACKAGE_VERSION "2.0.10"
 
-/* Define to 1 if all of the C90 standard headers exist (not just the ones
+/* Define to 1 if all of the C89 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
    backward compatibility; new code need not use it. */
 #define STDC_HEADERS 1
@@ -220,9 +220,9 @@
 #define USE_FLXMLRPC 0
 
 /* Define to 1 if we are using libgpiod */
-#define USE_LIBGPIOD 1
+#define USE_LIBGPIOD 0
 
-/* Enable extensions on AIX 3, Interix.  */
+/* Enable extensions on AIX, Interix, z/OS.  */
 #ifndef _ALL_SOURCE
 # define _ALL_SOURCE 1
 #endif
@@ -283,11 +283,15 @@
 #ifndef __STDC_WANT_IEC_60559_DFP_EXT__
 # define __STDC_WANT_IEC_60559_DFP_EXT__ 1
 #endif
+/* Enable extensions specified by C23 Annex F.  */
+#ifndef __STDC_WANT_IEC_60559_EXT__
+# define __STDC_WANT_IEC_60559_EXT__ 1
+#endif
 /* Enable extensions specified by ISO/IEC TS 18661-4:2015.  */
 #ifndef __STDC_WANT_IEC_60559_FUNCS_EXT__
 # define __STDC_WANT_IEC_60559_FUNCS_EXT__ 1
 #endif
-/* Enable extensions specified by ISO/IEC TS 18661-3:2015.  */
+/* Enable extensions specified by C23 Annex H and ISO/IEC TS 18661-3:2015.  */
 #ifndef __STDC_WANT_IEC_60559_TYPES_EXT__
 # define __STDC_WANT_IEC_60559_TYPES_EXT__ 1
 #endif
@@ -311,13 +315,13 @@
 
 
 /* Define to 1 if we are using x */
-#define USE_X 1
+/* #undef USE_X */
 
 /* Version number of package */
 #define VERSION "2.0.10"
 
 /* x version */
-#define X_BUILD_VERSION "1.7.5"
+/* #undef X_BUILD_VERSION */
 
 /* Define to 1 if we are building on cygwin or mingw */
 /* #undef _WINDOWS */
@@ -328,5 +332,5 @@
 /* Define to 1 if we are building on mingw */
 /* #undef __WIN32__ */
 
-/* Define to `unsigned int' if <sys/types.h> does not define. */
+/* Define as 'unsigned int' if <stddef.h> doesn't define. */
 /* #undef size_t */
