@@ -219,6 +219,21 @@ extern Fl_Button *btn_ft991_select_13;
 extern Fl_PL_tone *choice_ft991_tTONE;
 extern Fl_PL_tone *choice_ft991_rTONE;
 
+extern Fl_Group  *tab_ftx1_bands;
+extern Fl_Button *btn_ftx1_select_1;
+extern Fl_Button *btn_ftx1_select_2;
+extern Fl_Button *btn_ftx1_select_3;
+extern Fl_Button *btn_ftx1_select_4;
+extern Fl_Button *btn_ftx1_select_5;
+extern Fl_Button *btn_ftx1_select_6;
+extern Fl_Button *btn_ftx1_select_7;
+extern Fl_Button *btn_ftx1_select_8;
+extern Fl_Button *btn_ftx1_select_9;
+extern Fl_Button *btn_ftx1_select_10;
+extern Fl_Button *btn_ftx1_select_11;
+extern Fl_Button *btn_ftx1_select_12;
+extern Fl_Button *btn_ftx1_select_13;
+
 extern Fl_Group *tab_FT8n_bands;
 extern Fl_Button *btn_FT8n_select_1;
 extern Fl_Button *btn_FT8n_select_2;

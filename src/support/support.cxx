@@ -2005,7 +2005,7 @@ void updateTCI(void *d)
 		opBW->redraw();
 		opBW->show();
 	}
-} 
+}
 
 void updateFLEX1500(void *d)
 {
@@ -2060,7 +2060,7 @@ void updateFLEX1500(void *d)
 
 	updateBandwidthControl((void *)0);
 
-} 
+}
 
 // set_bandwidth_control updates iBW and then posts the call for
 // the UI thread to updateBandwidthControl
@@ -2306,11 +2306,11 @@ void updateSelect() {
 @F%d@S%d@.|\t\
 @F%d@S%d@.%s",
 			progStatus.memfontnbr, progStatus.memfontsize, oplist[n].freq / 1000.0,
-			progStatus.memfontnbr, progStatus.memfontsize, 
+			progStatus.memfontnbr, progStatus.memfontsize,
 			progStatus.memfontnbr, progStatus.memfontsize, selrig->get_bwname_(oplist[n].iBW, oplist[n].imode),
-			progStatus.memfontnbr, progStatus.memfontsize, 
+			progStatus.memfontnbr, progStatus.memfontsize,
 			progStatus.memfontnbr, progStatus.memfontsize, selrig->get_modename_(oplist[n].imode),
-			progStatus.memfontnbr, progStatus.memfontsize, 
+			progStatus.memfontnbr, progStatus.memfontsize,
 			progStatus.memfontnbr, progStatus.memfontsize, szatag );
 
 		FreqSelect->add (szline);
@@ -3641,6 +3641,21 @@ void redrawAGC()
 	}
 
 	if (xcvr_name == rig_FT991A.name_) {
+		switch (val) {
+			case 0 : btnAGC->selection_color(FL_BACKGROUND_COLOR);  // off
+					 break;
+			case 1 : btnAGC->selection_color(FL_RED); // fast
+					 break;
+			case 2 : btnAGC->selection_color(FL_YELLOW); // medium
+					 break;
+			case 3 : btnAGC->selection_color(FL_GREEN); // slow
+					 break;
+			case 4 : btnAGC->selection_color(FL_WHITE); // auto
+		}
+		btnAGC->redraw();
+	}
+
+	if (xcvr_name == rig_FTX1.name_) {
 		switch (val) {
 			case 0 : btnAGC->selection_color(FL_BACKGROUND_COLOR);  // off
 					 break;

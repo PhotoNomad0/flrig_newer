@@ -808,7 +808,6 @@ int RIG_FTX1::get_tune()
 	return 1;
 }
 
-
 int  RIG_FTX1::next_attenuator()
 {
 	switch (atten_state) {

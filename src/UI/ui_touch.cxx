@@ -1076,6 +1076,62 @@ CTRL  click: FreqB -> FreqA\
 
 			tab_ft991_bands->end();
 
+			tab_ftx1_bands = new Fl_Group(xpos, ypos+tabh, W, tabb, _("Band"));
+
+				btn_ftx1_select_1 = new Fl_Button(xpos+4, by, 50, bh, _("1.8"));
+				btn_ftx1_select_1->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_1->callback((Fl_Callback*)cb_btn_band_select, (void *)1);
+
+				btn_ftx1_select_2 = new Fl_Button(xpos+58, by, 50, bh, _("3.5"));
+				btn_ftx1_select_2->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_2->callback((Fl_Callback*)cb_btn_band_select, (void *)2);
+
+				btn_ftx1_select_3 = new Fl_Button(xpos+112, by, 50, bh, _("7"));
+				btn_ftx1_select_3->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_3->callback((Fl_Callback*)cb_btn_band_select, (void *)3);
+
+				btn_ftx1_select_4 = new Fl_Button(xpos+166, by, 50, bh, _("10"));
+				btn_ftx1_select_4->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_4->callback((Fl_Callback*)cb_btn_band_select, (void *)4);
+
+				btn_ftx1_select_5 = new Fl_Button(xpos+220, by, 50, bh, _("14"));
+				btn_ftx1_select_5->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_5->callback((Fl_Callback*)cb_btn_band_select, (void *)5);
+
+				btn_ftx1_select_6 = new Fl_Button(xpos+274, by, 50, bh, _("18"));
+				btn_ftx1_select_6->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_6->callback((Fl_Callback*)cb_btn_band_select, (void *)6);
+
+				btn_ftx1_select_7 = new Fl_Button(xpos+328, by, 50, bh, _("21"));
+				btn_ftx1_select_7->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_7->callback((Fl_Callback*)cb_btn_band_select, (void *)7);
+
+				btn_ftx1_select_8 = new Fl_Button(xpos+372, by, 50, bh, _("24"));
+				btn_ftx1_select_8->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_8->callback((Fl_Callback*)cb_btn_band_select, (void *)8);
+
+				btn_ftx1_select_9 = new Fl_Button(xpos+426, by, 50, bh, _("28"));
+				btn_ftx1_select_9->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_9->callback((Fl_Callback*)cb_btn_band_select, (void *)9);
+
+				btn_ftx1_select_10 = new Fl_Button(xpos+480, by, 50, bh, _("50"));
+				btn_ftx1_select_10->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_10->callback((Fl_Callback*)cb_btn_band_select, (void *)10);
+
+				btn_ftx1_select_11 = new Fl_Button(xpos+534, by, 50, bh, _("144"));
+				btn_ftx1_select_11->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_11->callback((Fl_Callback*)cb_btn_band_select, (void *)13);
+
+				btn_ftx1_select_12 = new Fl_Button(xpos+ 588, by, 50, bh, _("440"));
+				btn_ftx1_select_12->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_12->callback((Fl_Callback*)cb_btn_band_select, (void *)14);
+
+				btn_ftx1_select_13 = new Fl_Button(xpos+ 642, by, 50, bh, _("Gen"));
+				btn_ftx1_select_13->tooltip(_("Left click - get\nRight click - set"));
+				btn_ftx1_select_13->callback((Fl_Callback*)cb_btn_band_select, (void *)11);
+
+			tab_ft991_bands->end();
+
 			tab_FT8n_bands = new Fl_Group(xpos, ypos+tabh, W, tabb, _("Band"));
 			static const char setsave[] = _("Left click - set\nRight click - save");
 				btn_FT8n_select_1 = new Fl_Button(xpos+4, by, 50, bh, _("1.8"));
@@ -1493,7 +1549,7 @@ CTRL  click: FreqB -> FreqA\
 				btn_ext_tuner = new Fl_Check_Button(
 					btnSpecial->x() +
 					btnSpecial->w() + 5,
-					by, 100, bh, 
+					by, 100, bh,
 					_("Ext tuner"));
 				btn_ext_tuner->tooltip(_("use external auto tuner"));
 				btn_ext_tuner->down_box(FL_DOWN_BOX);
@@ -1502,7 +1558,7 @@ CTRL  click: FreqB -> FreqA\
 
 				btn_xcvr_auto_on = new Fl_Check_Button(
 					btn_ext_tuner->x() + btn_ext_tuner->w() + 5, by,
-					100, bh, 
+					100, bh,
 					_("Rig autOn"));
 				btn_xcvr_auto_on->tooltip(_("Auto Turn Rig On with Flrig startup"));
 				btn_xcvr_auto_on->down_box(FL_DOWN_BOX);
@@ -1510,7 +1566,7 @@ CTRL  click: FreqB -> FreqA\
 				btn_xcvr_auto_on->value(progStatus.xcvr_auto_on);
 
 				btn_xcvr_auto_off = new Fl_Check_Button(
-					btn_xcvr_auto_on->x(), by + bh, 
+					btn_xcvr_auto_on->x(), by + bh,
 					100, bh, _("Rig autOff"));
 				btn_xcvr_auto_off->tooltip(_("Auto Turn Rig Off with Flrig exit"));
 				btn_xcvr_auto_off->down_box(FL_DOWN_BOX);
@@ -1526,7 +1582,7 @@ CTRL  click: FreqB -> FreqA\
 				btn_xcvr_synch_clock->value(progStatus.sync_clock);
 
 				btn_xcvr_synch_gmt = new Fl_Check_Button(
-					btn_xcvr_synch_clock->x(), by + bh + 2, 
+					btn_xcvr_synch_clock->x(), by + bh + 2,
 					90, bh, _("Use GMT"));
 				btn_xcvr_synch_gmt->tooltip(_("Synchronize to Greenwich Mean Time"));
 				btn_xcvr_synch_gmt->down_box(FL_DOWN_BOX);
@@ -2101,7 +2157,7 @@ CTRL  click: FreqB -> FreqA\
 				tt550_AT_inline->callback((Fl_Callback*)cb_AT_bypass);
 
 				tt550_AT_Z = new Fl_Light_Button(
-					RIGHT_OF(tt550_AT_inline) + 10, 
+					RIGHT_OF(tt550_AT_inline) + 10,
 					by, 4*bh, bh, _("Z hi"));
 				tt550_AT_Z->tooltip(_("Hi / Lo Impedance network"));
 				tt550_AT_Z->callback((Fl_Callback*)cb_AT_Z);

@@ -756,7 +756,7 @@ Fl_Double_Window *tabs_window()
 	int gph = 70 + 22;
 
 	Fl_Double_Window *w = new Fl_Double_Window(
-		0, 0, 
+		0, 0,
 		small_mainW, gph,
 		"flrig extra controls");
 
@@ -1289,6 +1289,63 @@ Fl_Double_Window *tabs_window()
 			choice_ft991_rTONE->hide();
 
 		tab_ft991_bands->end();
+}
+
+		tab_ftx1_bands = new Fl_Group(0, 24, small_mainW, gph - 24, _("Band"));
+{
+			btn_ftx1_select_1 = new Fl_Button(4, 30, 60, 18, _("1.8"));
+			btn_ftx1_select_1->tooltip(_("Left click - get"));
+			btn_ftx1_select_1->callback((Fl_Callback*)cb_btn_band_select, (void *)1);
+
+			btn_ftx1_select_2 = new Fl_Button(74, 30, 60, 18, _("3.5"));
+			btn_ftx1_select_2->tooltip(_("Left click - get"));
+			btn_ftx1_select_2->callback((Fl_Callback*)cb_btn_band_select, (void *)2);
+
+			btn_ftx1_select_3 = new Fl_Button(145, 30, 60, 18, _("7"));
+			btn_ftx1_select_3->tooltip(_("Left click - get"));
+			btn_ftx1_select_3->callback((Fl_Callback*)cb_btn_band_select, (void *)3);
+
+			btn_ftx1_select_4 = new Fl_Button(216, 30, 60, 18, _("10"));
+			btn_ftx1_select_4->tooltip(_("Left click - get"));
+			btn_ftx1_select_4->callback((Fl_Callback*)cb_btn_band_select, (void *)4);
+
+			btn_ftx1_select_5 = new Fl_Button(287, 30, 60, 18, _("14"));
+			btn_ftx1_select_5->tooltip(_("Left click - get"));
+			btn_ftx1_select_5->callback((Fl_Callback*)cb_btn_band_select, (void *)5);
+
+			btn_ftx1_select_6 = new Fl_Button(358, 30, 60, 18, _("18"));
+			btn_ftx1_select_6->tooltip(_("Left click - get"));
+			btn_ftx1_select_6->callback((Fl_Callback*)cb_btn_band_select, (void *)6);
+
+			btn_ftx1_select_7 = new Fl_Button(4, 50, 60, 18, _("21"));
+			btn_ftx1_select_7->tooltip(_("Left click - get"));
+			btn_ftx1_select_7->callback((Fl_Callback*)cb_btn_band_select, (void *)7);
+
+			btn_ftx1_select_8 = new Fl_Button(74, 50, 60, 18, _("24"));
+			btn_ftx1_select_8->tooltip(_("Left click - get"));
+			btn_ftx1_select_8->callback((Fl_Callback*)cb_btn_band_select, (void *)8);
+
+			btn_ftx1_select_9 = new Fl_Button(145, 50, 60, 18, _("28"));
+			btn_ftx1_select_9->tooltip(_("Left click - get"));
+			btn_ftx1_select_9->callback((Fl_Callback*)cb_btn_band_select, (void *)9);
+
+			btn_ftx1_select_10 = new Fl_Button(216, 50, 60, 18, _("50"));
+			btn_ftx1_select_10->tooltip(_("Left click - get"));
+			btn_ftx1_select_10->callback((Fl_Callback*)cb_btn_band_select, (void *)10);
+
+			btn_ftx1_select_11 = new Fl_Button(287, 50, 60, 18, _("144"));
+			btn_ftx1_select_11->tooltip(_("Left click - get"));
+			btn_ftx1_select_11->callback((Fl_Callback*)cb_btn_band_select, (void *)13);
+
+			btn_ftx1_select_12 = new Fl_Button(358, 50, 60, 18, _("430"));
+			btn_ftx1_select_12->tooltip(_("Left click - get"));
+			btn_ftx1_select_12->callback((Fl_Callback*)cb_btn_band_select, (void *)14);
+
+			btn_ftx1_select_13 = new Fl_Button(4, 70, 60, 18, _("Gen"));
+			btn_ftx1_select_13->tooltip(_("Left click - get"));
+			btn_ftx1_select_13->callback((Fl_Callback*)cb_btn_band_select, (void *)11);
+
+		tab_ftx1_bands->end();
 }
 		tab_FT8n_bands = new Fl_Group(0, 24, small_mainW, gph - 24, _("Band"));
 {
