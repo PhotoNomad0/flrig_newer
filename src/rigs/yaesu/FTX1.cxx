@@ -360,13 +360,13 @@ void RIG_FTX1::get_band_selection(int v)
 {
 	int inc_60m = false;
 	cmd = "IF;";
-	wait_char(';', 28, 100, "get band", ASC);
+	wait_char(';', 30, 100, "get band", ASC);
 
 	sett("get band");
 
 	size_t p = replystr.rfind("IF");
 	if (p == std::string::npos) return;
-	if (replystr[p+22 ] != '0') {	// vfo 60M memory mode
+	if (replystr[p+24 ] != '0') {	// vfo 60M memory mode
 		inc_60m = true;
 	}
 
