@@ -366,9 +366,10 @@ void RIG_FTX1::get_band_selection(int v)
 
 	size_t p = replystr.rfind("IF");
 	if (p == std::string::npos) return;
-	if (replystr[p+24 ] != '0') {	// vfo 60M memory mode
-		inc_60m = true;
-	}
+// TODO: this doesn't seem right
+// 	if (replystr[p+24 ] != '0') {	// vfo 60M memory mode
+// 		inc_60m = true;
+// 	}
 
 	if (v == 12) {	// 5MHz 60m presets
 		if (Channels_60m[0].empty()) return;	// no 60m Channels so skip
@@ -382,7 +383,7 @@ void RIG_FTX1::get_band_selection(int v)
 		else {
 			if (v < 3)
 				v = v - 1;
-			cmd.assign("BS").append(to_decimal(v, 2)).append(";");
+			cmd.assign("BS0").append(to_decimal(v, 2)).append(";");
 		}
 	}
 
@@ -418,7 +419,7 @@ unsigned long long RIG_FTX1::get_vfoA ()
 	unsigned long long f = 0;
 	sscanf(replystr.c_str(), "FA%lld", &f);
 	if (f)
-		freqA = f;
+		freqA = f % 100000000;
 	return freqA;
 }
 
@@ -446,10 +447,9 @@ unsigned long long RIG_FTX1::get_vfoB ()
 	unsigned long long f = 0;
 	sscanf(replystr.c_str(), "FB%lld", &f);
 	if (f)
-		freqB = f;
+		freqB = f % 100000000;
 	return freqB;
 }
-
 
 void RIG_FTX1::set_vfoB (unsigned long long freq)
 {

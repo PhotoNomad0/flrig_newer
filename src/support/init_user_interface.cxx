@@ -816,11 +816,10 @@ void TRACED(init_Generic_Tabs)
 			tabsGeneric->add(tab_ft991_bands);
 			tab_ft991_bands->redraw();
 			tab_ft991_bands->show();
-// TODO: disabled for now, not working right
-// 		} else if (selrig->name_ == rig_FTX1.name_) {
-// 			tabsGeneric->add(tab_ftx1_bands);
-// 			tab_ftx1_bands->redraw();
-// 			tab_ftx1_bands->show();
+		} else if (selrig->name_ == rig_FTX1.name_) {
+			tabsGeneric->add(tab_ftx1_bands);
+			tab_ftx1_bands->redraw();
+			tab_ftx1_bands->show();
 		} else {
 			tabsGeneric->add(tab_yaesu_bands);
 			tab_yaesu_bands->redraw();
