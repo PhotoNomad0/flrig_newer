@@ -35,6 +35,7 @@ RIG_FT100D		rig_FT100D;
 RIG_FT450		rig_FT450;
 RIG_FT450D		rig_FT450D;
 RIG_FT710		rig_FT710;
+RIG_FTX1		rig_FTX1;
 RIG_FT736R		rig_FT736R;
 RIG_FT747		rig_FT747;
 RIG_FT747GX		rig_FT747GX;
@@ -180,6 +181,7 @@ rigbase *rigs[] = {
 	&rig_FTdx3000,	// 33
 	&rig_FT5000,	// 34
 	&rig_FTdx9000,	// 35
+    &rig_FTX1,		// 35a
 	&rig_IC703,		// 36
 	&rig_IC705,		// 37
 	&rig_IC706MKIIG,// 38
