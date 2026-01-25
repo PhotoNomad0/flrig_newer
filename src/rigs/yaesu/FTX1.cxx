@@ -40,12 +40,12 @@ static const char FTX1name_[] = "FTX-1";
 static int defBW_narrow[NUM_MODES] = {
 //  mLSB, mUSB, mCW_U, mFM, mAM, mRTTY_L, mCW_L, mDATA_L, mRTTY_U, mDATA_FM, mFM_N, mDATA_U, mAM_N, mPSK, mDATA_FMN };
 //  0,    1,    2,    3,    4,    5,       6,     7,      8,       9,        10,    11,      12,    13,      14		// mode index
-	6,    6,    9,    0,    0,   10,       9,     6,     10,       0,         0,     6,       0,     5,       0 
+	6,    6,    9,    0,    0,   10,       9,     6,     10,       0,         0,     6,       0,     5,       0
 };
 static int defBW_wide[NUM_MODES] = {
 //  mLSB, mUSB, mCW_U, mFM, mAM, mRTTY_L, mCW_L, mDATA_L, mRTTY_U, mDATA_FM, mFM_N, mDATA_U, mAM_N, mPSK, mDATA_FMN };
 //  0,    1,    2,    3,    4,    5,       6,     7,      8,       9,        10,    11,      12,    13,      14		// mode index
-	13,  13,   16,    0,    0,   10,      16,    17,     10,       0,         0,    17,       0,     9,       0 
+	13,  13,   16,    0,    0,   10,      16,    17,     10,       0,         0,    17,       0,     9,       0
 };
 
 static int mode_bwA[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
@@ -53,7 +53,7 @@ static int mode_bwB[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 
 static std::vector<std::string>FTX1modes_;
 static const char *vmd[] = {
-"LSB", "USB", "CW-U", "FM", "AM", 
+"LSB", "USB", "CW-U", "FM", "AM",
 "RTTY-L", "CW-L", "DATA-L", "RTTY-U", "DATA-FM",
 "FM-N", "DATA-U", "AM-N", "PSK", "DATA-FMN"};
 
@@ -291,7 +291,7 @@ RIG_FTX1::RIG_FTX1() {
 	has_preamp_control =
 	has_ifshift_control =
 	has_ptt_control =
-	has_tune_control = 
+	has_tune_control =
 	has_xcvr_auto_on_off = true;
 
 // derived specific
@@ -643,7 +643,7 @@ double RIG_FTX1::get_voltmeter()
 
 int RIG_FTX1::get_power_out()
 {
-	static meterpair pwrtbl[] = { 
+	static meterpair pwrtbl[] = {
 		{ 35,  5.0 },
 		{ 94, 25.0 },
 		{147, 50.0 },
@@ -667,7 +667,7 @@ int RIG_FTX1::get_power_out()
 			break;
 	if (mtr < 0) mtr = 0;
 	if (mtr > 205) mtr = 205;
-	double pwr = (int)ceil(pwrtbl[i].val + 
+	double pwr = (int)ceil(pwrtbl[i].val +
 			  (pwrtbl[i+1].val - pwrtbl[i].val)*(mtr - pwrtbl[i].mtr) / (pwrtbl[i+1].mtr - pwrtbl[i].mtr));
 
 	if (pwr > 100) pwr = 100;
@@ -702,14 +702,14 @@ double RIG_FTX1::get_power_control()
 	if (p == std::string::npos) return progStatus.power_level;
 	if (p + 5 >= replystr.length()) return progStatus.power_level;
 
-	int mtr = atoi(&replystr[p+2]);
+	int mtr = atoi(&replystr[p+2]) % 100; // remove the amp selector
 	return mtr;
 }
 
 void RIG_FTX1::set_power_control(double val)
 {
 	int ival = (int)val;
-	cmd = "PC000;";
+	cmd = "PC100;"; // add amp selector
 	for (int i = 4; i > 1; i--) {
 		cmd[i] += ival % 10;
 		ival /= 10;
@@ -738,7 +738,7 @@ int RIG_FTX1::get_volume_control()
 	return val;
 }
 
-void RIG_FTX1::set_volume_control(int val) 
+void RIG_FTX1::set_volume_control(int val)
 {
 	int ivol = (int)(val * 250 / 100);
 	cmd = "AG0000;";
@@ -929,19 +929,19 @@ std::vector<std::string>& RIG_FTX1::bwtable(int n)
 	switch (n) {
 		case mCW_U: case mCW_L:
 			return FTX1_widths_CW;
-		case mFM: 
+		case mFM:
 			return FTX1_widths_FMwide;
-		case mAM: 
+		case mAM:
 			return FTX1_widths_AMwide;
-		case mAM_N : 
+		case mAM_N :
 			return FTX1_widths_AMnar;
-		case mRTTY_L: case mRTTY_U: 
+		case mRTTY_L: case mRTTY_U:
 			return FTX1_widths_RTTY;
-		case mDATA_L: case mDATA_U: 
+		case mDATA_L: case mDATA_U:
 			return FTX1_widths_DATA;
-		case mFM_N: 
+		case mFM_N:
 			return FTX1_widths_DATA_FMN;
-		case mDATA_FM: 
+		case mDATA_FM:
 			return FTX1_widths_DATA_FM;
 		default: ;
 	}
@@ -1052,8 +1052,8 @@ int RIG_FTX1::get_bwA()
 	if (modeA == mFM || modeA == mAM || modeA == mFM_N || modeA == mDATA_FM) {
 		bwA = 0;
 		mode_bwA[modeA] = bwA;
-		return bwA;	
-	} 
+		return bwA;
+	}
 	cmd = rsp = "SH0";
 	cmd += ';';
 	wait_char(';', 7, 100, "get bw A", ASC);
@@ -1105,7 +1105,7 @@ int RIG_FTX1::get_bwB()
 		bwB = 0;
 		mode_bwB[modeB] = bwB;
 		return bwB;
-	} 
+	}
 	cmd = rsp = "SH0";
 	cmd += ';';
 	wait_char(';', 7, 100, "get bw B", ASC);
