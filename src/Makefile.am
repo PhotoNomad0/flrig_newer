@@ -201,6 +201,7 @@ flrig_SOURCES += \
 	rigs/yaesu/FT450.cxx \
 	rigs/yaesu/FT450D.cxx \
 	rigs/yaesu/FT710.cxx \
+	rigs/yaesu/FTX1.cxx \
 	rigs/yaesu/FT736R.cxx \
 	rigs/yaesu/FT747.cxx \
 	rigs/yaesu/FT747GX.cxx \
