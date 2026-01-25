@@ -695,22 +695,22 @@ double RIG_FTX1::get_power_control()
 {
 	cmd = rsp = "PC";
 	cmd += ';';
-	wait_char(';', 6, 100, "get power", ASC);
+	wait_char(';', 7, 100, "get power", ASC);
 
 	gett("get_power_control()");
 
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return progStatus.power_level;
-	if (p + 5 >= replystr.length()) return progStatus.power_level;
+	if (p + 6 >= replystr.length()) return progStatus.power_level;
 
-	int mtr = atoi(&replystr[p+2]) % 100; // remove the amp selector
+	int mtr = atoi(&replystr[p+3]);
 	return mtr;
 }
 
 void RIG_FTX1::set_power_control(double val)
 {
 	int ival = (int)val;
-	cmd = "PC100;"; // add amp selector
+	cmd = "PC2000;"; // add amp selector
 	for (int i = 4; i > 1; i--) {
 		cmd[i] += ival % 10;
 		ival /= 10;
@@ -779,14 +779,14 @@ void RIG_FTX1::tune_rig(int val)
 {
 	switch (val) {
 		case 0:
-			cmd = "AC000;";
+			cmd = "AC100;";
 			break;
 		case 1:
-			cmd = "AC001;";
+			cmd = "AC101;";
 			break;
 		case 2:
 		default:
-			cmd = "AC003;";
+			cmd = "AC103;";
 			break;
 	}
 	sendCommand(cmd);

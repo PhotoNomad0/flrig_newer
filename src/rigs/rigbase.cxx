@@ -559,6 +559,25 @@ int rigbase::waitN(int n, int timeout, const char *sz, int pr)
 
 }
 
+/**
+ * Waits for a specific character to appear in the response stream.
+ *
+ * @param ch The character to wait for (termination character)
+ * @param n Maximum number of bytes to read
+ * @param timeout Timeout value in milliseconds
+ * @param sz Description string for logging/tracing purposes
+ * @param pr Print format flag (HEX or ASCII)
+ * @return Number of bytes successfully read
+ *
+ * This function sends the command stored in the 'cmd' member variable,
+ * then reads the response until either:
+ * - The specified character 'ch' is found in the response
+ * - 'n' bytes have been read
+ * - The timeout is reached
+ *
+ * The function handles both TCP/IP and serial connections based on
+ * progStatus.use_tcpip flag, and stores the response in 'replystr'.
+ */
 int rigbase::wait_char(int ch, int n, int timeout, const char *sz, int pr)
 {
 	guard_lock reply_lock(&mutex_replystr);
@@ -695,7 +714,7 @@ int rigbase::wait_crlf(std::string cmd, std::string sz, int nr, int timeout, int
 	if (psrx != std::string::npos)
 		srx.replace(psrx, 2, "<cr><lf>");
 
-	snprintf( ctrace, sizeof(ctrace), "%s: read %d bytes in %d msec, %s", 
+	snprintf( ctrace, sizeof(ctrace), "%s: read %d bytes in %d msec, %s",
 		sz.c_str(), retnbr,
 		(int)(zmsec() - tstart),
 		srx.c_str());
@@ -764,7 +783,7 @@ int rigbase::wait_string(std::string sz, int nr, int timeout, int pr)
 	static char ctrace[1000];
 	memset(ctrace, 0, 1000);
 
-	snprintf( ctrace, sizeof(ctrace), "%s: read %d bytes in %d msec, %s", 
+	snprintf( ctrace, sizeof(ctrace), "%s: read %d bytes in %d msec, %s",
 		sz.c_str(), retnbr,
 		(int)(zmsec() - tstart),
 		replystr.c_str());
@@ -829,7 +848,7 @@ int rigbase::waitfor(int nr, int timeout, int pr)
 	static char ctrace[1000];
 	memset(ctrace, 0, 1000);
 
-	snprintf( ctrace, sizeof(ctrace), "read %d bytes in %d msec, %s", 
+	snprintf( ctrace, sizeof(ctrace), "read %d bytes in %d msec, %s",
 		retnbr,
 		(int)(zmsec() - tstart),
 		replystr.c_str());
