@@ -633,7 +633,8 @@ double RIG_FTX1::get_voltmeter()
 	size_t p = replystr.rfind("RM8");
 	if (p != std::string::npos) {
 		sscanf(&replystr[p], "RM8%3d%3d", &mtr, &dmy);
-		val = 13.8 * mtr / 190;
+		// initial: val = 13.8 * mtr / 190;
+		val = 0.028 * mtr + 7.46; // through measurement
 		return val;
 	}
 
