@@ -305,7 +305,7 @@ RIG_FTX1::RIG_FTX1() {
 	can_synch_clock = true;
 
 	precision = 1;
-	ndigits = 8;
+	ndigits = 9; // expand to support UHF and VHF bands
 
 }
 
@@ -419,7 +419,7 @@ unsigned long long RIG_FTX1::get_vfoA ()
 	unsigned long long f = 0;
 	sscanf(replystr.c_str(), "FA%lld", &f);
 	if (f)
-		freqA = f % 100000000;
+		freqA = f;
 	return freqA;
 }
 
@@ -447,7 +447,7 @@ unsigned long long RIG_FTX1::get_vfoB ()
 	unsigned long long f = 0;
 	sscanf(replystr.c_str(), "FB%lld", &f);
 	if (f)
-		freqB = f % 100000000;
+		freqB = f;
 	return freqB;
 }
 
