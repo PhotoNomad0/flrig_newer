@@ -299,6 +299,7 @@ RIG_FTX1::RIG_FTX1() {
 	preamp_state = 0;
 	notch_on = false;
 	m_60m_indx = 0;
+	m_tX_output = '1'; // default to '1' for field only
 
 	inuse = onA;
 
@@ -702,6 +703,7 @@ double RIG_FTX1::get_power_control()
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return progStatus.power_level;
 	if (p + 6 >= replystr.length()) return progStatus.power_level;
+	m_tX_output = replystr[p+2]; // detect if SPA-1 is attached
 
 	int mtr = atoi(&replystr[p+3]);
 	return mtr;
@@ -710,7 +712,9 @@ double RIG_FTX1::get_power_control()
 void RIG_FTX1::set_power_control(double val)
 {
 	int ival = (int)val;
-	cmd = "PC2000;"; // add amp selector
+	cmd = "PC";
+    cmd += m_tX_output;   // append the output selector
+    cmd += "000;";
 	for (int i = 4; i > 1; i--) {
 		cmd[i] += ival % 10;
 		ival /= 10;
