@@ -872,6 +872,8 @@ int RIG_FTX1::get_preamp()
 	cmd += ';';
 	wait_char(';', 5, 100, "get pre", ASC);
 
+    //TODO: add support for UHF and VHF just off and on (not two stage)
+    
 	gett("get_preamp()");
 
 	size_t p = replystr.rfind(rsp);
@@ -1490,15 +1492,15 @@ bool RIG_FTX1::set_cw_spot()
 void RIG_FTX1::set_cw_weight()
 {
 	int n = round(progStatus.cw_weight * 10);
-	cmd.assign("EX020205").append(to_decimal(n, 2)).append(";");
+	cmd.assign("EX020203").append(to_decimal(n, 2)).append(";");
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET cw weight", cmd, replystr);
 }
 
 void RIG_FTX1::set_cw_qsk()
 {
-	int n = progStatus.cw_qsk / 5 - 3;
-	cmd.assign("EX0202116").append(to_decimal(n, 1)).append(";");
+	int n = (progStatus.cw_qsk / 5 - 3) % 10;
+	cmd.assign("EX020117").append(to_decimal(n, 1)).append(";");
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET cw qsk", cmd, replystr);
 }
@@ -1556,7 +1558,7 @@ int  RIG_FTX1::get_noise_reduction_val()
 // DNR
 void RIG_FTX1::set_noise_reduction(int val)
 {
-	cmd.assign("NR0").append(val ? "1" : "0" ).append(";");
+	cmd.assign("RL0").append(to_decimal(val, 2)).append(";");
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET noise reduction", cmd, replystr);
 	sett("set_noise_reduction_on/off");
@@ -1564,14 +1566,7 @@ void RIG_FTX1::set_noise_reduction(int val)
 
 int  RIG_FTX1::get_noise_reduction()
 {
-	int val;
-	cmd = rsp = "NR0";
-	cmd.append(";");
-	wait_char(';',5, 100, "GET noise reduction", ASC);
-	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) return 0;
-	val = replystr[p+3] - '0';
-	return val;
+	return get_noise_reduction_val();
 }
 
 // ---------------------------------------------------------------------
