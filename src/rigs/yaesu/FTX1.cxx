@@ -135,7 +135,7 @@ static std::vector<std::string>& Channels_60m = FTX1_US_60m;
 
 //----------------------------------------------------------------------
 static std::vector<std::string>FTX1_att_labels;
-static const char *vFTX1_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB"};
+static const char *vFTX1_att_labels[] = { "ATT", "ATT on"};
 
 static std::vector<std::string>FTX1_pre_labels;
 static const char *vFTX1_pre_labels[] = { "IPO", "Amp 1", "Amp 2" };
@@ -816,9 +816,7 @@ int  RIG_FTX1::next_attenuator()
 {
 	switch (atten_state) {
 		case 0: return 1;
-		case 1: return 2;
-		case 2: return 3;
-		case 3: return 0;
+		case 1: return 0;
 	}
 	return 0;
 }
@@ -826,6 +824,9 @@ int  RIG_FTX1::next_attenuator()
 void RIG_FTX1::set_attenuator(int val)
 {
 	atten_state = val;
+	if (val) {
+    	atten_state = 1; // sanity limit
+	}
 	cmd = "RA00;";
 	cmd[3] += atten_state;
 	sendCommand(cmd);
