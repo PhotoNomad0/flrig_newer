@@ -844,12 +844,31 @@ int RIG_FTX1::get_attenuator()
 	return atten_state;
 }
 
+bool RIG_FTX1::is_two_meter_plus()
+{
+    unsigned long long freq = 0;
+    if (inuse == onB)
+        freq = get_vfoB();
+    else
+        freq = get_vfoA();
+
+    const bool two_meter_plus = freq >= 144000000ULL;
+    return two_meter_plus;
+}
+
 int  RIG_FTX1::next_preamp()
 {
+    const bool two_meter_plus = is_two_meter_plus();
+    
 	switch (preamp_state) {
 		case 0: return 1;
-		case 1: return 2;
-		case 2: return 0;
+		case 1: 
+            if (two_meter_plus) { // there is only one level of amplifier in this case
+                return 0;
+            } else {
+		        return 2;
+            }
+		default: return 0;
 	}
 	return 0;
 }
@@ -858,6 +877,12 @@ void RIG_FTX1::set_preamp(int val)
 {
 	preamp_state = val;
 	cmd = "PA00;";
+
+    const bool two_meter_plus = is_two_meter_plus();
+    if (two_meter_plus && (preamp_state > 1) { // limit preamp for higher bands
+        preamp_state = 1;
+    }
+
 	cmd[3] = '0' + preamp_state;
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET preamp", cmd, replystr);
@@ -869,8 +894,6 @@ int RIG_FTX1::get_preamp()
 	cmd += ';';
 	wait_char(';', 5, 100, "get pre", ASC);
 
-    //TODO: add support for UHF and VHF just off and on (not two stage)
-    
 	gett("get_preamp()");
 
 	size_t p = replystr.rfind(rsp);
@@ -1449,7 +1472,7 @@ void RIG_FTX1::set_vox_hang()
 
 void RIG_FTX1::set_vox_on_dataport()
 {
-	cmd = "EX0304050;";
+    cmd = "EX0305100;";
 	if (progStatus.vox_on_dataport) cmd[8] = '1';
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET vox on data port", cmd, replystr);
