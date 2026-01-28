@@ -29,42 +29,46 @@
 #include "support.h"
 
 enum mFTX1 {
-   mLSB, mUSB, mCW_U, mFM, mAM, mRTTY_L, mCW_L, mDATA_L, mRTTY_U, mDATA_FM, mFM_N, mDATA_U, mAM_N, mPSK, mDATA_FMN };
-//  0,    1,    2,    3,    4,    5,       6,     7,      8,       9,        10,    11,      12,    13,      14		// mode index
+   mLSB, mUSB, mCW_U, mFM, mAM, mRTTY_L, mCW_L, mDATA_L, mRTTY_U, mDATA_FM, mFM_N, mDATA_U, mAM_N, mPSK, mDATA_FMN,  m_NA_G, mC4FM_N, mC4FM_VW };
+//  0,    1,    2,    3,    4,    5,       6,     7,      8,       9,        10,    11 ,     12,    13,      14,      15	  16,      17   // mode index
+//  1,    2,    3,    4,    5,    6,       7,     8,      9,       A,        B,     C,       D,      E		 F,       G,      H,       I    // actual value
 
 static const char FTX1name_[] = "FTX-1";
 
 #undef  NUM_MODES
-#define NUM_MODES  15
+#define NUM_MODES  17
 
 static int defBW_narrow[NUM_MODES] = {
-//  mLSB, mUSB, mCW_U, mFM, mAM, mRTTY_L, mCW_L, mDATA_L, mRTTY_U, mDATA_FM, mFM_N, mDATA_U, mAM_N, mPSK, mDATA_FMN };
-//  0,    1,    2,    3,    4,    5,       6,     7,      8,       9,        10,    11,      12,    13,      14		// mode index
-	6,    6,    9,    0,    0,   10,       9,     6,     10,       0,         0,     6,       0,     5,       0
+//  mLSB, mUSB, mCW_U, mFM, mAM, mRTTY_L, mCW_L, mDATA_L, mRTTY_U, mDATA_FM, mFM_N, mDATA_U, mAM_N, mPSK, mDATA_FMN,  m_NA_G, mC4FM_N, mC4FM_VW };
+//  0,    1,    2,    3,    4,    5,       6,     7,      8,       9,        10,    11 ,     12,    13,      14,      15	  16,      17   // mode index
+//  1,    2,    3,    4,    5,    6,       7,     8,      9,       A,        B,     C,       D,      E		 F,       G,      H,       I    // actual value
+	6,    6,    9,    0,    0,   10,       9,     6,     10,       0,         0,     6,       0,     5,      0,       0,      0,       0,
 };
 static int defBW_wide[NUM_MODES] = {
-//  mLSB, mUSB, mCW_U, mFM, mAM, mRTTY_L, mCW_L, mDATA_L, mRTTY_U, mDATA_FM, mFM_N, mDATA_U, mAM_N, mPSK, mDATA_FMN };
-//  0,    1,    2,    3,    4,    5,       6,     7,      8,       9,        10,    11,      12,    13,      14		// mode index
-	13,  13,   16,    0,    0,   10,      16,    17,     10,       0,         0,    17,       0,     9,       0
+//     mLSB, mUSB, mCW_U, mFM, mAM, mRTTY_L, mCW_L, mDATA_L, mRTTY_U, mDATA_FM, mFM_N, mDATA_U, mAM_N, mPSK, mDATA_FMN,  m_NA_G, mC4FM_N, mC4FM_VW };
+//  0,    1,    2,    3,    4,    5,       6,     7,      8,       9,        10,    11 ,     12,    13,      14,      15	  16,      17   // mode index
+//  1,    2,    3,    4,    5,    6,       7,     8,      9,       A,        B,     C,       D,      E		 F,       G,      H,       I    // actual value
+	13,  13,   16,    0,    0,   10,      16,    17,     10,       0,         0,    17,       0,     9,      0,       0,      0,       0,
 };
 
-static int mode_bwA[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-static int mode_bwB[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static int mode_bwA[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static int mode_bwB[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 
 static std::vector<std::string>FTX1modes_;
 static const char *vmd[] = {
-"LSB", "USB", "CW-U", "FM", "AM",
-"RTTY-L", "CW-L", "DATA-L", "RTTY-U", "DATA-FM",
-"FM-N", "DATA-U", "AM-N", "PSK", "DATA-FMN"};
+  "LSB", "USB", "CW-U", "FM", "AM",
+  "RTTY-L", "CW-L", "DATA-L", "RTTY-U", "DATA-FM",
+  "FM-N", "DATA-U", "AM-N", "PSK", "DATA-FMN", "-",
+  "C4FM_N", "C4FM_VW"};
 
-static const char FTX1_mode_chr[] =  { '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-static const char FTX1_mode_type[] = { 'L', 'U', 'U', 'U', 'U', 'L', 'L', 'L', 'U', 'U', 'U', 'U', 'U', 'U', 'U' };
+static const char FTX1_mode_chr[] =  { '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I' };
+static const char FTX1_mode_type[] = { 'L', 'U', 'U', 'U', 'U', 'L', 'L', 'L', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U' };
 
 static std::vector<std::string>FTX1_widths_SSB;
 static const char *vssb[] = {
  "300",  "400",  "600",  "850", "1100", 	// 1 ... 5
 "1200", "1500", "1650", "1800", "1950",		// 6 ... 10
-"2100", "2250", "2400", "2450", "2500",		// 7 ... 15
+"2100", "2250", "2400", "2450", "2500",		// 11 ... 15
 "2600", "2700", "2800", "2900", "3000",		// 16 ... 20
 "3200", "3500", "4000" };				// 21 ... 23
 
@@ -306,7 +310,7 @@ RIG_FTX1::RIG_FTX1() {
 	can_synch_clock = true;
 
 	precision = 1;
-	ndigits = 9; // expand to support UHF and VHF bands
+	ndigits = 9; // expand to support higher frequencies in UHF and VHF bands
 
 }
 
