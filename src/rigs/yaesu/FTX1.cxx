@@ -36,7 +36,7 @@ enum mFTX1 {
 static const char FTX1name_[] = "FTX-1";
 
 #undef  NUM_MODES
-#define NUM_MODES  17
+#define NUM_MODES  18
 
 static int defBW_narrow[NUM_MODES] = {
 //  mLSB, mUSB, mCW_U, mFM, mAM, mRTTY_L, mCW_L, mDATA_L, mRTTY_U, mDATA_FM, mFM_N, mDATA_U, mAM_N, mPSK, mDATA_FMN,  m_NA_G, mC4FM_N, mC4FM_VW };
@@ -59,7 +59,7 @@ static const char *vmd[] = {
   "LSB", "USB", "CW-U", "FM", "AM",
   "RTTY-L", "CW-L", "DATA-L", "RTTY-U", "DATA-FM",
   "FM-N", "DATA-U", "AM-N", "PSK", "DATA-FMN", "-",
-  "C4FM_N", "C4FM_VW"};
+  "C4FM_N", "C4FM_VW" };
 
 static const char FTX1_mode_chr[] =  { '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I' };
 static const char FTX1_mode_type[] = { 'L', 'U', 'U', 'U', 'U', 'L', 'L', 'L', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U' };
@@ -70,7 +70,7 @@ static const char *vssb[] = {
 "1200", "1500", "1650", "1800", "1950",		// 6 ... 10
 "2100", "2250", "2400", "2450", "2500",		// 11 ... 15
 "2600", "2700", "2800", "2900", "3000",		// 16 ... 20
-"3200", "3500", "4000" };				// 21 ... 23
+"3200", "3500", "4000" };				    // 21 ... 23
 
 static int FTX1_wvals_SSB[] = {
 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23, WVALS_LIMIT};
@@ -81,7 +81,7 @@ static const char *vcww[] = {
  "300",  "350",  "400",  "450",  "500",		// 6 ... 10
  "600",  "800", "1200", "1400", "1700",		// 11 ... 15
 "2000", "2400", "3000", "3200", "3500",		// 16 .. 20
-"4000" };								// 21
+"4000" };								    // 21
 
 static int FTX1_wvals_CW[] = {
 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18, 19, 20, 21, WVALS_LIMIT };
@@ -92,18 +92,18 @@ static const char *vrtty[] = {
  "300",  "350",  "400",  "450",  "500",		// 6 ... 10
  "600",  "800", "1200", "1400", "1700",		// 11 ... 15
 "2000", "2400", "3000", "3200", "3500",		// 16 .. 20
-"4000" };								// 21
+"4000" };								    // 21
 
 static int FTX1_wvals_RTTY[] = {
 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18, 19, 20, 21, WVALS_LIMIT };
 
 static std::vector<std::string>FTX1_widths_DATA;
 static const char *vdata[] = {
-  "50",  "100",  "150",  "200",  "250",		// 1 ... 5
- "300",  "350",  "400",  "450",  "500",		// 6 ... 10
+  "50",  "100",  "150",  "200",  "250",		//  1 ... 5
+ "300",  "350",  "400",  "450",  "500",		//  6 ... 10
  "600",  "800", "1200", "1400", "1700",		// 11 ... 15
 "2000", "2400", "3000", "3200", "3500",		// 16 .. 20
-"4000" };								// 21
+"4000" };								    // 21
 
 static int FTX1_wvals_PSK[] = {
 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18, 19, 20, 21, WVALS_LIMIT };
@@ -133,7 +133,7 @@ static const char *vfmdn[] = { "9000" };
 // static const char *FTX1_UK_60m[] = {"", "126", "127", "128", "130", "131", "132"};
 
 static std::vector<std::string>FTX1_US_60m;
-static const char *v60m[] = {"", "126", "127", "128", "130"};
+static const char *v60m[] = {"50011", "50012", "50013", "50014", "50015"};
 
 static std::vector<std::string>& Channels_60m = FTX1_US_60m;
 
@@ -372,12 +372,20 @@ void RIG_FTX1::get_band_selection(int v)
 	size_t p = replystr.rfind("IF");
 	if (p == std::string::npos) return;
 
-	if (v == 12) {	// 5MHz 60m presets
+ 	if (replystr[p+24 ] != '0') {	// P7 = 0 means VFO mode, otherwise assume memory mode
+ 		inc_60m = true;
+ 	}
+
+	if (v == 12) {	// 5MHz 60m presets, each time it is called toggle to next channel
 		if (Channels_60m[0].empty()) return;	// no 60m Channels so skip
 		if (inc_60m) {
-			if (++m_60m_indx > (int)Channels_60m.size()) m_60m_indx = 0;
+			if (++m_60m_indx >= (int)Channels_60m.size()) m_60m_indx = 0;
 		}
-		cmd.assign("MC").append(Channels_60m[m_60m_indx]).append(";");
+		if (inuse == onB)
+			cmd = "MC1";
+		else
+			cmd = "MC0";
+		cmd.append(Channels_60m[m_60m_indx]).append(";");
 	} else {		// v == 1..11 band selection OR return to vfo mode == 0
 		if (inc_60m)
 			cmd = "VM;";
@@ -882,10 +890,10 @@ void RIG_FTX1::set_preamp(int val)
 	preamp_state = val;
 	cmd = "PA00;";
 
-    const bool two_meter_plus = is_two_meter_plus();
-    if (two_meter_plus && (preamp_state > 1) { // limit preamp for higher bands
-        preamp_state = 1;
-    }
+	const bool two_meter_plus = is_two_meter_plus();
+	if (two_meter_plus && (preamp_state > 1)) { // limit preamp for higher bands
+		preamp_state = 1;
+	}
 
 	cmd[3] = '0' + preamp_state;
 	sendCommand (cmd);
