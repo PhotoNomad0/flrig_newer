@@ -2,7 +2,7 @@
 /* src/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Build platform */
-#define BUILD_BUILD_PLATFORM "x86_64-apple-darwin23.6.0"
+#define BUILD_BUILD_PLATFORM "x86_64-apple-darwin24.6.0"
 
 /* Compiler */
 #define BUILD_COMPILER "clang: warning: argument unused during compilation: '-std=gnu++11' [-Wunused-command-line-argument]"
@@ -11,25 +11,25 @@
 #define BUILD_CONFIGURE_ARGS ""
 
 /* Build date */
-#define BUILD_DATE "Mon Jan 26 12:52:43 EST 2026"
+#define BUILD_DATE "Sun Feb  1 08:56:14 EST 2026"
 
 /* Build host */
-#define BUILD_HOST "SunshineGirl.local"
+#define BUILD_HOST "MiniMax.local"
 
 /* Host platform */
-#define BUILD_HOST_PLATFORM "x86_64-apple-darwin23.6.0"
+#define BUILD_HOST_PLATFORM "x86_64-apple-darwin24.6.0"
 
 /* Target platform */
-#define BUILD_TARGET_PLATFORM "x86_64-apple-darwin23.6.0"
+#define BUILD_TARGET_PLATFORM "x86_64-apple-darwin24.6.0"
 
 /* Build user */
 #define BUILD_USER "blm"
 
 /* FLRIG compiler flags */
-#define FLRIG_BUILD_CXXFLAGS "-I$(srcdir) -I$(srcdir)/include -I$(srcdir)/xmlrpcpp -fno-stack-check -mmacosx-version-min=10.11 -I$(srcdir)/xmlrpcpp -I/usr/local/include -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT -I$(srcdir) -I$(srcdir)/include -pipe -Wall -fexceptions -O2 -fno-stack-check -mmacosx-version-min=10.11 -DNDEBUG"
+#define FLRIG_BUILD_CXXFLAGS "-I$(srcdir) -I$(srcdir)/include -I$(srcdir)/xmlrpcpp -fno-stack-check -mmacosx-version-min=10.11 -I$(srcdir)/xmlrpcpp -I/usr/local/include -I/usr/local/include/FL/images -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT -I$(srcdir) -I$(srcdir)/include -pipe -Wall -fexceptions -O2 -fno-stack-check -mmacosx-version-min=10.11 -DNDEBUG"
 
 /* FLRIG linker flags */
-#define FLRIG_BUILD_LDFLAGS "-L/usr/local/lib -lfltk_images -lpng -lz -ljpeg -lfltk -lpthread -framework Cocoa -framework IOKit -framework CoreFoundation"
+#define FLRIG_BUILD_LDFLAGS "-L/usr/local/lib -lfltk_images -lfltk_png -lz -lfltk_jpeg -lfltk -lpthread -framework Cocoa -framework IOKit -framework CoreFoundation"
 
 /* FLTK API major version */
 #define FLRIG_FLTK_API_MAJOR 1

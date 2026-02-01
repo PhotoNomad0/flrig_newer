@@ -130,10 +130,10 @@ pthread_mutex_t mutex_srvc_reqs = PTHREAD_MUTEX_INITIALIZER;
 
 pthread_mutex_t mutex_trace = PTHREAD_MUTEX_INITIALIZER;
 
-int use_trace = 1;
-int use_rig_trace = 1;
-int use_get_trace = 1;
-int use_set_trace = 1;
+int use_trace = 0;
+int use_rig_trace = 0;
+int use_get_trace = 0;
+int use_set_trace = 0;
 int use_serial_trace = 0;
 int use_xml_trace = 0;
 int use_rpc_trace = 0;
