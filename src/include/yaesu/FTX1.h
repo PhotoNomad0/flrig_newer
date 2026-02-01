@@ -104,7 +104,7 @@ public:
 	virtual int  next_preamp();
 	virtual void set_preamp(int val);
 	virtual int  get_preamp();
-
+    virtual bool is_two_meter_plus();
 	virtual void set_if_shift(int val);
 	virtual bool get_if_shift(int &val);
 	virtual void get_if_min_max_step(int &min, int &max, int &step);

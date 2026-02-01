@@ -871,10 +871,10 @@ bool RIG_FTX1::is_two_meter_plus()
 int  RIG_FTX1::next_preamp()
 {
     const bool two_meter_plus = is_two_meter_plus();
-    
+
 	switch (preamp_state) {
 		case 0: return 1;
-		case 1: 
+		case 1:
             if (two_meter_plus) { // there is only one level of amplifier in this case
                 return 0;
             } else {
@@ -1531,7 +1531,7 @@ void RIG_FTX1::set_cw_weight()
 
 void RIG_FTX1::set_cw_qsk()
 {
-	int n = (progStatus.cw_qsk / 5 - 3) % 10;
+	int n = progStatus.cw_qsk / 5 - 3;
 	cmd.assign("EX020117").append(to_decimal(n, 1)).append(";");
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET cw qsk", cmd, replystr);
