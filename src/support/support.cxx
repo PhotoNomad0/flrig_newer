@@ -3493,33 +3493,19 @@ void set_power_controlImage(double pwr)
 
 void set_init_power_control();
 
-#define TRACE_STREAM(level, streamExpr)                           \
-    do {                                                          \
-        std::ostringstream _trace_os_;                             \
-        _trace_os_ << streamExpr;                                  \
-        const std::string _trace_s_ = _trace_os_.str();            \
-        trace((level), _trace_s_.c_str());                         \
-    } while (0)
-
 void execute_setPower()
 {
 	double set = 0;
 
 	if (spnrPOWER) {
 	  set = progStatus.power_level = spnrPOWER->value();
-
-        TRACE_STREAM(1, "execute_setPower()-spnrPOWER, progStatus.power_level=" << progStatus.power_level);
 	}
 	if (sldrPOWER) {
 	  set = progStatus.power_level = sldrPOWER->value();
-
-        TRACE_STREAM(1, "execute_setPower()-sldrPOWER, progStatus.power_level=" << progStatus.power_level);
 	}
 
 	double min, max, step;
 	selrig->get_pc_min_max_step(min, max, step);
-
-        TRACE_STREAM(1, "execute_setPower()- min=" << min << ",  max=" << max << ",  step=" << step << ",  progStatus.enable_power_limit=" << progStatus.enable_power_limit);
 
 	if (xcvr_name == rig_K2.name_) {
 		if (spnrPOWER) spnrPOWER->minimum(min);
@@ -3534,15 +3520,9 @@ void execute_setPower()
 		if (sldrPOWER) sldrPOWER->redraw();
 	}
 
-        TRACE_STREAM(1,  "execute_setPower()- progStatus.enable_power_limit=" << progStatus.enable_power_limit << ",  set=" << set);
-
-       TRACE_STREAM(1, "execute_setPower()-  set=" << set);
-
 	if (progStatus.enable_power_limit && (set > progStatus.power_limit * max / 100)) {
 
 		set = progStatus.power_limit * max / 100;
-
-                TRACE_STREAM(1, "execute_setPower()- set=" << set);
 
 		if (spnrPOWER) spnrPOWER->value(set);
 		if (sldrPOWER) sldrPOWER->value(set);

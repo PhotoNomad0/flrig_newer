@@ -740,13 +740,6 @@ void RIG_FTX1::set_power_control(double val)
 	}
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET power", cmd, replystr);
-	MilliSleep(100);
-
-       std::stringstream str;
-        str << "RIG_FTX1::set_power_control()- val=" << val << ",  cmd=" << cmd;
-        trace(1, str.str().c_str());
-
-
 }
 
 // Volume control return 0 ... 100
