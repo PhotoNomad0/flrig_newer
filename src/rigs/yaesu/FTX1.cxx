@@ -314,6 +314,7 @@ RIG_FTX1::RIG_FTX1() {
 	preamp_state = 0;
 	notch_on = false;
 	m_60m_indx = 0;
+	m_noise_reduction_on = false;
 	m_tX_output = '1'; // default to '1' for field only
 
 	inuse = onA;
@@ -1355,45 +1356,47 @@ int  RIG_FTX1::get_auto_notch()
 	return 0;
 }
 
+// this is for the noise blanker NB
 void RIG_FTX1::set_noise(bool b)
-{
-	if (inuse == onB)
-		cmd = "NB10;";
-	else
-		cmd = "NB00;";
+ {
+ 	if (inuse == onB)
+ 		cmd = "NL10;";
+ 	else
+ 		cmd = "NL00;";
 
-	nb_state = b;
+ 	nb_state = b;
 
-	if (b) {
-		cmd[3] = '1';
-		noise_blanker_label(nb_label(), true);
-	} else
-		noise_blanker_label(nb_label(), false);
+ 	if (b) {
+ 		cmd[3] = '1';
+ 		noise_blanker_label(nb_label(), true);
+ 	} else
+ 		noise_blanker_label(nb_label(), false);
 
-	sendCommand (cmd);
-	showresp(WARN, ASC, "SET NB", cmd, replystr);
-}
+ 	sendCommand (cmd);
+ 	showresp(WARN, ASC, "SET NB", cmd, replystr);
+ }
 
-int RIG_FTX1::get_noise()
-{
-	cmd = rsp = "NB0";
-	cmd += ';';
-	wait_char(';', 5, 100, "get NB", ASC);
+ // this is for the noise blanker NB
+ int RIG_FTX1::get_noise()
+ {
+ 	cmd = rsp = "NL0";
+ 	cmd += ';';
+ 	wait_char(';', 5, 100, "get NL", ASC);
 
-	gett("get_noise()");
+ 	gett("get_noise()");
 
-	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) return nb_state;
+ 	size_t p = replystr.rfind(rsp);
+ 	if (p == std::string::npos) return nb_state;
 
-	nb_state = replystr[p+3] - '0';
+ 	nb_state = replystr[p+3] - '0';
 
-	if (nb_state) {
-		noise_blanker_label("NB on", true);
-	} else
-		noise_blanker_label("NB", false);
+ 	if (nb_state) {
+ 		noise_blanker_label("NB on", true);
+ 	} else
+ 		noise_blanker_label("NB", false);
 
-	return nb_state;
-}
+ 	return nb_state;
+ }
 
 // val 0 .. 100
 void RIG_FTX1::set_mic_gain(int val)
@@ -1579,18 +1582,22 @@ int RIG_FTX1::get_break_in()
 	return progStatus.break_in;
 }
 
-// DNR
+// DNR - called by NR slider
 void RIG_FTX1::set_noise_reduction_val(int val)
 {
+    if (!m_noise_reduction_on) {
+        val = 0; // if NR button is toggled off, make sure off
+    }
 	cmd.assign("RL0").append(to_decimal(val, 2)).append(";");
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET_noise_reduction_val", cmd, replystr);
 	sett("set_noise_reduction_val");
 }
 
+// DNR - NR slider value
 int  RIG_FTX1::get_noise_reduction_val()
 {
-	int val = 1;
+	int val = 0;
 	cmd = rsp = "RL0";
 	cmd.append(";");
 	wait_char(';',6, 100, "GET noise reduction val", ASC);
@@ -1600,18 +1607,30 @@ int  RIG_FTX1::get_noise_reduction_val()
 	return val;
 }
 
-// DNR
+// DNR - called by NR toggle button
 void RIG_FTX1::set_noise_reduction(int val)
 {
-	cmd.assign("RL0").append(to_decimal(val, 2)).append(";");
-	sendCommand(cmd);
+    int newValue = val;
+    m_noise_reduction_on = val > 0;
+    if (m_noise_reduction_on) { // if user selected NR on
+        newValue = get_noise_reduction_val();
+        if (newValue > 0) { // check if already on
+            return; // nothing to do, already on
+        }
+
+        newValue = 1; // if user wants to switch on, start at minimum
+    }
+
+    cmd.assign("RL0").append(to_decimal(newValue, 2)).append(";");
+    sendCommand(cmd);
 	showresp(WARN, ASC, "SET noise reduction", cmd, replystr);
 	sett("set_noise_reduction_on/off");
 }
 
+// DNR - value for NR toggle button
 int  RIG_FTX1::get_noise_reduction()
 {
-	return get_noise_reduction_val();
+	return get_noise_reduction_val() > 0 ? 1 : 0; // any value but zero is on
 }
 
 // ---------------------------------------------------------------------
