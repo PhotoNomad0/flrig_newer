@@ -77,8 +77,8 @@ static const char FTX1_mode_type[] = { 'L', 'U', 'U', 'U', 'U', 'L', 'L', 'L', '
 
 static std::vector<std::string>FTX1_widths_SSB;
 static const char *vssb[] = {
- "300",  "400",  "600",  "850", "1100", 	// 1 ... 5
-"1200", "1500", "1650", "1800", "1950",		// 6 ... 10
+ "300",  "400",  "600",  "850", "1100", 	//  1 ... 5
+"1200", "1500", "1650", "1800", "1950",		//  6 ... 10
 "2100", "2250", "2400", "2450", "2500",		// 11 ... 15
 "2600", "2700", "2800", "2900", "3000",		// 16 ... 20
 "3200", "3500", "4000" };				    // 21 ... 23
@@ -88,8 +88,8 @@ static int FTX1_wvals_SSB[] = {
 
 static std::vector<std::string>FTX1_widths_CW;
 static const char *vcww[] = {
-  "50",  "100",  "150",  "200",  "250",		// 1 ... 5
- "300",  "350",  "400",  "450",  "500",		// 6 ... 10
+  "50",  "100",  "150",  "200",  "250",		//  1 ... 5
+ "300",  "350",  "400",  "450",  "500",		//  6 ... 10
  "600",  "800", "1200", "1400", "1700",		// 11 ... 15
 "2000", "2400", "3000", "3200", "3500",		// 16 .. 20
 "4000" };								    // 21
@@ -99,8 +99,8 @@ static int FTX1_wvals_CW[] = {
 
 static std::vector<std::string>FTX1_widths_RTTY;
 static const char *vrtty[] = {
-  "50",  "100",  "150",  "200",  "250",		// 1 ... 5
- "300",  "350",  "400",  "450",  "500",		// 6 ... 10
+  "50",  "100",  "150",  "200",  "250",		//  1 ... 5
+ "300",  "350",  "400",  "450",  "500",		//  6 ... 10
  "600",  "800", "1200", "1400", "1700",		// 11 ... 15
 "2000", "2400", "3000", "3200", "3500",		// 16 .. 20
 "4000" };								    // 21
@@ -398,13 +398,15 @@ void RIG_FTX1::get_band_selection(int v)
 			cmd = "MC0";
 		cmd.append(Channels_60m[m_60m_indx]).append(";");
 	} else {		// v == 1..11 band selection OR return to vfo mode == 0
-		if (inc_60m)
-			cmd = "VM;";
-		else {
-			if (v < 3)
-				v = v - 1;
-			cmd.assign("BS0").append(to_decimal(v, 2)).append(";");
+		if (inc_60m) {
+			cmd = "VM;"; // first switch back to VFO
+			sendCommand(cmd);
 		}
+
+		if (v < 3) {
+			v = v - 1;
+		}
+		cmd.assign("BS0").append(to_decimal(v, 2)).append(";");
 	}
 
 	sendCommand(cmd);

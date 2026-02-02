@@ -3497,12 +3497,8 @@ void execute_setPower()
 {
 	double set = 0;
 
-	if (spnrPOWER) {
-	  set = progStatus.power_level = spnrPOWER->value();
-	}
-	if (sldrPOWER) {
-	  set = progStatus.power_level = sldrPOWER->value();
-	}
+	if (spnrPOWER) set = progStatus.power_level = spnrPOWER->value();
+	if (sldrPOWER) set = progStatus.power_level = sldrPOWER->value();
 
 	double min, max, step;
 	selrig->get_pc_min_max_step(min, max, step);
@@ -3521,9 +3517,7 @@ void execute_setPower()
 	}
 
 	if (progStatus.enable_power_limit && (set > progStatus.power_limit * max / 100)) {
-
 		set = progStatus.power_limit * max / 100;
-
 		if (spnrPOWER) spnrPOWER->value(set);
 		if (sldrPOWER) sldrPOWER->value(set);
 	}
