@@ -18,6 +18,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
+//////////////////////////
+// based on FT-710 driver
+
 // comment out for distribution
 //#define TESTING 1
 
