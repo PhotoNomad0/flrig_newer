@@ -72,7 +72,7 @@ void TRACED(adjust_small_ui)
 	if (progStatus.schema == 1 && selrig->widgets[0].W != (Fl_Widget *)0) {
 		int i = 0;
 		while (selrig->widgets[i].W != NULL) {
-			if (selrig->widgets[i].w != 0)
+			if (selrig->widgets[i].w != 0) 
 				selrig->widgets[i].W->resize(
 					selrig->widgets[i].x, selrig->widgets[i].y,
 					selrig->widgets[i].w, selrig->widgets[i].W->h() );
@@ -312,7 +312,7 @@ void TRACED(adjust_small_ui)
 	progStatus.mainY = mainwindow->y();
 	progStatus.mainW = mainwindow->w();
 	progStatus.mainH = mainwindow->h();
-
+	
 	mainwindow->init_sizes();
 	mainwindow->redraw();
 
@@ -1169,69 +1169,69 @@ void TRACED(init_Generic_Tabs)
 	poll_nr->activate(); poll_nr->value(progStatus.poll_nr);
 	poll_compression->activate(); poll_compression->value(progStatus.poll_compression);
 
-	if (!selrig->has_bandwidth_control) {
-		poll_bandwidth->deactivate();
+	if (!selrig->has_bandwidth_control) { 
+		poll_bandwidth->deactivate(); 
 		poll_bandwidth->value( progStatus.poll_bandwidth = 0 ); }
-	if (!selrig->has_smeter) {
-		poll_smeter->deactivate();
+	if (!selrig->has_smeter) { 
+		poll_smeter->deactivate(); 
 		poll_smeter->value( progStatus.poll_smeter = 0 ); }
-	if (!selrig->has_power_out) {
-		poll_pout->deactivate();
+	if (!selrig->has_power_out) { 
+		poll_pout->deactivate(); 
 		poll_pout->value( progStatus.poll_pout = 0 ); }
-	if (!selrig->has_swr_control) {
-		poll_swr->deactivate();
+	if (!selrig->has_swr_control) { 
+		poll_swr->deactivate(); 
 		poll_swr->value( progStatus.poll_swr = 0 ); }
-	if (!selrig->has_alc_control) {
-		poll_alc->deactivate();
+	if (!selrig->has_alc_control) { 
+		poll_alc->deactivate(); 
 		poll_alc->value( progStatus.poll_alc = 0 ); }
-	if (!selrig->has_volume_control) {
-		poll_volume->deactivate();
+	if (!selrig->has_volume_control) { 
+		poll_volume->deactivate(); 
 		poll_volume->value( progStatus.poll_volume = 0 ); }
-	if (!selrig->has_notch_control) {
-		poll_notch->deactivate();
+	if (!selrig->has_notch_control) { 
+		poll_notch->deactivate(); 
 		poll_notch->value( progStatus.poll_notch = 0 ); }
-	if (!selrig->has_tune_control) {
+	if (!selrig->has_tune_control) { 
 		poll_tuner->deactivate();
 		poll_tuner->value( progStatus.poll_tuner = 0 ); }
-	if (!selrig->has_cw_break_in) {
-		poll_break_in->deactivate();
+	if (!selrig->has_cw_break_in) { 
+		poll_break_in->deactivate(); 
 		poll_break_in->value( progStatus.poll_break_in = 0 ); }
 	if (!selrig->has_auto_notch ||
-		xcvr_name == rig_FT1000MP.name_ ) {
-			poll_auto_notch->deactivate();
+		xcvr_name == rig_FT1000MP.name_ ) { 
+			poll_auto_notch->deactivate(); 
 			poll_auto_notch->value( progStatus.poll_auto_notch = 0 ); }
 	if (!selrig->has_ifshift_control) {
 		poll_ifshift->deactivate();
 		poll_ifshift->value( progStatus.poll_ifshift = 0 ); }
-	if (!selrig->has_pbt_controls) {
-		poll_pbt->deactivate();
+	if (!selrig->has_pbt_controls) { 
+		poll_pbt->deactivate(); 
 		poll_pbt->value( progStatus.poll_pbt = 0 ); }
-	if (!selrig->has_power_control) {
-		poll_power_control->deactivate();
+	if (!selrig->has_power_control) { 
+		poll_power_control->deactivate(); 
 		poll_power_control->value( progStatus.poll_power_control = 0 ); }
 	if (!selrig->has_preamp_control && !selrig->has_attenuator_control) {
-		poll_pre_att->deactivate();
+		poll_pre_att->deactivate(); 
 		poll_pre_att->value( progStatus.poll_pre_att = 0 ); }
-	if (!selrig->has_sql_control) {
-		poll_squelch->deactivate();
+	if (!selrig->has_sql_control) { 
+		poll_squelch->deactivate(); 
 		poll_squelch->value( progStatus.poll_squelch = 0 ); }
-	if (!selrig->has_micgain_control) {
-		poll_micgain->deactivate();
+	if (!selrig->has_micgain_control) { 
+		poll_micgain->deactivate(); 
 		poll_micgain->value( progStatus.poll_micgain = 0 ); }
-	if (!selrig->has_rf_control) {
-		poll_rfgain->deactivate();
+	if (!selrig->has_rf_control) { 
+		poll_rfgain->deactivate(); 
 		poll_rfgain->value( progStatus.poll_rfgain = 0 ); }
-	if (!selrig->has_split) {
-		poll_split->deactivate();
+	if (!selrig->has_split) { 
+		poll_split->deactivate(); 
 		poll_split->value( progStatus.poll_split = 0 ); }
 	if (!selrig->has_noise_control) {
-		poll_noise->deactivate();
+		poll_noise->deactivate(); 
 		poll_noise->value( progStatus.poll_noise = 0 );}
 	if (!selrig->has_noise_reduction) {
-		poll_nr->deactivate();
+		poll_nr->deactivate(); 
 		poll_nr->value( progStatus.poll_nr = 0 );}
-	if (!selrig->has_compression) {
-		poll_compression->deactivate();
+	if (!selrig->has_compression) { 
+		poll_compression->deactivate(); 
 		poll_compression->value( progStatus.poll_compression = 0 ); }
 
 }
@@ -2056,7 +2056,7 @@ P1/E1  on/on");
 
 	 else {
 
-	if (selrig->name_ == rig_PCR1000.name_) {
+	if (selrig->name_ == rig_PCR1000.name_) { 
 		   btnPreamp->tooltip("On/Off"); //Kludge necessary to get the tooltip verbiage for the PCR-1000 correct. Feel free to re-order the if-else statements
 	   }
 	 else

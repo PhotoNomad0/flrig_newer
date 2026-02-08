@@ -2005,7 +2005,7 @@ void updateTCI(void *d)
 		opBW->redraw();
 		opBW->show();
 	}
-}
+} 
 
 void updateFLEX1500(void *d)
 {
@@ -2060,7 +2060,7 @@ void updateFLEX1500(void *d)
 
 	updateBandwidthControl((void *)0);
 
-}
+} 
 
 // set_bandwidth_control updates iBW and then posts the call for
 // the UI thread to updateBandwidthControl
@@ -2306,11 +2306,11 @@ void updateSelect() {
 @F%d@S%d@.|\t\
 @F%d@S%d@.%s",
 			progStatus.memfontnbr, progStatus.memfontsize, oplist[n].freq / 1000.0,
-			progStatus.memfontnbr, progStatus.memfontsize,
+			progStatus.memfontnbr, progStatus.memfontsize, 
 			progStatus.memfontnbr, progStatus.memfontsize, selrig->get_bwname_(oplist[n].iBW, oplist[n].imode),
-			progStatus.memfontnbr, progStatus.memfontsize,
+			progStatus.memfontnbr, progStatus.memfontsize, 
 			progStatus.memfontnbr, progStatus.memfontsize, selrig->get_modename_(oplist[n].imode),
-			progStatus.memfontnbr, progStatus.memfontsize,
+			progStatus.memfontnbr, progStatus.memfontsize, 
 			progStatus.memfontnbr, progStatus.memfontsize, szatag );
 
 		FreqSelect->add (szline);

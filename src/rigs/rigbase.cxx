@@ -695,7 +695,7 @@ int rigbase::wait_crlf(std::string cmd, std::string sz, int nr, int timeout, int
 	if (psrx != std::string::npos)
 		srx.replace(psrx, 2, "<cr><lf>");
 
-	snprintf( ctrace, sizeof(ctrace), "%s: read %d bytes in %d msec, %s",
+	snprintf( ctrace, sizeof(ctrace), "%s: read %d bytes in %d msec, %s", 
 		sz.c_str(), retnbr,
 		(int)(zmsec() - tstart),
 		srx.c_str());
@@ -764,7 +764,7 @@ int rigbase::wait_string(std::string sz, int nr, int timeout, int pr)
 	static char ctrace[1000];
 	memset(ctrace, 0, 1000);
 
-	snprintf( ctrace, sizeof(ctrace), "%s: read %d bytes in %d msec, %s",
+	snprintf( ctrace, sizeof(ctrace), "%s: read %d bytes in %d msec, %s", 
 		sz.c_str(), retnbr,
 		(int)(zmsec() - tstart),
 		replystr.c_str());
@@ -829,7 +829,7 @@ int rigbase::waitfor(int nr, int timeout, int pr)
 	static char ctrace[1000];
 	memset(ctrace, 0, 1000);
 
-	snprintf( ctrace, sizeof(ctrace), "read %d bytes in %d msec, %s",
+	snprintf( ctrace, sizeof(ctrace), "read %d bytes in %d msec, %s", 
 		retnbr,
 		(int)(zmsec() - tstart),
 		replystr.c_str());
