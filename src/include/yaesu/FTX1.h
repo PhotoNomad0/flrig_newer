@@ -27,6 +27,7 @@ class RIG_FTX1 : public rigbase {
 private:
 	bool notch_on;
 	int  m_60m_indx;
+	bool  m_noise_reduction_on;
 	char m_tX_output; // will be either '1' for field only, or '2' for SPA-1 attached
 public:
 	RIG_FTX1();
@@ -104,7 +105,7 @@ public:
 	virtual int  next_preamp();
 	virtual void set_preamp(int val);
 	virtual int  get_preamp();
-
+    virtual bool is_two_meter_plus();
 	virtual void set_if_shift(int val);
 	virtual bool get_if_shift(int &val);
 	virtual void get_if_min_max_step(int &min, int &max, int &step);
