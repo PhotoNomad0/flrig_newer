@@ -1363,17 +1363,33 @@ int  RIG_FTX1::get_auto_notch()
 void RIG_FTX1::set_noise(bool b)
  {
  	if (inuse == onB)
- 		cmd = "NL10;";
+ 		cmd = "NL10";
  	else
- 		cmd = "NL00;";
+ 		cmd = "NL00";
 
- 	nb_state = b;
+    int initial_state = nb_state;
 
- 	if (b) {
- 		cmd[3] = '1';
- 		noise_blanker_label(nb_labels_[1].c_str(), true);
- 	} else
- 		noise_blanker_label(nb_labels_[0].c_str(), false);
+	if (nb_state == 0) {
+		nb_state = 1;
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state < 8) {
+		nb_state += 3;
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state < 10) {
+		nb_state += 1;
+		noise_blanker_label(nb_label(), true);
+	} else {
+		nb_state = 0;
+		noise_blanker_label(nb_label(), false);
+	}
+    char buf[3];
+    std::snprintf(buf, sizeof(buf), "%02d", nb_state);
+	cmd = cmd + buf + ";";
+
+    // trace the command
+//     std::stringstream s;
+//     s << " initial_state=" << initial_state << ",final  nb_state=" << nb_state;
+//     set_trace(3,"set_noise", cmd.c_str(), s.str().c_str());
 
  	sendCommand (cmd);
  	showresp(WARN, ASC, "SET NB", cmd, replystr);
@@ -1382,16 +1398,30 @@ void RIG_FTX1::set_noise(bool b)
  // this is for the noise blanker NB
  int RIG_FTX1::get_noise()
  {
- 	cmd = rsp = "NL0";
+  	if (inuse == onB)
+  		rsp = "NL1";
+  	else
+  		rsp = "NL0";
+
+ 	cmd = rsp;
  	cmd += ';';
- 	wait_char(';', 5, 100, "get NL", ASC);
+ 	wait_char(';', 7, 100, "get NL", ASC);
 
  	gett("get_noise()");
 
  	size_t p = replystr.rfind(rsp);
  	if (p == std::string::npos) return nb_state;
 
- 	nb_state = replystr[p+3] - '0';
+    // Parse 2 digits starting at p+4 (i.e., replystr[p+4] and replystr[p+5])
+    // Example: "NL0007;" -> nb_state = 7, "NL0010;" -> nb_state = 10
+    std::string stateStr = replystr.substr(4, 2);
+    nb_state = std::stoi(stateStr);
+
+// trace the command
+//     std::stringstream s;
+//     s << " response" << rsp << ", stateStr=" << stateStr << ", nb_state=" << nb_state;
+//     set_trace(3,"get_noise", cmd.c_str(), replystr.c_str());
+//     set_trace(2,"get_noise2", s.str().c_str());
 
  	if (nb_state) {
  	    if (nb_state > 10) {
