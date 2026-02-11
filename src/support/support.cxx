@@ -4472,35 +4472,36 @@ void cbNoise()
 	btn = progStatus.noise = btnNOISE->value();
 
 	selrig->set_noise(btn);
-	
-	std::stringstream s;
-    s << "cbNoise(): btn=" << btn;
-    trace(1, s.str().c_str());
+
+// trace the command
+// 	std::stringstream s;
+//     s << "cbNoise(): btn=" << btn;
+//     trace(1, s.str().c_str());
 
 	MilliSleep(50);
 	get = selrig->get_noise();
-	
-	s.clear();
-	s << "cbNoise(): get_noise=" << get;
-    trace(1, s.str().c_str());
-        
+
+// 	s.str("");
+// 	s << "cbNoise(): get_noise=" << get;
+//     trace(1, s.str().c_str());
+
 	while ((get != btn) && (cnt++ < 10)) {
 		MilliSleep(progStatus.serial_post_write_delay);
 		get = selrig->get_noise();
-		
-        s.clear();
-        s << "cbNoise(): " << cnt << " get_noise=" << get;
-        trace(1, s.str().c_str());
-        
+
+//         s.str("");
+//         s << "cbNoise(): " << cnt << " get_noise=" << get;
+//         trace(1, s.str().c_str());
+
 		Fl::awake();
 	}
 
 	vfo->noise = progStatus.noise;
 	vfo->nb_level = progStatus.nb_level;
-	
-    s.clear();
-    s << "cbNoise(): vfo->nb_level=" << vfo->nb_level;
-    trace(1, s.str().c_str());
+
+//     s.str("");
+//     s << "cbNoise(): vfo->nb_level=" << vfo->nb_level;
+//     trace(1, s.str().c_str());
 
 	update_noise( (void*)0 );
 }
