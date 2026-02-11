@@ -2,28 +2,28 @@
 /* src/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Build platform */
-#define BUILD_BUILD_PLATFORM "x86_64-apple-darwin24.6.0"
+#define BUILD_BUILD_PLATFORM "aarch64-apple-darwin25.2.0"
 
 /* Compiler */
-#define BUILD_COMPILER "clang: warning: argument unused during compilation: '-std=gnu++11' [-Wunused-command-line-argument]"
+#define BUILD_COMPILER "InstalledDir: /Library/Developer/CommandLineTools/usr/bin"
 
 /* Configure arguments */
 #define BUILD_CONFIGURE_ARGS ""
 
 /* Build date */
-#define BUILD_DATE "Fri Feb  6 04:57:51 EST 2026"
+#define BUILD_DATE "Wed Feb 11 07:42:34 EST 2026"
 
 /* Build host */
-#define BUILD_HOST "MiniMax.local"
+#define BUILD_HOST "BigDude.local"
 
 /* Host platform */
-#define BUILD_HOST_PLATFORM "x86_64-apple-darwin24.6.0"
+#define BUILD_HOST_PLATFORM "aarch64-apple-darwin25.2.0"
 
 /* Target platform */
-#define BUILD_TARGET_PLATFORM "x86_64-apple-darwin24.6.0"
+#define BUILD_TARGET_PLATFORM "aarch64-apple-darwin25.2.0"
 
 /* Build user */
-#define BUILD_USER "blm"
+#define BUILD_USER "blm0"
 
 /* FLRIG compiler flags */
 #define FLRIG_BUILD_CXXFLAGS "-I$(srcdir) -I$(srcdir)/include -I$(srcdir)/xmlrpcpp -fno-stack-check -mmacosx-version-min=10.11 -I$(srcdir)/xmlrpcpp -I/usr/local/include -I/usr/local/include/FL/images -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT -I$(srcdir) -I$(srcdir)/include -pipe -Wall -fexceptions -O2 -fno-stack-check -mmacosx-version-min=10.11 -DNDEBUG"
