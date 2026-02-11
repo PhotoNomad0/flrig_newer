@@ -159,7 +159,7 @@ static std::vector<std::string>FTX1_pre_labels;
 static const char *vFTX1_pre_labels[] = { "IPO", "Amp 1", "Amp 2" };
 
 static std::vector<std::string>FTX1_nb_labels;
-static const char *vFTX1_nb_labels[] = { "NB", "NB on" };
+static const char *vFTX1_nb_labels[] = { "NB off", "NB 1", "NB 2", "NB 3", "NB 4", "NB 5", "NB 6", "NB 7", "NB 8", "NB 8", "NB 10" };
 //----------------------------------------------------------------------
 
 static GUI rig_widgets[]= {
@@ -1371,9 +1371,9 @@ void RIG_FTX1::set_noise(bool b)
 
  	if (b) {
  		cmd[3] = '1';
- 		noise_blanker_label(nb_label(), true);
+ 		noise_blanker_label(nb_labels_[1].c_str(), true);
  	} else
- 		noise_blanker_label(nb_label(), false);
+ 		noise_blanker_label(nb_labels_[0].c_str(), false);
 
  	sendCommand (cmd);
  	showresp(WARN, ASC, "SET NB", cmd, replystr);
@@ -1394,7 +1394,10 @@ void RIG_FTX1::set_noise(bool b)
  	nb_state = replystr[p+3] - '0';
 
  	if (nb_state) {
- 		noise_blanker_label("NB on", true);
+ 	    if (nb_state > 10) {
+ 	        nb_state = 10;
+ 	    }
+ 		noise_blanker_label(nb_labels_[nb_state].c_str(), true);
  	} else
  		noise_blanker_label("NB", false);
 
