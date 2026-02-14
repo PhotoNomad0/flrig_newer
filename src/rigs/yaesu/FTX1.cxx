@@ -158,6 +158,9 @@ static const char *vFTX1_att_labels[] = { "ATT", "ATT on"};
 static std::vector<std::string>FTX1_pre_labels;
 static const char *vFTX1_pre_labels[] = { "IPO", "Amp 1", "Amp 2" };
 
+static std::vector<std::string>FTX1_agc_labels;
+static const char *vFTX1_agc_labels[] = { "AGC OFF", "AGC Fast", "AGC MID", "AGC SLOW", "AGC AUTO" };
+
 static std::vector<std::string>FTX1_nb_labels;
 static const char *vFTX1_nb_labels[] = { "NB off", "NB 1", "NB 2", "NB 3", "NB 4", "NB 5", "NB 6", "NB 7", "NB 8", "NB 8", "NB 10" };
 //----------------------------------------------------------------------
@@ -201,6 +204,9 @@ void RIG_FTX1::initialize()
 
 	VECTOR (FTX1_att_labels, vFTX1_att_labels);
 	att_labels_ = FTX1_att_labels;
+
+	VECTOR (FTX1_agc_labels, vFTX1_agc_labels);
+	agc_labels_ = FTX1_agc_labels;
 
 	VECTOR (FTX1_pre_labels, vFTX1_pre_labels);
 	pre_labels_ = FTX1_pre_labels;
@@ -297,6 +303,7 @@ RIG_FTX1::RIG_FTX1() {
 	has_volume_control =
 	has_rf_control =
 	has_sql_control =
+	has_agc_control =
 	has_micgain_control =
 	has_mode_control =
 	has_noise_control =
@@ -314,6 +321,7 @@ RIG_FTX1::RIG_FTX1() {
 
 // derived specific
 	atten_state = 0;
+	agcval = 0;
 	preamp_state = 0;
 	notch_on = false;
 	m_60m_indx = 0;
@@ -868,9 +876,74 @@ int RIG_FTX1::get_attenuator()
 
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return progStatus.attenuator;
-	if (p + 3 >= replystr.length()) return progStatus.attenuator;
+	if (p + 5 >= replystr.length()) return progStatus.attenuator;
 	atten_state = replystr[p+3] - '0';
 	return atten_state;
+}
+
+int RIG_FTX1::next_agc()
+{
+    int new_agc = 0;
+
+    if (agcval <= 0) {
+      new_agc = 1;
+    } else if (agcval < 4) {
+      new_agc =  agcval + 1;
+    }
+    TRACE_STREAM(1, "next_agc() initial agcval=" << agcval << ", new_agc=" << new_agc);
+    return new_agc;
+}
+
+int RIG_FTX1::incr_agc()
+{
+	agcval = this->next_agc();
+    TRACE_STREAM(1, "incr_agc() agcval=" << agcval);
+
+    this->set_agc(agcval);
+	return agcval;
+}
+
+void RIG_FTX1::set_agc(int val)
+{
+	if (inuse == onB)
+		cmd = rsp = "GT1";
+	else
+		cmd = rsp = "GT0";
+
+    TRACE_STREAM(1, "set_agc() val=" << val);
+
+	agcval = val;
+	if (val > 4) {
+    	agcval = 4; // sanity limit
+	}
+    cmd += static_cast<char>('0' + agcval);
+    cmd += ';';
+	sendCommand(cmd);
+	showresp(WARN, ASC, "SET agc", cmd, replystr);
+}
+
+int RIG_FTX1::get_agc()
+{
+	if (inuse == onB)
+		cmd = rsp = "GT1";
+	else
+		cmd = rsp = "GT0";
+
+	cmd += ';';
+	wait_char(';', 5, 100, "get agc", ASC);
+
+	gett("get_agc()");
+
+	size_t p = replystr.rfind(rsp);
+	if (p + 5 >= replystr.length()) return 0;
+	agcval = replystr[p+3] - '0';
+	if (agcval > 4) {
+	  agcval = 4;
+	}
+
+    TRACE_STREAM(1, "get_agc() replystr=" << replystr << ", agcval=" << agcval);
+
+	return agcval;
 }
 
 bool RIG_FTX1::is_two_meter_plus()

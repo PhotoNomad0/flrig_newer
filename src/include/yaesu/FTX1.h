@@ -29,6 +29,7 @@ private:
 	int  m_60m_indx;
 	bool  m_noise_reduction_on;
 	char m_tX_output; // will be either '1' for field only, or '2' for SPA-1 attached
+
 public:
 	RIG_FTX1();
 	~RIG_FTX1() {}
@@ -102,6 +103,12 @@ public:
 	virtual int  next_attenuator();
 	virtual void set_attenuator(int val);
 	virtual int  get_attenuator();
+
+    virtual int  get_agc();
+    virtual void set_agc(int val);
+    virtual int  next_agc();
+    virtual int  incr_agc();
+
 	virtual int  next_preamp();
 	virtual void set_preamp(int val);
 	virtual int  get_preamp();
