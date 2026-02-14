@@ -108,6 +108,8 @@ public:
     virtual void set_agc(int val);
     virtual int  next_agc();
     virtual int  incr_agc();
+    virtual int  agc_val();
+    virtual const char *  agc_label();
 
 	virtual int  next_preamp();
 	virtual void set_preamp(int val);

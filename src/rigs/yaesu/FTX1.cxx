@@ -158,9 +158,6 @@ static const char *vFTX1_att_labels[] = { "ATT", "ATT on"};
 static std::vector<std::string>FTX1_pre_labels;
 static const char *vFTX1_pre_labels[] = { "IPO", "Amp 1", "Amp 2" };
 
-static std::vector<std::string>FTX1_agc_labels;
-static const char *vFTX1_agc_labels[] = { "AGC OFF", "AGC Fast", "AGC MID", "AGC SLOW", "AGC AUTO" };
-
 static std::vector<std::string>FTX1_nb_labels;
 static const char *vFTX1_nb_labels[] = { "NB off", "NB 1", "NB 2", "NB 3", "NB 4", "NB 5", "NB 6", "NB 7", "NB 8", "NB 8", "NB 10" };
 //----------------------------------------------------------------------
@@ -204,9 +201,6 @@ void RIG_FTX1::initialize()
 
 	VECTOR (FTX1_att_labels, vFTX1_att_labels);
 	att_labels_ = FTX1_att_labels;
-
-	VECTOR (FTX1_agc_labels, vFTX1_agc_labels);
-	agc_labels_ = FTX1_agc_labels;
 
 	VECTOR (FTX1_pre_labels, vFTX1_pre_labels);
 	pre_labels_ = FTX1_pre_labels;
@@ -881,6 +875,31 @@ int RIG_FTX1::get_attenuator()
 	return atten_state;
 }
 
+int RIG_FTX1::get_agc()
+{
+	if (inuse == onB)
+		cmd = rsp = "GT1";
+	else
+		cmd = rsp = "GT0";
+
+	cmd += ';';
+	wait_char(';', 5, 100, "get agc", ASC);
+
+	gett("get_agc()");
+
+	size_t p = replystr.rfind(rsp);
+    if (p == std::string::npos) return agcval;
+
+	agcval = replystr[p+3] - '0';
+	if (agcval > 4) {
+	  agcval = 4;
+	}
+
+    TRACE_STREAM(1, "get_agc() replystr=" << replystr << ", agcval=" << agcval);
+
+	return agcval;
+}
+
 int RIG_FTX1::next_agc()
 {
     int new_agc = 0;
@@ -922,29 +941,17 @@ void RIG_FTX1::set_agc(int val)
 	showresp(WARN, ASC, "SET agc", cmd, replystr);
 }
 
-int RIG_FTX1::get_agc()
+static const char *agcstrs[] = {"AGC", "FST", "MED", "SLO", "AUT"};
+const char *RIG_FTX1::agc_label()
 {
-	if (inuse == onB)
-		cmd = rsp = "GT1";
-	else
-		cmd = rsp = "GT0";
-
-	cmd += ';';
-	wait_char(';', 5, 100, "get agc", ASC);
-
-	gett("get_agc()");
-
-	size_t p = replystr.rfind(rsp);
-	if (p + 5 >= replystr.length()) return 0;
-	agcval = replystr[p+3] - '0';
-	if (agcval > 4) {
-	  agcval = 4;
-	}
-
-    TRACE_STREAM(1, "get_agc() replystr=" << replystr << ", agcval=" << agcval);
-
-	return agcval;
+	return agcstrs[agcval];
 }
+
+int  RIG_FTX1::agc_val()
+{
+	return (agcval);
+}
+
 
 bool RIG_FTX1::is_two_meter_plus()
 {
