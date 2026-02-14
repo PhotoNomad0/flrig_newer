@@ -2063,6 +2063,12 @@ P1/E1  on/on");
 			btnPreamp->tooltip("On/Off/Level");
 		}
 
+    if (selrig->name_ == rig_FTX1.name_) {
+        btnPreamp->label("IPO");
+        btnPreamp->redraw_label();
+        btnPreamp->tooltip("IPO/AMP 1/AMP 2");
+    }
+
 	} else {
 		switch (progStatus.UIsize) {
 			case small_ui :
