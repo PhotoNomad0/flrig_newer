@@ -895,7 +895,7 @@ int RIG_FTX1::get_agc()
 	  agcval = 4;
 	}
 
-    TRACE_STREAM(1, "get_agc() replystr=" << replystr << ", agcval=" << agcval);
+//     TRACE_STREAM(1, "get_agc() replystr=" << replystr << ", agcval=" << agcval);
 
 	return agcval;
 }
@@ -909,14 +909,14 @@ int RIG_FTX1::next_agc()
     } else if (agcval < 4) {
       new_agc =  agcval + 1;
     }
-    TRACE_STREAM(1, "next_agc() initial agcval=" << agcval << ", new_agc=" << new_agc);
+//     TRACE_STREAM(1, "next_agc() initial agcval=" << agcval << ", new_agc=" << new_agc);
     return new_agc;
 }
 
 int RIG_FTX1::incr_agc()
 {
 	agcval = this->next_agc();
-    TRACE_STREAM(1, "incr_agc() agcval=" << agcval);
+//     TRACE_STREAM(1, "incr_agc() agcval=" << agcval);
 
     this->set_agc(agcval);
 	return agcval;
@@ -929,7 +929,7 @@ void RIG_FTX1::set_agc(int val)
 	else
 		cmd = rsp = "GT0";
 
-    TRACE_STREAM(1, "set_agc() val=" << val);
+//     TRACE_STREAM(1, "set_agc() val=" << val);
 
 	agcval = val;
 	if (val > 4) {
