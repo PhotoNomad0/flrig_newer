@@ -66,6 +66,16 @@
 #include "cmedia.h"
 #include "tmate2.h"
 
+// use like this to trace data: `TRACE_STREAM(1, "execute_setPower()-spnrPOWER, progStatus.power_level=" << progStatus.power_level);`
+#define TRACE_STREAM(level, streamExpr)                           \
+    do {                                                          \
+        std::ostringstream _trace_os_;                             \
+        _trace_os_ << streamExpr;                                  \
+        const std::string _trace_s_ = _trace_os_.str();            \
+        trace((level), _trace_s_.c_str());                         \
+    } while (0)
+
+
 //void initTabs();
 
 rigbase *selrig = rigs[0];
@@ -4473,35 +4483,37 @@ void cbNoise()
 
 	selrig->set_noise(btn);
 
-// trace the command
-// 	std::stringstream s;
-//     s << "cbNoise(): btn=" << btn;
-//     trace(1, s.str().c_str());
+    // trace the command
+//     TRACE_STREAM(1, "cbNoise(): btn=" << btn);
 
 	MilliSleep(50);
-	get = selrig->get_noise();
 
-// 	s.str("");
-// 	s << "cbNoise(): get_noise=" << get;
-//     trace(1, s.str().c_str());
+    if (selrig->name_ == rig_FTX1.name_) {
 
-	while ((get != btn) && (cnt++ < 10)) {
-		MilliSleep(progStatus.serial_post_write_delay);
-		get = selrig->get_noise();
+        vfo->nb_level = progStatus.nb_level = selrig->get_nb_level();
+        vfo->noise = progStatus.noise = vfo->nb_level > 0;
+//         TRACE_STREAM(1, "cbNoise(): FTX1, vfo->nb_level=" << vfo->nb_level);
 
-//         s.str("");
-//         s << "cbNoise(): " << cnt << " get_noise=" << get;
-//         trace(1, s.str().c_str());
+    } else {
 
-		Fl::awake();
-	}
+        get = selrig->get_noise();
 
-	vfo->noise = progStatus.noise;
-	vfo->nb_level = progStatus.nb_level;
+//         TRACE_STREAM(1, "cbNoise(): get_noise=" << get << ", selrig->name_=" << selrig->name_);
 
-//     s.str("");
-//     s << "cbNoise(): vfo->nb_level=" << vfo->nb_level;
-//     trace(1, s.str().c_str());
+        while ((get != btn) && (cnt++ < 10)) {
+            MilliSleep(progStatus.serial_post_write_delay);
+            get = selrig->get_noise();
+
+//             TRACE_STREAM(1, "cbNoise(): " << cnt << " get_noise=" << get);
+
+            Fl::awake();
+        }
+
+        vfo->noise = progStatus.noise;
+        vfo->nb_level = progStatus.nb_level;
+    }
+
+    TRACE_STREAM(1, "cbNoise(): vfo->nb_level=" << vfo->nb_level << ", vfo->noise=" << vfo->noise);
 
 	update_noise( (void*)0 );
 }

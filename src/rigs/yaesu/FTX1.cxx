@@ -302,6 +302,7 @@ RIG_FTX1::RIG_FTX1() {
 	has_mode_control =
 	has_noise_control =
 	has_noise_reduction =
+	has_nb_level =
 	has_noise_reduction_control =
 	has_bandwidth_control =
 	has_notch_control =
@@ -1439,45 +1440,37 @@ int  RIG_FTX1::get_auto_notch()
 	return 0;
 }
 
-// this is for the noise blanker NB
-void RIG_FTX1::set_noise(bool b)
- {
+// this is for setting the noise blanker NB analog level
+void RIG_FTX1::set_nb_level(int val)
+{
  	if (inuse == onB)
  		cmd = "NL10";
  	else
  		cmd = "NL00";
 
-    int initial_state = nb_state;
-
-	if (nb_state == 0) {
-		nb_state = 1;
-		noise_blanker_label(nb_label(), true);
-	} else if (nb_state < 8) {
-		nb_state += 3;
-		noise_blanker_label(nb_label(), true);
-	} else if (nb_state < 10) {
-		nb_state += 1;
-		noise_blanker_label(nb_label(), true);
-	} else {
+	if (nb_state < 0) {
 		nb_state = 0;
-		noise_blanker_label(nb_label(), false);
+	} else if (nb_state > 10) {
+		nb_state = 10;
+		noise_blanker_label(nb_label(), true);
 	}
+
     char buf[3];
     std::snprintf(buf, sizeof(buf), "%02d", nb_state);
 	cmd = cmd + buf + ";";
 
     // trace the command
-//     std::stringstream s;
-//     s << " initial_state=" << initial_state << ",final  nb_state=" << nb_state;
-//     set_trace(3,"set_noise", cmd.c_str(), s.str().c_str());
+    //     std::stringstream s;
+    //     s << "final  nb_state=" << nb_state;
+    //     set_trace(3,"set_noise", cmd.c_str(), s.str().c_str());
 
  	sendCommand (cmd);
- 	showresp(WARN, ASC, "SET NB", cmd, replystr);
- }
+ 	showresp(WARN, ASC, "SET NB Level", cmd, replystr);
+}
 
- // this is for the noise blanker NB
- int RIG_FTX1::get_noise()
- {
+// this is for getting the noise blanker NB analog level
+int RIG_FTX1::get_nb_level()
+{
   	if (inuse == onB)
   		rsp = "NL1";
   	else
@@ -1485,9 +1478,9 @@ void RIG_FTX1::set_noise(bool b)
 
  	cmd = rsp;
  	cmd += ';';
- 	wait_char(';', 7, 100, "get NL", ASC);
+ 	wait_char(';', 7, 100, "get NB Level", ASC);
 
- 	gett("get_noise()");
+ 	gett("get_nb_level()");
 
  	size_t p = replystr.rfind(rsp);
  	if (p == std::string::npos) return nb_state;
@@ -1512,6 +1505,37 @@ void RIG_FTX1::set_noise(bool b)
  		noise_blanker_label("NB", false);
 
  	return nb_state;
+}
+
+// this is for toggling the noise blanker (NB), each call cycles to next blanking level
+void RIG_FTX1::set_noise(bool b)
+ {
+    // start with last level and move to next state - jump by 3's
+	if (nb_state == 0) {
+		nb_state = 1; // switch from off to on at level 1
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state < 8) {
+		nb_state += 3; // bump up by 3
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state < 10) {
+		nb_state += 1; // bump up by 1
+		noise_blanker_label(nb_label(), true);
+	} else {
+		nb_state = 0; // switch off
+		noise_blanker_label(nb_label(), false);
+	}
+
+    this->set_nb_level(nb_state);
+ }
+
+ // this is for the noise blanker NB - boolean true if on
+ int RIG_FTX1::get_noise()
+ {
+ 	gett("get_noise()");
+
+ 	int noiseLevel = this->get_nb_level();
+
+ 	return noiseLevel > 0; // return boolean for on/off
  }
 
 // val 0 .. 100

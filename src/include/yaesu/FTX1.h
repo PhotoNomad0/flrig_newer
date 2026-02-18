@@ -128,6 +128,10 @@ public:
 
 	virtual void set_noise(bool b);
 	virtual int  get_noise();
+//	void get_nb_min_max_step(int &min, int &max, int &step) {
+//		min = 1; max = 10; step = 3; }
+	void set_nb_level(int val);
+	int  get_nb_level();
 
 	virtual void set_mic_gain(int val);
 	virtual int  get_mic_gain();
