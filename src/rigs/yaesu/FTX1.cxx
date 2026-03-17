@@ -303,7 +303,6 @@ RIG_FTX1::RIG_FTX1() {
 	preamp_state = 0;
 	notch_on = false;
 	m_60m_indx = 0;
-	m_memory_mode = false;
 	m_tX_output = '1'; // default to '1' for field only
 
 	inuse = onA;
@@ -362,20 +361,30 @@ void RIG_FTX1::set_xcvr_auto_off()
 	}
 }
 
-void RIG_FTX1::get_band_selection(int v)
+static bool memory_mode = false;
+
+bool RIG_FTX1::get_current_mode()
 {
-	int inc_60m = false;
+	int memory_mode_ = false;
 	cmd = "IF;";
 	wait_char(';', 30, 100, "get band", ASC);
 
 	sett("get band");
 
 	size_t p = replystr.rfind("IF");
-	if (p == std::string::npos) return;
-
- 	if (replystr[p+24 ] != '0') {	// P7 = 0 means VFO mode, otherwise assume memory mode
- 		inc_60m = true;
+    if (p != std::string::npos) {
+        if (replystr[p+24 ] != '0') {	// P7 = 0 means VFO mode, otherwise assume memory mode
+            memory_mode_ = true;
+        }
  	}
+ 	memory_mode = memory_mode_;
+ 	return memory_mode_;
+}
+
+void RIG_FTX1::get_band_selection(int v)
+{
+	sett("get band");
+	int inc_60m = get_current_mode();
 
 	if (v == 12) {	// 5MHz 60m presets, each time it is called toggle to next channel
 		if (Channels_60m[0].empty()) return;	// no 60m Channels so skip
@@ -482,7 +491,7 @@ bool RIG_FTX1::twovfos()
 
 void memory_label(void *)
 {
-	if (m_memory_mode) labelMEMORY->show();
+	if (memory_mode) labelMEMORY->show();
 	else  labelMEMORY->hide();
 }
 
