@@ -509,12 +509,6 @@ bool RIG_FTX1::twovfos()
 	return true;
 }
 
-void memory_label(void *)
-{
-	if (memory_mode) labelMEMORY->show();
-	else  labelMEMORY->hide();
-}
-
 
 int RIG_FTX1::get_vfoAorB()
 {
@@ -523,8 +517,6 @@ int RIG_FTX1::get_vfoAorB()
 	wait_char(';', 4, 100, "get vfoAorB()", ASC);
 	gett("get vfoAorB()");
 	size_t p = replystr.rfind(rsp);
-
-    Fl::awake(memory_label);
 
 	if (p != std::string::npos)
 		inuse = (replystr[p + 2] == '1') ? onB : onA;
