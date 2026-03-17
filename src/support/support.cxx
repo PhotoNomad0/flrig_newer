@@ -66,6 +66,16 @@
 #include "cmedia.h"
 #include "tmate2.h"
 
+// use like this to trace data: `TRACE_STREAM(1, "execute_setPower()-spnrPOWER, progStatus.power_level=" << progStatus.power_level);`
+#define TRACE_STREAM(level, streamExpr)                           \
+    do {                                                          \
+        std::ostringstream _trace_os_;                             \
+        _trace_os_ << streamExpr;                                  \
+        const std::string _trace_s_ = _trace_os_.str();            \
+        trace((level), _trace_s_.c_str());                         \
+    } while (0)
+
+
 //void initTabs();
 
 rigbase *selrig = rigs[0];
@@ -4473,16 +4483,38 @@ void cbNoise()
 
 	selrig->set_noise(btn);
 
-	MilliSleep(50);
-	get = selrig->get_noise();
-	while ((get != btn) && (cnt++ < 10)) {
-		MilliSleep(progStatus.serial_post_write_delay);
-		get = selrig->get_noise();
-		Fl::awake();
-	}
+    // trace the command
+//     TRACE_STREAM(1, "cbNoise(): btn=" << btn);
 
-	vfo->noise = progStatus.noise;
-	vfo->nb_level = progStatus.nb_level;
+	MilliSleep(50);
+
+    if (selrig->name_ == rig_FTX1.name_) {
+
+        vfo->nb_level = progStatus.nb_level = selrig->get_nb_level();
+        vfo->noise = progStatus.noise = vfo->nb_level > 0;
+//         TRACE_STREAM(1, "cbNoise(): FTX1, vfo->nb_level=" << vfo->nb_level);
+
+    } else {
+
+        get = selrig->get_noise();
+
+//         TRACE_STREAM(1, "cbNoise(): get_noise=" << get << ", selrig->name_=" << selrig->name_);
+
+        while ((get != btn) && (cnt++ < 10)) {
+            MilliSleep(progStatus.serial_post_write_delay);
+            get = selrig->get_noise();
+
+//             TRACE_STREAM(1, "cbNoise(): " << cnt << " get_noise=" << get);
+
+            Fl::awake();
+        }
+
+        vfo->noise = progStatus.noise;
+        vfo->nb_level = progStatus.nb_level;
+    }
+
+    TRACE_STREAM(1, "cbNoise(): vfo->nb_level=" << vfo->nb_level << ", vfo->noise=" << vfo->noise);
+
 	update_noise( (void*)0 );
 }
 

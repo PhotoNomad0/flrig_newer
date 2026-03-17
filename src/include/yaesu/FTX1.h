@@ -27,6 +27,7 @@ class RIG_FTX1 : public rigbase {
 private:
 	bool notch_on;
 	int  m_60m_indx;
+	bool  m_noise_reduction_on;
 	char m_tX_output; // will be either '1' for field only, or '2' for SPA-1 attached
 
 public:
@@ -102,6 +103,14 @@ public:
 	virtual int  next_attenuator();
 	virtual void set_attenuator(int val);
 	virtual int  get_attenuator();
+
+    virtual int  get_agc();
+    virtual void set_agc(int val);
+    virtual int  next_agc();
+    virtual int  incr_agc();
+    virtual int  agc_val();
+    virtual const char *  agc_label();
+
 	virtual int  next_preamp();
 	virtual void set_preamp(int val);
 	virtual int  get_preamp();
@@ -119,6 +128,10 @@ public:
 
 	virtual void set_noise(bool b);
 	virtual int  get_noise();
+//	void get_nb_min_max_step(int &min, int &max, int &step) {
+//		min = 1; max = 10; step = 3; }
+	void set_nb_level(int val);
+	int  get_nb_level();
 
 	virtual void set_mic_gain(int val);
 	virtual int  get_mic_gain();

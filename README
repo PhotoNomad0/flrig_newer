@@ -1,3 +1,7 @@
+This source is from flrig release sources v2.0.10 tar.qz. Added Yaesu FTX-1 support
+
+--------------------------------
+
 Flrig is a transceiver control program for Amateur Radio use.  It does
 not use any 3rd party transceiver control libraries.  It is a c++ pro-
 gram that encapsulates each transceiver in it's own class.  Where ever

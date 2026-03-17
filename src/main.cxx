@@ -164,8 +164,8 @@ Built with Fltk library version %s\n\
 Dedicated to the memory of Mike Black, W9MDB,\n\
 hamlib expert, and prolific contributor to flrig.";
 	fl_message(
-		msg.c_str(), 
-		PACKAGE_TARNAME, 
+		msg.c_str(),
+		PACKAGE_TARNAME,
 		PACKAGE_VERSION,
 		FLTK_BUILD_VERSION );
 }
