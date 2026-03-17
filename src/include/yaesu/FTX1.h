@@ -27,7 +27,9 @@ class RIG_FTX1 : public rigbase {
 private:
 	bool notch_on;
 	int  m_60m_indx;
+	bool m_memory_mode
 	char m_tX_output; // will be either '1' for field only, or '2' for SPA-1 attached
+
 public:
 	RIG_FTX1();
 	~RIG_FTX1() {}

@@ -303,6 +303,7 @@ RIG_FTX1::RIG_FTX1() {
 	preamp_state = 0;
 	notch_on = false;
 	m_60m_indx = 0;
+	m_memory_mode = false;
 	m_tX_output = '1'; // default to '1' for field only
 
 	inuse = onA;
@@ -479,6 +480,13 @@ bool RIG_FTX1::twovfos()
 	return true;
 }
 
+void memory_label(void *)
+{
+	if (m_memory_mode) labelMEMORY->show();
+	else  labelMEMORY->hide();
+}
+
+
 int RIG_FTX1::get_vfoAorB()
 {
 	cmd = "VS;";
@@ -486,7 +494,9 @@ int RIG_FTX1::get_vfoAorB()
 	wait_char(';', 4, 100, "get vfoAorB()", ASC);
 	gett("get vfoAorB()");
 	size_t p = replystr.rfind(rsp);
-//	inuse = onA;
+
+    Fl::awake(memory_label);
+
 	if (p != std::string::npos)
 		inuse = (replystr[p + 2] == '1') ? onB : onA;
 	return inuse;
