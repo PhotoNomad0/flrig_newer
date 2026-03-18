@@ -393,9 +393,9 @@ bool RIG_FTX1::get_current_memory(int &memory_channel_)
 		cmd = rsp = "OI";
 
 	cmd += ';';
-	wait_char(';', 30, 100, "get band", ASC);
+	wait_char(';', 30, 100, "get_current_memory", ASC);
 
-	sett("get band");
+	sett("get_current_memory");
 
 	size_t p = replystr.rfind(rsp);
     if (p != std::string::npos) {
@@ -403,21 +403,21 @@ bool RIG_FTX1::get_current_memory(int &memory_channel_)
         memory_channel_ = std::stoi(P1);
         char P7 = replystr[p+24]; // P7 = 0 means VFO mode, otherwise assume memory mode
         TRACE_STREAM(1, "get_current_memory() replystr=" << replystr << ", P1=" << P1 << ", P7=" << P7);
-        if (P7 != '0') {	
+        if (P7 != '0') {
             in_memory_mode_ = true;
         }
  	}
 
  	in_memory_mode = in_memory_mode_;
- 	memory_channel = memory_channel_
+ 	memory_channel = memory_channel_;
  	return in_memory_mode_;
 }
 
 void RIG_FTX1::get_band_selection(int v)
 {
-	sett("get band");
 	int memory_channel = 0;
 	bool inc_60m = get_current_memory(memory_channel);
+	sett("get band");
 
 	if (v == 12) {	// 5MHz 60m presets, each time it is called toggle to next channel
 		if (Channels_60m[0].empty()) return;	// no 60m Channels so skip
