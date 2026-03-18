@@ -322,14 +322,16 @@ void read_vfo()
 	}
 
 	if (xcvr_name == rig_FTX1.name_) {
+    	trace(2,"read_vfo(), rig_FTX1.name_", rig_FTX1.name_.c_str());
 		int memory_channel = 0;
 		bool in_memory_mode = selrig->get_current_memory(memory_channel);
 		if (in_memory_mode) {
 			labelMEMORY->show();
-			const char * memory_channel_str = std::to_string(memory_channel).c_str();
+			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel=" << memory_channel );
+			std::string memory_channel_str = std::to_string(memory_channel);
 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str );
 
-			labelMEMORY->label(memory_channel_str);
+			labelMEMORY->label(memory_channel_str.c_str());
 			labelMEMORY->redraw_label();
 		}
 		else  labelMEMORY->hide();
