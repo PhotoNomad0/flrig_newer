@@ -321,6 +321,11 @@ void read_vfo()
 		return;
 	}
 
+	if (xcvr_name == ftx1.name_) {
+		read_K3_vfo();
+		return;
+	}
+
 // transceiver changed ?
 	trace(1,"read_vfo()");
 	unsigned long long  freq;
