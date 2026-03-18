@@ -161,7 +161,7 @@ public:
 	void set_break_in();
 	int  get_break_in();
 
-    bool get_current_mode();
+    bool get_current_memory();
 	virtual void get_band_selection(int v);
 
 	void get_nr_min_max_step(int &min, int &max, int &step) {

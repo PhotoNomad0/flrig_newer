@@ -381,7 +381,7 @@ void RIG_FTX1::set_xcvr_auto_off()
 
 static bool memory_mode = false;
 
-bool RIG_FTX1::get_current_mode()
+bool RIG_FTX1::get_current_memory()
 {
 	int memory_mode_ = false;
 	cmd = "IF;";
@@ -402,7 +402,7 @@ bool RIG_FTX1::get_current_mode()
 void RIG_FTX1::get_band_selection(int v)
 {
 	sett("get band");
-	int inc_60m = get_current_mode();
+	int inc_60m = get_current_memory();
 
 	if (v == 12) {	// 5MHz 60m presets, each time it is called toggle to next channel
 		if (Channels_60m[0].empty()) return;	// no 60m Channels so skip
