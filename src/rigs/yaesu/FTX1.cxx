@@ -391,7 +391,9 @@ bool RIG_FTX1::get_current_memory()
 
 	size_t p = replystr.rfind("IF");
     if (p != std::string::npos) {
-        if (replystr[p+24 ] != '0') {	// P7 = 0 means VFO mode, otherwise assume memory mode
+        char P7 = replystr[p+24]; // P7 = 0 means VFO mode, otherwise assume memory mode
+        //     TRACE_STREAM(1, "get_agc() replystr=" << replystr << ", agcval=" << agcval);
+        if (P7 != '0') {	
             memory_mode_ = true;
         }
  	}
