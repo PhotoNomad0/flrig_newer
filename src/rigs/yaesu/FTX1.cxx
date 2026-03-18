@@ -381,6 +381,7 @@ void RIG_FTX1::set_xcvr_auto_off()
 
 static bool in_memory_mode = false;
 static int memory_channel = 0;
+static std::string memory_channel_str;
 
 bool RIG_FTX1::get_current_memory(int &memory_channel_)
 {
@@ -395,14 +396,15 @@ bool RIG_FTX1::get_current_memory(int &memory_channel_)
 	cmd += ';';
 	wait_char(';', 30, 100, "get_current_memory", ASC);
 
-	sett("get_current_memory");
+// 	sett("get_current_memory");
 
 	size_t p = replystr.rfind(rsp);
     if (p != std::string::npos) {
-		std::string P1 = replystr.substr(p + 2, 5); // P1 = 5 bytes representing current memory channel
+		std::string P1 = replystr.substr(p + 2, 5); // P1 = 5 bytes representing current memory channel. NOTE - the numbers get strange on Emergency channels - seeing semicolons
+        memory_channel_str = P1;
         memory_channel_ = std::stoi(P1);
         char P7 = replystr[p+24]; // P7 = 0 means VFO mode, otherwise assume memory mode
-        TRACE_STREAM(1, "get_current_memory() replystr=" << replystr << ", P1=" << P1 << ", P7=" << P7);
+//         TRACE_STREAM(1, "get_current_memory() replystr=" << replystr << ", P1=" << P1 << ", P7=" << P7);
         if (P7 != '0') {
             in_memory_mode_ = true;
         }
