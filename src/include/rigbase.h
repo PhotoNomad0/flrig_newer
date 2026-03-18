@@ -773,6 +773,7 @@ double vfo_;
 	virtual void set_special(int v) {}
 	virtual void set_band_selection(int v) {}
 	virtual void get_band_selection(int v) {}
+	virtual bool get_current_memory(int &memory_channel){return false;}
 	virtual void set_xcvr_auto_on() {}
 	virtual void set_xcvr_auto_off() {}
 

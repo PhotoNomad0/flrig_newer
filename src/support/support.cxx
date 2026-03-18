@@ -322,8 +322,17 @@ void read_vfo()
 	}
 
 	if (xcvr_name == ftx1.name_) {
-		read_K3_vfo();
-		return;
+		int memory_channel = 0;
+		bool in_memory_mode = selrig->get_current_memory(memory_channel);
+		if (in_memory_mode) {
+			labelMEMORY->show();
+			const char * memory_channel_str = std::to_string(memory_channel).c_str()
+			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str );
+
+			labelMEMORY->label(memory_channel_str);
+			labelMEMORY->redraw_label();
+		}
+		else  labelMEMORY->hide();
 	}
 
 // transceiver changed ?
