@@ -379,6 +379,12 @@ void RIG_FTX1::set_xcvr_auto_off()
 	}
 }
 
+void RIG_FTX1::vfo_mem_toggle()
+{
+	sendCommand("VM;");
+	sett("vfo_mem_toggle");
+}
+
 static bool in_memory_mode = false;
 static int memory_channel = 0;
 static std::string memory_channel_str;

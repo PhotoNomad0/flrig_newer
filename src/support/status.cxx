@@ -562,7 +562,7 @@ status progStatus = {
 	0,			// int    cwioSHARED; 0 = NONE, 1 = CAT, 2 = AUX, 3 = SEP, 4 = CWIO
 	0,			// int    cwioPTT; 1 - use PTT, 0 - use Brea-in
 	0,			// int    cwioCONNECTED; 1 - connected state; 0 - unconnected state
-	0,			// int    cwioINVERTED; 1 - DTR/RTS (-) keying; 
+	0,			// int    cwioINVERTED; 1 - DTR/RTS (-) keying;
 	0,			// double cwio_comp;
 	0,			// double cwio_keycorr;
 	"",			// std::string cwioPORT;
@@ -590,7 +590,7 @@ status progStatus = {
 	0,			// int		FSK_SHARED; 0 = NONE, 1 = CAT, 2 = AUX, 3 = SEP
 	0,			// int		FSK_PTT; 1 - use PTT, 0 - use Brea-in
 	0,			// int		FSK_CONNECTED; 1 - connected state; 0 - unconnected state
-	0,			// int		FSK_INVERTED; reverse keying; 
+	0,			// int		FSK_INVERTED; reverse keying;
 	1,			// int		FSK_STOPBITS; 1 - 1.5; 0 - 2
 	8,			// int		fsk_idles
 	45.45,		// double	fsk_baud
@@ -2492,7 +2492,7 @@ bool status::loadXcvrState(std::string xcvr)
 
 		loadScheme(ui_name);
 
-		return true; 
+		return true;
 	}
 	return false;
 }
@@ -2528,7 +2528,7 @@ void status::UI_laststate()
 // void Fl::background2 ( uchar r, uchar g, uchar b )
 // Changes the alternative background color.
 // This color is used as a background by Fl_Input and other text widgets.
-// This call may change fl_color(FL_FOREGROUND_COLOR) if it does not provide 
+// This call may change fl_color(FL_FOREGROUND_COLOR) if it does not provide
 // sufficient contrast to FL_BACKGROUND2_COLOR.
 // we want to preserve the user selection.  ordering of Fl:: sequence is important
 	Fl::background2( bg2_sys_red, bg2_sys_green, bg2_sys_blue);
@@ -2628,6 +2628,7 @@ void status::UI_laststate()
 	if (btn_vox)			btn_vox->selection_color(btn_lt_color);
 	if (btnCompON)			btnCompON->selection_color(btn_lt_color);
 	if (btnSpecial)			btnSpecial->selection_color(btn_lt_color);
+    if (btn_vfo_mem)        btn_vfo_mem->selection_color(btn_lt_color);
 	if (btn_tt550_vox)		btn_tt550_vox->selection_color(btn_lt_color);
 	if (btn_tt550_CompON)	btn_tt550_CompON->selection_color(btn_lt_color);
 	if (btnAGC)				btnAGC->selection_color(btn_lt_color);
@@ -2919,7 +2920,7 @@ void ss_trace(bool on)
 		progStatus.rigtrace =
 		progStatus.settrace =
 		progStatus.serialtrace =
-		progStatus.gettrace = 
+		progStatus.gettrace =
 		progStatus.tcitrace = true;
 	} else {
 		progStatus.trace = strace;

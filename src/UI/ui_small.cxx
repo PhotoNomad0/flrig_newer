@@ -1759,8 +1759,12 @@ Fl_Double_Window *tabs_window()
 {
 			genericMisc->hide();
 
-			btnSpecial = new Fl_Light_Button(5, 35, 75, 22, _("Special"));
-			btnSpecial->callback((Fl_Callback*)cb_btnSpecial);
+			// btnSpecial = new Fl_Light_Button(5, 35, 75, 22, _("Special"));
+			// btnSpecial->callback((Fl_Callback*)cb_btnSpecial);
+
+			btn_vfo_mem = new Fl_Button(5, 35, 75, 22, _("VFO/MEM"));
+			btn_vfo_mem->tooltip(_("Toggle between VFO and MEM"));
+			btn_vfo_mem->callback((Fl_Callback*)cb_btn_vfo_mem);
 
 			btn_ext_tuner = new Fl_Check_Button(5, 60, 75, 22, _("Ext tuner"));
 			btn_ext_tuner->tooltip(_("use external auto tuner"));

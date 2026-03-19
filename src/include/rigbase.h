@@ -350,7 +350,7 @@ public:
 
 	bool has_voltmeter;
 
-// Icom Xcvr 
+// Icom Xcvr
 	bool ICOMrig;
 	bool ICOMmainsub;
 	std::string pre_to;
@@ -480,7 +480,7 @@ public:
 
 	virtual double  get_voltmeter(void) { return -1; }
 
-	virtual const char *agc_label() { 
+	virtual const char *agc_label() {
 		try {
 			return agc_labels_.at(agcval).c_str();
 		} catch (...) {
@@ -561,7 +561,7 @@ int tune_;
 	virtual int  get_tune() { return tune_; }
 
 	virtual void set_attenuator(int val) {atten_state = val;}
-	virtual int  next_attenuator() { 
+	virtual int  next_attenuator() {
 		if (atten_state == 0) atten_state = 1;
 		else atten_state = 0;
 		return atten_state;
@@ -569,7 +569,7 @@ int tune_;
 	virtual int  get_attenuator() {return atten_state;}
 
 	virtual void set_preamp(int val) {preamp_state = val;}
-	virtual int  next_preamp() { 
+	virtual int  next_preamp() {
 		if (preamp_state == 0) preamp_state = 1;
 		else preamp_state = 0;
 		return preamp_state;
@@ -773,6 +773,7 @@ double vfo_;
 	virtual void set_special(int v) {}
 	virtual void set_band_selection(int v) {}
 	virtual void get_band_selection(int v) {}
+	virtual void vfo_mem_toggle() {}
 	virtual bool get_current_memory(int &memory_channel){return false;}
 	virtual void set_xcvr_auto_on() {}
 	virtual void set_xcvr_auto_off() {}
@@ -847,8 +848,8 @@ double vfo_;
 
 // KX3 power scale
 	int powerScale;
-	virtual int power_scale() { 
-		return 1; 
+	virtual int power_scale() {
+		return 1;
 	}
 	virtual int power_max() {
 		return pmax;

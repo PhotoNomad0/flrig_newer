@@ -4061,6 +4061,17 @@ void TRACED(synchronize_now)
 	Fl::add_timeout(0, synchronize);
 }
 
+void vfo_mem_toggle( void *) {
+	trace(1, "VFO memory toggle()");
+	selrig->vfo_mem_toggle();
+}
+
+void TRACED(vfo_mem_toggle_now)
+	Fl::remove_timeout(vfo_mem_toggle);
+	Fl::add_timeout(0, vfo_mem_toggle);
+}
+
+
 void TRACED(start_commands)
 
 	if (!progStatus.cmd_on_start1.empty()) send_st_ex_command(progStatus.cmd_on_start1);
