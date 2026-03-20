@@ -4042,32 +4042,30 @@ void TRACED(send_st_ex_command, std::string command)
 #include "timeops.h"
 void synchronize( void *) {
 
-	if (xcvr_name != rig_FTX1.name_) {
-		time_t now;
-		time(&now);
-		struct tm *tm_time;
-		static char sztm[20];
+	time_t now;
+	time(&now);
+	struct tm *tm_time;
+	static char sztm[20];
 
-		if (progStatus.sync_gmt) {
-			tm_time = gmtime(&now);
-			strftime(sztm, sizeof(sztm), "%H:%M:%S Z", tm_time);
-		} else {
-			tm_time = localtime(&now);
-			strftime(sztm, sizeof(sztm), "%H:%M:%S", tm_time);
-		}
-
-		if (strncmp(&sztm[6], "00", 2) == 0) {
-			guard_lock serial_lock(&mutex_serial, "38");
-			static char szdate[20];
-			strftime(szdate, sizeof(szdate), "%Y%m%d", tm_time);
-			selrig->sync_clock(sztm);
-			selrig->sync_date(szdate);
-			txt_xcvr_synch->value("--SYNC'D--");
-			return;
-		}
-		txt_xcvr_synch->value(sztm);
-		Fl::repeat_timeout(0.05, synchronize);
+	if (progStatus.sync_gmt) {
+		tm_time = gmtime(&now);
+		strftime(sztm, sizeof(sztm), "%H:%M:%S Z", tm_time);
+	} else {
+		tm_time = localtime(&now);
+		strftime(sztm, sizeof(sztm), "%H:%M:%S", tm_time);
 	}
+
+	if (strncmp(&sztm[6], "00", 2) == 0) {
+		guard_lock serial_lock(&mutex_serial, "38");
+		static char szdate[20];
+		strftime(szdate, sizeof(szdate), "%Y%m%d", tm_time);
+		selrig->sync_clock(sztm);
+		selrig->sync_date(szdate);
+		txt_xcvr_synch->value("--SYNC'D--");
+		return;
+	}
+	txt_xcvr_synch->value(sztm);
+	Fl::repeat_timeout(0.05, synchronize);
 }
 
 void TRACED(synchronize_now)

@@ -575,7 +575,6 @@ bool RIG_FTX1::twovfos()
 	return true;
 }
 
-
 int RIG_FTX1::get_vfoAorB()
 {
 	cmd = "VS;";

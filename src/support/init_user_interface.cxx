@@ -1065,37 +1065,38 @@ void TRACED(init_Generic_Tabs)
 	if (selrig->has_line_out ||
 		selrig->has_xcvr_auto_on_off ||
 		selrig->can_synch_clock ) {
-	    btn_xcvr_auto_on->show();
-	    btn_xcvr_auto_off->show();
-	    if (selrig->has_xcvr_auto_on_off) {
-	        btn_xcvr_auto_on->value(progStatus.xcvr_auto_on);
-	        btn_xcvr_auto_off->value(progStatus.xcvr_auto_off);
-	        btn_xcvr_auto_on->activate();
-	        btn_xcvr_auto_off->activate();
-	    } else {
-	        btn_xcvr_auto_on->deactivate();
-	        btn_xcvr_auto_off->deactivate();
-	    }
 
-	    if (selrig->can_synch_clock) {
-	        btn_xcvr_synch_clock->show();
-	        btn_xcvr_synch_gmt->show();
-	        btn_xcvr_synch_now->show();
-	        txt_xcvr_synch->show();
-	    } else {
-	        btn_xcvr_synch_clock->hide();
-	        btn_xcvr_synch_gmt->hide();
-	        btn_xcvr_synch_now->hide();
-	        txt_xcvr_synch->hide();
-	    }
-	    btn_xcvr_synch_clock->redraw();
-	    btn_xcvr_synch_gmt->redraw();
-	    btn_xcvr_synch_now->redraw();
-	    txt_xcvr_synch->redraw();
+		btn_xcvr_auto_on->show();
+		btn_xcvr_auto_off->show();
+		if (selrig->has_xcvr_auto_on_off) {
+			btn_xcvr_auto_on->value(progStatus.xcvr_auto_on);
+			btn_xcvr_auto_off->value(progStatus.xcvr_auto_off);
+			btn_xcvr_auto_on->activate();
+			btn_xcvr_auto_off->activate();
+		} else {
+			btn_xcvr_auto_on->deactivate();
+			btn_xcvr_auto_off->deactivate();
+		}
 
-	    tabsGeneric->add(genericMisc);
-	    genericMisc->redraw();
-	    genericMisc->show();
+		if (selrig->can_synch_clock) {
+			btn_xcvr_synch_clock->show();
+			btn_xcvr_synch_gmt->show();
+			btn_xcvr_synch_now->show();
+			txt_xcvr_synch->show();
+		} else {
+			btn_xcvr_synch_clock->hide();
+			btn_xcvr_synch_gmt->hide();
+			btn_xcvr_synch_now->hide();
+			txt_xcvr_synch->hide();
+		}
+		btn_xcvr_synch_clock->redraw();
+		btn_xcvr_synch_gmt->redraw();
+		btn_xcvr_synch_now->redraw();
+		txt_xcvr_synch->redraw();
+
+		tabsGeneric->add(genericMisc);
+		genericMisc->redraw();
+		genericMisc->show();
 	}
 
     if (selrig->name_ == rig_FTX1.name_) {
@@ -2300,11 +2301,11 @@ void TRACED(set_init_break_in)
 
 void TRACED(init_special_controls)
 
-    btnSpecial->show();
-    if (selrig->has_special)
-        btnSpecial->activate();
-    else
-        btnSpecial->deactivate();
+	btnSpecial->show();
+	if (selrig->has_special)
+		btnSpecial->activate();
+	else
+		btnSpecial->deactivate();
 }
 
 void TRACED(init_ftx1_tab)
@@ -2319,11 +2320,11 @@ void TRACED(init_ftx1_tab)
 
 void TRACED(init_external_tuner)
 
-    btn_ext_tuner->show();
-    if (selrig->has_ext_tuner)
-        btn_ext_tuner->activate();
-    else
-        btn_ext_tuner->deactivate();
+	btn_ext_tuner->show();
+	if (selrig->has_ext_tuner)
+		btn_ext_tuner->activate();
+	else
+		btn_ext_tuner->deactivate();
 }
 
 void TRACED(init_CIV)

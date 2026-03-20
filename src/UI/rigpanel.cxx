@@ -1046,7 +1046,6 @@ static void cb_btn_channel_down( Fl_Button *o, void *) {
 	channel_down_now();
 }
 
-
 //static void cb_kxpa_enabled(Fl_Check_Button* o, void *) {
 //	progStatus.kxpa = o->value();
 //}
