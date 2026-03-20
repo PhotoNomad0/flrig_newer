@@ -443,7 +443,7 @@ bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_chan
         }
 		if (in_memory_mode_) {
 			cmd = rsp = "MT";
-			cmd += ';';
+			cmd = cmd + P1 + ';';
 			wait_char(';', 30, 100, "get_current_memory_tag", ASC);
 			size_t p = replystr.rfind(rsp);
     		if (p != std::string::npos) {
