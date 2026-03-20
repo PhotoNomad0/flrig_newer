@@ -749,6 +749,7 @@ void TRACED(init_Generic_Tabs)
 		hidden_tabs->remove(genericSpeech);
 		hidden_tabs->remove(genericRx);
 		hidden_tabs->remove(genericMisc);
+		hidden_tabs->remove(ftx1_tab);
 		hidden_tabs->remove(genericAux);
 		hidden_tabs->remove(genericRXB);
 		hidden_tabs->remove(genericUser_1);
@@ -769,6 +770,13 @@ void TRACED(init_Generic_Tabs)
 		hidden_tabs->add(genericSpeech);
 		hidden_tabs->add(genericRx);
 		hidden_tabs->add(genericMisc);
+        if (selrig->name_ == rig_FTX1.name_) {
+            hidden_tabs->add(ftx1_tab);
+            ftx1_tab->redraw();
+            ftx1_tab->show();
+        } else {
+            ftx1_tab->hide();
+        }
 		hidden_tabs->add(genericAux);
 		hidden_tabs->add(genericRXB);
 		hidden_tabs->add(genericUser_1);
@@ -789,6 +797,7 @@ void TRACED(init_Generic_Tabs)
 		tabsGeneric->remove(genericSpeech);
 		tabsGeneric->remove(genericRx);
 		tabsGeneric->remove(genericMisc);
+		tabsGeneric->remove(ftx1_tab);
 		tabsGeneric->remove(genericAux);
 		tabsGeneric->remove(genericRXB);
 		tabsGeneric->remove(genericUser_1);
@@ -1089,6 +1098,14 @@ void TRACED(init_Generic_Tabs)
 		genericMisc->redraw();
 		genericMisc->show();
 	}
+
+    if (selrig->name_ == rig_FTX1.name_) {
+        tabsGeneric->add(ftx1_tab);
+        ftx1_tab->redraw();
+        ftx1_tab->show();
+    } else {
+        ftx1_tab->hide();
+    }
 
 	tabsGeneric->remove(genericAux);
 	genericAux->hide();
@@ -2289,6 +2306,16 @@ void TRACED(init_special_controls)
 		btnSpecial->activate();
 	else
 		btnSpecial->deactivate();
+}
+
+void TRACED(init_ftx1_tab)
+    btn_power_off->show();
+    if (selrig->has_vfo_mem) { // VFO memory control, swap out these buttons
+        trace(1, "init_ftx1_tab() - has_vfo_mem support");
+        btn_vfo_mem->show();
+        btn_channel_up->show();
+        btn_channel_down->show();
+    }
 }
 
 void TRACED(init_external_tuner)

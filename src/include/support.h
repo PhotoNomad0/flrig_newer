@@ -314,6 +314,10 @@ extern void break_in_label(const char *);
 extern void enable_yaesu_bandselect(int btn_num, bool enable = true);
 
 extern void synchronize_now();
+extern void vfo_mem_toggle_now();
+extern void power_off_now();
+extern void channel_up_now();
+extern void channel_down_now();
 
 // Display Dialog
 extern void cbUSBaudio();

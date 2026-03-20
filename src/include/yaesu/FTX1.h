@@ -161,7 +161,11 @@ public:
 	void set_break_in();
 	int  get_break_in();
 
+    virtual bool get_current_memory(int &memory_channel, std::string &memory_channel_tag);
 	virtual void get_band_selection(int v);
+    virtual void vfo_mem_toggle();
+	virtual void change_channel(bool channel_up);
+	virtual void power(bool on);
 
 	void get_nr_min_max_step(int &min, int &max, int &step) {
 		min = 1; max = 15; step = 1; }

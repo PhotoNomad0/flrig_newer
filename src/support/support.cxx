@@ -321,6 +321,34 @@ void read_vfo()
 		return;
 	}
 
+	if (xcvr_name == rig_FTX1.name_) {
+//     	trace(2,"read_vfo(), rig_FTX1.name_", rig_FTX1.name_.c_str());
+		static char tag_[20];
+		int memory_channel = 0;
+		std::string memory_channel_tag = "";
+		bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
+		if (in_memory_mode) {
+			labelMEMORY->show();
+			txt_xcvr_synch->hide();
+			label_mem_channel->show();
+// 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel=" << memory_channel );
+			std::string memory_channel_str = std::to_string(memory_channel);
+// 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
+
+			labelMEMORY->label(memory_channel_str.c_str());
+			labelMEMORY->redraw_label();
+			snprintf(tag_, sizeof(tag_), "%s", memory_channel_tag.c_str());
+// 			TRACE_STREAM(1, "read_vfo() - get_current_memory tag_=" << tag_ );
+			label_mem_channel->label(tag_);
+			label_mem_channel->redraw_label();
+		} else  {
+			labelMEMORY->hide();
+			label_mem_channel->label("");
+			label_mem_channel->redraw_label();
+			label_mem_channel->hide();
+		}
+	}
+
 // transceiver changed ?
 	trace(1,"read_vfo()");
 	unsigned long long  freq;
@@ -4043,6 +4071,46 @@ void synchronize( void *) {
 void TRACED(synchronize_now)
 	Fl::remove_timeout(synchronize);
 	Fl::add_timeout(0, synchronize);
+}
+
+void vfo_mem_toggle( void *) {
+	trace(1, "VFO memory toggle()");
+	selrig->vfo_mem_toggle();
+}
+
+void power_off( void *) {
+	trace(1, "power_off()");
+	selrig->power(false);
+}
+
+void channel_up(void *) {
+	trace(1, "channel_up()");
+	selrig->change_channel(true);
+}
+
+void channel_down(void *) {
+	trace(1, "channel_down()");
+	selrig->change_channel(false);
+}
+
+void TRACED(vfo_mem_toggle_now)
+	Fl::remove_timeout(vfo_mem_toggle);
+	Fl::add_timeout(0, vfo_mem_toggle);
+}
+
+void TRACED(power_off_now)
+	Fl::remove_timeout(power_off);
+	Fl::add_timeout(0, power_off);
+}
+
+void TRACED(channel_up_now)
+	Fl::remove_timeout(channel_up);
+	Fl::add_timeout(0, channel_up);
+}
+
+void TRACED(channel_down_now)
+	Fl::remove_timeout(channel_down);
+	Fl::add_timeout(0, channel_down);
 }
 
 void TRACED(start_commands)

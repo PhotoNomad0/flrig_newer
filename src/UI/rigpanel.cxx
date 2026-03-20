@@ -77,7 +77,7 @@ Fl_Box *tcpip_menu_box = (Fl_Box *)0;
 Fl_Group *tcpip_box = (Fl_Group *)0;
 
 Fl_Box *labelMEMORY = (Fl_Box *)0;
-
+Fl_Box *label_mem_channel = (Fl_Box *)0;
 Fl_Output *txt_encA=(Fl_Output *)0;
 
 Fl_Group *sm_grp1 = (Fl_Group *)0;
@@ -306,9 +306,14 @@ Fl_ComboBox *cbo_preamp = (Fl_ComboBox *)0;
 
 Fl_Check_Button *btn_use_bpf_center = (Fl_Check_Button *)0;
 Fl_Group *genericMisc = (Fl_Group *)0;
+Fl_Group *ftx1_tab = (Fl_Group *)0;
 Hspinner *spnr_vfo_adj = (Hspinner *)0;
 Hspinner *spnr_line_out = (Hspinner *)0;
 Fl_Light_Button *btnSpecial = (Fl_Light_Button *)0;
+Fl_Button *btn_vfo_mem = (Fl_Button *)0;
+Fl_Button *btn_power_off = (Fl_Button *)0;
+Fl_Button *btn_channel_up = (Fl_Button *)0;
+Fl_Button *btn_channel_down = (Fl_Button *)0;
 Fl_Check_Button *btn_ext_tuner = (Fl_Check_Button *)0;
 Fl_Check_Button *btn_xcvr_auto_on = (Fl_Check_Button *)0;
 Fl_Check_Button *btn_xcvr_auto_off = (Fl_Check_Button *)0;
@@ -1023,6 +1028,22 @@ static void cb_btn_xcvr_synch_gmt( Fl_Check_Button* o, void*) {
 
 static void cb_btn_xcvr_synch_now( Fl_Button *o, void *) {
 	synchronize_now();
+}
+
+static void cb_btn_vfo_mem( Fl_Button *o, void *) {
+	vfo_mem_toggle_now();
+}
+
+static void cb_btn_power_off( Fl_Button *o, void *) {
+	power_off_now();
+}
+
+static void cb_btn_channel_up( Fl_Button *o, void *) {
+	channel_up_now();
+}
+
+static void cb_btn_channel_down( Fl_Button *o, void *) {
+	channel_down_now();
 }
 
 //static void cb_kxpa_enabled(Fl_Check_Button* o, void *) {

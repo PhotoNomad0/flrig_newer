@@ -312,7 +312,8 @@ RIG_FTX1::RIG_FTX1() {
 	has_ifshift_control =
 	has_ptt_control =
 	has_tune_control =
-	has_xcvr_auto_on_off = true;
+	has_xcvr_auto_on_off =
+    has_vfo_mem = true;
 
 // derived specific
 	atten_state = 0;
@@ -379,20 +380,95 @@ void RIG_FTX1::set_xcvr_auto_off()
 	}
 }
 
+void RIG_FTX1::vfo_mem_toggle()
+{
+	sendCommand("VM;");
+	sett("vfo_mem_toggle");
+}
+
+void RIG_FTX1::change_channel(bool channel_up)
+{
+	cmd = channel_up ? "CH0;" : "CH1;";
+	sendCommand(cmd);
+	if (channel_up) {
+		sett("change_channel UP");
+	} else {
+		sett("change_channel DOWN");
+	}
+}
+
+void RIG_FTX1::power(bool on)
+{
+	cmd = on ? "PS1;" : "PS0;";
+	sendCommand(cmd);
+
+	if (on) {
+		sett("power on");
+	} else {
+		sett("power off");
+	}
+}
+
+
+static bool in_memory_mode = false;
+static int memory_channel = 0;
+static std::string memory_channel_id_str;
+static std::string memory_channel_tag;
+
+bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_channel_tag_)
+{
+	int in_memory_mode_ = false;
+	memory_channel_ = 0;
+	memory_channel_tag = "";
+
+	if (inuse == onA)
+		cmd = rsp = "IF";
+	else // onB
+		cmd = rsp = "OI";
+
+	cmd += ';';
+	wait_char(';', 30, 100, "get_current_memory", ASC);
+
+// 	sett("get_current_memory");
+
+	size_t p = replystr.rfind(rsp);
+    if (p != std::string::npos) {
+		std::string P1 = replystr.substr(p + 2, 5); // P1 = 5 bytes representing current memory channel. NOTE - the numbers get strange on Emergency channels - seeing semicolons
+        memory_channel_id_str = P1;
+        memory_channel_ = std::stoi(P1);
+        char P7 = replystr[p+24]; // P7 = 0 means VFO mode, otherwise assume memory mode
+//         TRACE_STREAM(1, "get_current_memory() replystr=" << replystr << ", P1=" << P1 << ", P7=" << P7);
+        if (P7 != '0') {
+            in_memory_mode_ = true;
+        }
+		if (in_memory_mode_) {
+			cmd = rsp = "MT";
+			cmd += ';';
+			wait_char(';', 30, 100, "get_current_memory_tag", ASC);
+			size_t p = replystr.rfind(rsp);
+    		if (p != std::string::npos) {
+				memory_channel_tag = replystr.substr(p + 7, 12);
+			}
+//           TRACE_STREAM(1, "get_current_memory_tag() replystr=" << replystr << ", memory_channel_tag=" << memory_channel_tag << ", memory_channel_id_str=" << memory_channel_id_str);
+			if (memory_channel_tag.empty()) {
+				memory_channel_tag = memory_channel_id_str;
+//                TRACE_STREAM(1, "get_current_memory_tag() fall back to using memory_channel_id_str=" << memory_channel_id_str);
+			}
+		}
+ 	}
+
+ 	in_memory_mode = in_memory_mode_;
+ 	memory_channel = memory_channel_;
+	memory_channel_tag_ = memory_channel_tag;
+ 	return in_memory_mode_;
+}
+
 void RIG_FTX1::get_band_selection(int v)
 {
-	int inc_60m = false;
-	cmd = "IF;";
-	wait_char(';', 30, 100, "get band", ASC);
-
+	int memory_channel = 0;
+	std::string memory_channel_tag;
+	bool inc_60m = get_current_memory(memory_channel, memory_channel_tag);
 	sett("get band");
-
-	size_t p = replystr.rfind("IF");
-	if (p == std::string::npos) return;
-
- 	if (replystr[p+24 ] != '0') {	// P7 = 0 means VFO mode, otherwise assume memory mode
- 		inc_60m = true;
- 	}
 
 	if (v == 12) {	// 5MHz 60m presets, each time it is called toggle to next channel
 		if (Channels_60m[0].empty()) return;	// no 60m Channels so skip
@@ -506,7 +582,7 @@ int RIG_FTX1::get_vfoAorB()
 	wait_char(';', 4, 100, "get vfoAorB()", ASC);
 	gett("get vfoAorB()");
 	size_t p = replystr.rfind(rsp);
-//	inuse = onA;
+
 	if (p != std::string::npos)
 		inuse = (replystr[p + 2] == '1') ? onB : onA;
 	return inuse;
