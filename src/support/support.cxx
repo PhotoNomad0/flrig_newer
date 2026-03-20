@@ -4066,11 +4066,25 @@ void vfo_mem_toggle( void *) {
 	selrig->vfo_mem_toggle();
 }
 
+void power_off( void *) {
+	trace(1, "power_off()");
+	selrig->power(false);
+}
+
+void change_channel(bool channel_up) {
+	trace(1, "change_channel()");
+	selrig->change_channel(channel_up);
+}
+
 void TRACED(vfo_mem_toggle_now)
 	Fl::remove_timeout(vfo_mem_toggle);
 	Fl::add_timeout(0, vfo_mem_toggle);
 }
 
+void TRACED(power_off_now)
+	Fl::remove_timeout(power_off);
+	Fl::add_timeout(0, power_off);
+}
 
 void TRACED(start_commands)
 

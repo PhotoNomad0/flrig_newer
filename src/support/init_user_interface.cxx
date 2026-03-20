@@ -2287,21 +2287,9 @@ void TRACED(init_special_controls)
     if (selrig->has_vfo_mem) {
         btnSpecial->hide();
         trace(1, "init_special_controls() - has_vfo_mem support");
-    } else {
-        btnSpecial->show();
-        if (selrig->has_special)
-            btnSpecial->activate();
-        else
-            btnSpecial->deactivate();
-    }
-}
-
-void TRACED(init_vfo_mem)
-
-    if (selrig->has_vfo_mem) {
-        trace(1, "init_vfo_mem() - has_vfo_mem support");
         btn_vfo_mem->show();
     } else {
+        btn_vfo_mem->hide();
         btnSpecial->show();
         if (selrig->has_special)
             btnSpecial->activate();
@@ -2311,12 +2299,17 @@ void TRACED(init_vfo_mem)
 }
 
 void TRACED(init_external_tuner)
-
-	btn_ext_tuner->show();
-	if (selrig->has_ext_tuner)
-		btn_ext_tuner->activate();
-	else
-		btn_ext_tuner->deactivate();
+    if (selrig->has_vfo_mem) {
+        btn_ext_tuner->hide();
+        trace(1, "init_external_tuner() - has_vfo_mem support");
+        btn_power_off->show();
+    } else {
+        btn_ext_tuner->show();
+        if (selrig->has_ext_tuner)
+            btn_ext_tuner->activate();
+        else
+            btn_ext_tuner->deactivate();
+    }
 }
 
 void TRACED(init_CIV)
@@ -2583,7 +2576,6 @@ trace(1, "selrig->initialize()");
 		init_auto_notch();
 		init_swr_control();
 		init_split_control();
-        init_vfo_mem();
 
 		if (selrig->name_ == rig_QCXP.name_) read_menus();
 

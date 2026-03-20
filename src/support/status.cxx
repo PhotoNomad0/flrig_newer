@@ -2629,6 +2629,7 @@ void status::UI_laststate()
 	if (btnCompON)			btnCompON->selection_color(btn_lt_color);
 	if (btnSpecial)			btnSpecial->selection_color(btn_lt_color);
     if (btn_vfo_mem)        btn_vfo_mem->selection_color(btn_lt_color);
+    if (btn_ext_tuner)      btn_ext_tuner->selection_color(btn_lt_color);
 	if (btn_tt550_vox)		btn_tt550_vox->selection_color(btn_lt_color);
 	if (btn_tt550_CompON)	btn_tt550_CompON->selection_color(btn_lt_color);
 	if (btnAGC)				btnAGC->selection_color(btn_lt_color);

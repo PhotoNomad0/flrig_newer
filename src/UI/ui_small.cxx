@@ -1772,6 +1772,10 @@ Fl_Double_Window *tabs_window()
 			btn_ext_tuner->callback((Fl_Callback*)cb_btn_ext_tuner);
 			btn_ext_tuner->value(progStatus.external_tuner);
 
+			btn_power_off = new Fl_Button(5, 60, 75, 22, _("Power Off"));
+			btn_power_off->tooltip(_("Toggle between VFO and MEM"));
+			btn_power_off->callback((Fl_Callback*)cb_btn_power_off);
+
 			btn_xcvr_auto_on = new Fl_Check_Button(100, 35, 100, 22, _("Rig auto On"));
 			btn_xcvr_auto_on->tooltip(_("Auto Turn Rig On with Flrig startup"));
 			btn_xcvr_auto_on->down_box(FL_DOWN_BOX);

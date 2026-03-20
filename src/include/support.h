@@ -315,6 +315,8 @@ extern void enable_yaesu_bandselect(int btn_num, bool enable = true);
 
 extern void synchronize_now();
 extern void vfo_mem_toggle_now();
+extern void power_off_now();
+
 
 // Display Dialog
 extern void cbUSBaudio();
@@ -491,7 +493,6 @@ extern void init_swr_control();
 extern void set_init_compression_control();
 extern void set_init_break_in();
 extern void init_special_controls();
-extern void init_vfo_mem();
 extern void init_external_tuner();
 extern void init_CIV();
 extern void init_TS990_special();

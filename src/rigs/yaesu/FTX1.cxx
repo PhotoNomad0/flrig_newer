@@ -386,6 +386,30 @@ void RIG_FTX1::vfo_mem_toggle()
 	sett("vfo_mem_toggle");
 }
 
+void RIG_FTX1::change_channel(bool channel_up)
+{
+	cmd = channel_up ? "CH0;" : "CH1;";
+	sendCommand(cmd);
+	if (channel_up) {
+		sett("change_channel UP");
+	} else {
+		sett("change_channel DOWN");
+	}
+}
+
+void RIG_FTX1::power(bool on)
+{
+	cmd = on ? "PS1;" : "PS0;";
+	sendCommand(cmd);
+
+	if (on) {
+		sett("power on");
+	} else {
+		sett("power off");
+	}
+}
+
+
 static bool in_memory_mode = false;
 static int memory_channel = 0;
 static std::string memory_channel_str;
