@@ -1816,6 +1816,11 @@ Fl_Double_Window *tabs_window()
 			txt_xcvr_synch->value("");
 			txt_xcvr_synch->align(FL_ALIGN_CENTER);
 
+			label_mem_channel = new Fl_Box(320, 60, 90, 22, _("CHANNEL"));
+			label_mem_channel->box(FL_DOWN_BOX);
+			label_mem_channel->align(FL_ALIGN_CENTER);
+			label_mem_channel->hide();
+
 		genericMisc->end();
 }
 //		kx3_extras = new Fl_Group(0, 24, small_mainW, gph - 24, _("KX3"));

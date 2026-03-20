@@ -77,7 +77,7 @@ Fl_Box *tcpip_menu_box = (Fl_Box *)0;
 Fl_Group *tcpip_box = (Fl_Group *)0;
 
 Fl_Box *labelMEMORY = (Fl_Box *)0;
-
+Fl_Box *label_mem_channel = (Fl_Box *)0;
 Fl_Output *txt_encA=(Fl_Output *)0;
 
 Fl_Group *sm_grp1 = (Fl_Group *)0;

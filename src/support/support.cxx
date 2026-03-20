@@ -329,7 +329,8 @@ void read_vfo()
 		bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
 		if (in_memory_mode) {
 			labelMEMORY->show();
-			txt_xcvr_synch->show();
+			txt_xcvr_synch->hide();
+			label_mem_channel->show();
 // 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel=" << memory_channel );
 			std::string memory_channel_str = std::to_string(memory_channel);
  			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
@@ -338,8 +339,8 @@ void read_vfo()
 			labelMEMORY->redraw_label();
 			snprintf(tag_, sizeof(tag_), "%s", memory_channel_tag.c_str());
  			TRACE_STREAM(1, "read_vfo() - get_current_memory tag_=" << tag_ );
-			txt_xcvr_synch->label(tag_);
-			txt_xcvr_synch->redraw_label();
+			label_mem_channel->label(tag_);
+			label_mem_channel->redraw_label();
 		} else  {
 			labelMEMORY->hide();
 		}
