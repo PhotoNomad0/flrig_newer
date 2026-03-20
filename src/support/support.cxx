@@ -4071,9 +4071,14 @@ void power_off( void *) {
 	selrig->power(false);
 }
 
-void change_channel(bool channel_up) {
-	trace(1, "change_channel()");
-	selrig->change_channel(channel_up);
+void channel_up(void *) {
+	trace(1, "channel_up()");
+	selrig->change_channel(true);
+}
+
+void channel_down(void *) {
+	trace(1, "channel_down()");
+	selrig->change_channel(false);
 }
 
 void TRACED(vfo_mem_toggle_now)
@@ -4084,6 +4089,16 @@ void TRACED(vfo_mem_toggle_now)
 void TRACED(power_off_now)
 	Fl::remove_timeout(power_off);
 	Fl::add_timeout(0, power_off);
+}
+
+void TRACED(channel_up_now)
+	Fl::remove_timeout(channel_up);
+	Fl::add_timeout(0, channel_up);
+}
+
+void TRACED(channel_down_now)
+	Fl::remove_timeout(channel_down);
+	Fl::add_timeout(0, channel_down);
 }
 
 void TRACED(start_commands)

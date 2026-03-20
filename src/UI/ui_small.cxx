@@ -1788,6 +1788,14 @@ Fl_Double_Window *tabs_window()
 			btn_xcvr_auto_off->callback((Fl_Callback*)cb_btn_xcvr_auto_off);
 			btn_xcvr_auto_off->value(progStatus.xcvr_auto_off);
 
+			btn_channel_up = new Fl_Button(100, 35, 100, 22, _("Channel UP"));
+			btn_channel_up->tooltip(_("Move up to greater Channel Number"));
+			btn_channel_up->callback((Fl_Callback*)cb_btn_channel_up);
+
+			btn_channel_down = new Fl_Button(100, 60, 100, 22, _("Channel DOWN"));
+			btn_channel_down->tooltip(_("Move down to lower Channel Number"));
+			btn_channel_down->callback((Fl_Callback*)cb_btn_channel_down);
+
 			btn_xcvr_synch_clock = new Fl_Check_Button(215, 35, 100, 22, _("Sync Clk"));
 			btn_xcvr_synch_clock->tooltip(_("Synchronize xcvr clock to PC"));
 			btn_xcvr_synch_clock->down_box(FL_DOWN_BOX);

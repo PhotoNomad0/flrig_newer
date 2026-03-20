@@ -2284,10 +2284,14 @@ void TRACED(set_init_break_in)
 
 void TRACED(init_special_controls)
 
-    if (selrig->has_vfo_mem) {
+    if (selrig->has_vfo_mem) { // VFO memory control, swap out these buttons
         btnSpecial->hide();
+        btn_xcvr_auto_on->hide();
+        btn_xcvr_auto_on->hide();
         trace(1, "init_special_controls() - has_vfo_mem support");
         btn_vfo_mem->show();
+        btn_channel_up->show();
+        btn_channel_down->show();
     } else {
         btn_vfo_mem->hide();
         btnSpecial->show();
@@ -2311,6 +2315,8 @@ void TRACED(init_external_tuner)
             btn_ext_tuner->deactivate();
     }
 }
+
+
 
 void TRACED(init_CIV)
 

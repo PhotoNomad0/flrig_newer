@@ -353,6 +353,8 @@ extern Hspinner *spnr_line_out;
 extern Fl_Light_Button *btnSpecial;
 extern Fl_Button *btn_vfo_mem;
 extern Fl_Button *btn_power_off;
+extern Fl_Button *btn_channel_up;
+extern Fl_Button *btn_channel_down;
 extern Fl_Check_Button *btn_ext_tuner;
 extern Fl_Check_Button *btn_xcvr_auto_on;
 extern Fl_Check_Button *btn_xcvr_auto_off;
