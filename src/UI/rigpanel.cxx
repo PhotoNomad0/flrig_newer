@@ -306,6 +306,7 @@ Fl_ComboBox *cbo_preamp = (Fl_ComboBox *)0;
 
 Fl_Check_Button *btn_use_bpf_center = (Fl_Check_Button *)0;
 Fl_Group *genericMisc = (Fl_Group *)0;
+Fl_Group *ftx1_tab = (Fl_Group *)0;
 Hspinner *spnr_vfo_adj = (Hspinner *)0;
 Hspinner *spnr_line_out = (Hspinner *)0;
 Fl_Light_Button *btnSpecial = (Fl_Light_Button *)0;

@@ -1762,19 +1762,11 @@ Fl_Double_Window *tabs_window()
 			btnSpecial = new Fl_Light_Button(5, 35, 75, 22, _("Special"));
 			btnSpecial->callback((Fl_Callback*)cb_btnSpecial);
 
-			btn_vfo_mem = new Fl_Button(5, 35, 75, 22, _("VFO/MEM"));
-			btn_vfo_mem->tooltip(_("Toggle between VFO and MEM"));
-			btn_vfo_mem->callback((Fl_Callback*)cb_btn_vfo_mem);
-
 			btn_ext_tuner = new Fl_Check_Button(5, 60, 75, 22, _("Ext tuner"));
 			btn_ext_tuner->tooltip(_("use external auto tuner"));
 			btn_ext_tuner->down_box(FL_DOWN_BOX);
 			btn_ext_tuner->callback((Fl_Callback*)cb_btn_ext_tuner);
 			btn_ext_tuner->value(progStatus.external_tuner);
-
-			btn_power_off = new Fl_Button(5, 60, 75, 22, _("Power Off"));
-			btn_power_off->tooltip(_("Toggle between VFO and MEM"));
-			btn_power_off->callback((Fl_Callback*)cb_btn_power_off);
 
 			btn_xcvr_auto_on = new Fl_Check_Button(100, 35, 100, 22, _("Rig auto On"));
 			btn_xcvr_auto_on->tooltip(_("Auto Turn Rig On with Flrig startup"));
@@ -1787,14 +1779,6 @@ Fl_Double_Window *tabs_window()
 			btn_xcvr_auto_off->down_box(FL_DOWN_BOX);
 			btn_xcvr_auto_off->callback((Fl_Callback*)cb_btn_xcvr_auto_off);
 			btn_xcvr_auto_off->value(progStatus.xcvr_auto_off);
-
-			btn_channel_up = new Fl_Button(100, 35, 100, 22, _("Channel UP"));
-			btn_channel_up->tooltip(_("Move up to greater Channel Number"));
-			btn_channel_up->callback((Fl_Callback*)cb_btn_channel_up);
-
-			btn_channel_down = new Fl_Button(100, 60, 100, 22, _("Channel DOWN"));
-			btn_channel_down->tooltip(_("Move down to lower Channel Number"));
-			btn_channel_down->callback((Fl_Callback*)cb_btn_channel_down);
 
 			btn_xcvr_synch_clock = new Fl_Check_Button(215, 35, 100, 22, _("Sync Clk"));
 			btn_xcvr_synch_clock->tooltip(_("Synchronize xcvr clock to PC"));
@@ -1816,13 +1800,38 @@ Fl_Double_Window *tabs_window()
 			txt_xcvr_synch->value("");
 			txt_xcvr_synch->align(FL_ALIGN_CENTER);
 
+		genericMisc->end();
+}
+
+		ftx1_tab = new Fl_Group(0, 24, small_mainW, gph - 24, _("FTX-1"));
+{
+			ftx1_tab->hide();
+
+			btn_vfo_mem = new Fl_Button(5, 35, 75, 22, _("VFO/MEM"));
+			btn_vfo_mem->tooltip(_("Toggle between VFO and MEM"));
+			btn_vfo_mem->callback((Fl_Callback*)cb_btn_vfo_mem);
+
+			btn_power_off = new Fl_Button(5, 60, 75, 22, _("Power Off"));
+			btn_power_off->tooltip(_("Toggle between VFO and MEM"));
+			btn_power_off->callback((Fl_Callback*)cb_btn_power_off);
+
+			btn_channel_up = new Fl_Button(100, 35, 100, 22, _("Channel UP"));
+			btn_channel_up->tooltip(_("Move up to greater Channel Number"));
+			btn_channel_up->callback((Fl_Callback*)cb_btn_channel_up);
+
+			btn_channel_down = new Fl_Button(100, 60, 100, 22, _("Channel DOWN"));
+			btn_channel_down->tooltip(_("Move down to lower Channel Number"));
+			btn_channel_down->callback((Fl_Callback*)cb_btn_channel_down);
+
 			label_mem_channel = new Fl_Box(320, 60, 90, 22, _("CHANNEL"));
 			label_mem_channel->box(FL_DOWN_BOX);
+			label_mem_channel->color(FL_WHITE);
 			label_mem_channel->align(FL_ALIGN_CENTER);
 			label_mem_channel->hide();
 
-		genericMisc->end();
+		ftx1_tab->end();
 }
+
 //		kx3_extras = new Fl_Group(0, 24, small_mainW, gph - 24, _("KX3"));
 {
 //			kxpa_enabled = new Fl_Check_Button( 15, kx3_extras->y() + 12, 18, 18, _("KXPA100 ON"));

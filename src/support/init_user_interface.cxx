@@ -749,6 +749,7 @@ void TRACED(init_Generic_Tabs)
 		hidden_tabs->remove(genericSpeech);
 		hidden_tabs->remove(genericRx);
 		hidden_tabs->remove(genericMisc);
+		hidden_tabs->remove(ftx1_tab);
 		hidden_tabs->remove(genericAux);
 		hidden_tabs->remove(genericRXB);
 		hidden_tabs->remove(genericUser_1);
@@ -769,6 +770,13 @@ void TRACED(init_Generic_Tabs)
 		hidden_tabs->add(genericSpeech);
 		hidden_tabs->add(genericRx);
 		hidden_tabs->add(genericMisc);
+        if (selrig->name_ == rig_FTX1.name_) {
+            hidden_tabs->add(ftx1_tab);
+            ftx1_tab->redraw();
+            ftx1_tab->show();
+        } else {
+            ftx1_tab->hide();
+        }
 		hidden_tabs->add(genericAux);
 		hidden_tabs->add(genericRXB);
 		hidden_tabs->add(genericUser_1);
@@ -789,6 +797,7 @@ void TRACED(init_Generic_Tabs)
 		tabsGeneric->remove(genericSpeech);
 		tabsGeneric->remove(genericRx);
 		tabsGeneric->remove(genericMisc);
+		tabsGeneric->remove(ftx1_tab);
 		tabsGeneric->remove(genericAux);
 		tabsGeneric->remove(genericRXB);
 		tabsGeneric->remove(genericUser_1);
@@ -1056,39 +1065,46 @@ void TRACED(init_Generic_Tabs)
 	if (selrig->has_line_out ||
 		selrig->has_xcvr_auto_on_off ||
 		selrig->can_synch_clock ) {
+	    btn_xcvr_auto_on->show();
+	    btn_xcvr_auto_off->show();
+	    if (selrig->has_xcvr_auto_on_off) {
+	        btn_xcvr_auto_on->value(progStatus.xcvr_auto_on);
+	        btn_xcvr_auto_off->value(progStatus.xcvr_auto_off);
+	        btn_xcvr_auto_on->activate();
+	        btn_xcvr_auto_off->activate();
+	    } else {
+	        btn_xcvr_auto_on->deactivate();
+	        btn_xcvr_auto_off->deactivate();
+	    }
 
-		btn_xcvr_auto_on->show();
-		btn_xcvr_auto_off->show();
-		if (selrig->has_xcvr_auto_on_off) {
-			btn_xcvr_auto_on->value(progStatus.xcvr_auto_on);
-			btn_xcvr_auto_off->value(progStatus.xcvr_auto_off);
-			btn_xcvr_auto_on->activate();
-			btn_xcvr_auto_off->activate();
-		} else {
-			btn_xcvr_auto_on->deactivate();
-			btn_xcvr_auto_off->deactivate();
-		}
+	    if (selrig->can_synch_clock) {
+	        btn_xcvr_synch_clock->show();
+	        btn_xcvr_synch_gmt->show();
+	        btn_xcvr_synch_now->show();
+	        txt_xcvr_synch->show();
+	    } else {
+	        btn_xcvr_synch_clock->hide();
+	        btn_xcvr_synch_gmt->hide();
+	        btn_xcvr_synch_now->hide();
+	        txt_xcvr_synch->hide();
+	    }
+	    btn_xcvr_synch_clock->redraw();
+	    btn_xcvr_synch_gmt->redraw();
+	    btn_xcvr_synch_now->redraw();
+	    txt_xcvr_synch->redraw();
 
-		if (selrig->can_synch_clock) {
-			btn_xcvr_synch_clock->show();
-			btn_xcvr_synch_gmt->show();
-			btn_xcvr_synch_now->show();
-			txt_xcvr_synch->show();
-		} else {
-			btn_xcvr_synch_clock->hide();
-			btn_xcvr_synch_gmt->hide();
-			btn_xcvr_synch_now->hide();
-			txt_xcvr_synch->hide();
-		}
-		btn_xcvr_synch_clock->redraw();
-		btn_xcvr_synch_gmt->redraw();
-		btn_xcvr_synch_now->redraw();
-		txt_xcvr_synch->redraw();
-
-		tabsGeneric->add(genericMisc);
-		genericMisc->redraw();
-		genericMisc->show();
+	    tabsGeneric->add(genericMisc);
+	    genericMisc->redraw();
+	    genericMisc->show();
 	}
+
+    if (selrig->name_ == rig_FTX1.name_) {
+        tabsGeneric->add(ftx1_tab);
+        ftx1_tab->redraw();
+        ftx1_tab->show();
+    } else {
+        ftx1_tab->hide();
+    }
 
 	tabsGeneric->remove(genericAux);
 	genericAux->hide();
@@ -2284,39 +2300,31 @@ void TRACED(set_init_break_in)
 
 void TRACED(init_special_controls)
 
+    btnSpecial->show();
+    if (selrig->has_special)
+        btnSpecial->activate();
+    else
+        btnSpecial->deactivate();
+}
+
+void TRACED(init_ftx1_tab)
+    btn_power_off->show();
     if (selrig->has_vfo_mem) { // VFO memory control, swap out these buttons
-        btnSpecial->hide();
-        btn_xcvr_auto_on->hide();
-        btn_xcvr_auto_on->hide();
-        trace(1, "init_special_controls() - has_vfo_mem support");
+        trace(1, "init_ftx1_tab() - has_vfo_mem support");
         btn_vfo_mem->show();
         btn_channel_up->show();
         btn_channel_down->show();
-    } else {
-        btn_vfo_mem->hide();
-        btnSpecial->show();
-        if (selrig->has_special)
-            btnSpecial->activate();
-        else
-            btnSpecial->deactivate();
     }
 }
 
 void TRACED(init_external_tuner)
-    if (selrig->has_vfo_mem) {
-        btn_ext_tuner->hide();
-        trace(1, "init_external_tuner() - has_vfo_mem support");
-        btn_power_off->show();
-    } else {
-        btn_ext_tuner->show();
-        if (selrig->has_ext_tuner)
-            btn_ext_tuner->activate();
-        else
-            btn_ext_tuner->deactivate();
-    }
+
+    btn_ext_tuner->show();
+    if (selrig->has_ext_tuner)
+        btn_ext_tuner->activate();
+    else
+        btn_ext_tuner->deactivate();
 }
-
-
 
 void TRACED(init_CIV)
 

@@ -333,16 +333,19 @@ void read_vfo()
 			label_mem_channel->show();
 // 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel=" << memory_channel );
 			std::string memory_channel_str = std::to_string(memory_channel);
- 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
+// 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
 
 			labelMEMORY->label(memory_channel_str.c_str());
 			labelMEMORY->redraw_label();
 			snprintf(tag_, sizeof(tag_), "%s", memory_channel_tag.c_str());
- 			TRACE_STREAM(1, "read_vfo() - get_current_memory tag_=" << tag_ );
+// 			TRACE_STREAM(1, "read_vfo() - get_current_memory tag_=" << tag_ );
 			label_mem_channel->label(tag_);
 			label_mem_channel->redraw_label();
 		} else  {
 			labelMEMORY->hide();
+			label_mem_channel->label("");
+			label_mem_channel->redraw_label();
+			label_mem_channel->hide();
 		}
 	}
 

@@ -349,6 +349,7 @@ extern Fl_Wheel_Value_Slider *sldr_nb_level;
 extern Hspinner *spnr_bpf_center;
 extern Fl_Check_Button *btn_use_bpf_center;
 extern Fl_Group *genericMisc;
+extern Fl_Group *ftx1_tab;
 extern Hspinner *spnr_vfo_adj;
 extern Hspinner *spnr_line_out;
 extern Fl_Light_Button *btnSpecial;
