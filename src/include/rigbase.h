@@ -350,6 +350,8 @@ public:
 
 	bool has_voltmeter;
 
+	bool has_vfo_mem;
+
 // Icom Xcvr
 	bool ICOMrig;
 	bool ICOMmainsub;

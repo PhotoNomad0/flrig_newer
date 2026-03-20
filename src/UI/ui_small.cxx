@@ -1759,8 +1759,8 @@ Fl_Double_Window *tabs_window()
 {
 			genericMisc->hide();
 
-			// btnSpecial = new Fl_Light_Button(5, 35, 75, 22, _("Special"));
-			// btnSpecial->callback((Fl_Callback*)cb_btnSpecial);
+			btnSpecial = new Fl_Light_Button(5, 35, 75, 22, _("Special"));
+			btnSpecial->callback((Fl_Callback*)cb_btnSpecial);
 
 			btn_vfo_mem = new Fl_Button(5, 35, 75, 22, _("VFO/MEM"));
 			btn_vfo_mem->tooltip(_("Toggle between VFO and MEM"));

@@ -491,6 +491,7 @@ extern void init_swr_control();
 extern void set_init_compression_control();
 extern void set_init_break_in();
 extern void init_special_controls();
+extern void init_vfo_mem();
 extern void init_external_tuner();
 extern void init_CIV();
 extern void init_TS990_special();

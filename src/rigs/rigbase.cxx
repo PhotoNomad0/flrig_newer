@@ -208,7 +208,8 @@ rigbase::rigbase()
 	ICOMmainsub =
 	can_synch_clock =
 	has_a2b =
-	has_vfoAB = false;
+	has_vfoAB =
+	has_vfo_mem = false;
 
 	data_type = DT_BINARY;
 
