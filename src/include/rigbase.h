@@ -779,7 +779,7 @@ double vfo_;
 	virtual void power_off() {}
 	virtual void change_channel(bool channel_up) {}
 	virtual void power(bool on) {}
-	virtual bool get_current_memory(int &memory_channel){return false;}
+	virtual bool get_current_memory(int &memory_channel, std::string &memory_channel_tag){return false;}
 	virtual void set_xcvr_auto_on() {}
 	virtual void set_xcvr_auto_off() {}
 

@@ -323,18 +323,26 @@ void read_vfo()
 
 	if (xcvr_name == rig_FTX1.name_) {
 //     	trace(2,"read_vfo(), rig_FTX1.name_", rig_FTX1.name_.c_str());
+		static char tag_[20];
 		int memory_channel = 0;
-		bool in_memory_mode = selrig->get_current_memory(memory_channel);
+		std::string memory_channel_tag = "";
+		bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
 		if (in_memory_mode) {
 			labelMEMORY->show();
+			txt_xcvr_synch->show();
 // 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel=" << memory_channel );
 			std::string memory_channel_str = std::to_string(memory_channel);
-// 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str );
+ 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
 
 			labelMEMORY->label(memory_channel_str.c_str());
 			labelMEMORY->redraw_label();
+			snprintf(tag_, sizeof(tag_), "%s", memory_channel_tag.c_str());
+ 			TRACE_STREAM(1, "read_vfo() - get_current_memory tag_=" << tag_ );
+			txt_xcvr_synch->label(tag_);
+			txt_xcvr_synch->redraw_label();
+		} else  {
+			labelMEMORY->hide();
 		}
-		else  labelMEMORY->hide();
 	}
 
 // transceiver changed ?
@@ -4030,30 +4038,32 @@ void TRACED(send_st_ex_command, std::string command)
 #include "timeops.h"
 void synchronize( void *) {
 
-	time_t now;
-	time(&now);
-	struct tm *tm_time;
-	static char sztm[20];
+	if (xcvr_name != rig_FTX1.name_) {
+		time_t now;
+		time(&now);
+		struct tm *tm_time;
+		static char sztm[20];
 
-	if (progStatus.sync_gmt) {
-		tm_time = gmtime(&now);
-		strftime(sztm, sizeof(sztm), "%H:%M:%S Z", tm_time);
-	} else {
-		tm_time = localtime(&now);
-		strftime(sztm, sizeof(sztm), "%H:%M:%S", tm_time);
-	}
+		if (progStatus.sync_gmt) {
+			tm_time = gmtime(&now);
+			strftime(sztm, sizeof(sztm), "%H:%M:%S Z", tm_time);
+		} else {
+			tm_time = localtime(&now);
+			strftime(sztm, sizeof(sztm), "%H:%M:%S", tm_time);
+		}
 
-	if (strncmp(&sztm[6], "00", 2) == 0) {
-		guard_lock serial_lock(&mutex_serial, "38");
-		static char szdate[20];
-		strftime(szdate, sizeof(szdate), "%Y%m%d", tm_time);
-		selrig->sync_clock(sztm);
-		selrig->sync_date(szdate);
-		txt_xcvr_synch->value("--SYNC'D--");
-		return;
+		if (strncmp(&sztm[6], "00", 2) == 0) {
+			guard_lock serial_lock(&mutex_serial, "38");
+			static char szdate[20];
+			strftime(szdate, sizeof(szdate), "%Y%m%d", tm_time);
+			selrig->sync_clock(sztm);
+			selrig->sync_date(szdate);
+			txt_xcvr_synch->value("--SYNC'D--");
+			return;
+		}
+		txt_xcvr_synch->value(sztm);
+		Fl::repeat_timeout(0.05, synchronize);
 	}
-	txt_xcvr_synch->value(sztm);
-	Fl::repeat_timeout(0.05, synchronize);
 }
 
 void TRACED(synchronize_now)
