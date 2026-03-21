@@ -23,19 +23,6 @@
 
 #include "rigbase.h"
 
-struct MemoryResponse {
-    std::string ChannelNum;  // channel number (5 bytes)
-    std::string Frequency;  // frequency (9 bytes)
-    std::string Clarifier;  // clarifier (5 bytes)
-    std::string RxClarifier;  // RX clarifier (1 byte)
-    std::string TxClarifier;  // TX clarifier (1 byte)
-    std::string Mode;  // mode (1 byte)
-    std::string VfoMem;  // VFO/memory mode (1 byte)
-    std::string RepeaterMode;  // repeater mode (1 byte)
-    std::string Shift; // shift (1 byte)
-};
-
-
 class RIG_FTX1 : public rigbase {
 private:
 	bool notch_on;
@@ -174,6 +161,9 @@ public:
 	void set_break_in();
 	int  get_break_in();
 
+    virtual std::vector<MemoryResponse> get_memory_channels();
+
+    std::vector<MemoryResponse> get_memory_range(int start_channel, int end_channel);
     std::string get_memory_tag(const std::string memory_channel_id_str_);
     bool parse_memory_response(const std::string replystr, const size_t offset, MemoryResponse &parsedResponse);
     bool get_memory_config(const std::string memory_channel_id_str_, MemoryResponse &parsedResponse);

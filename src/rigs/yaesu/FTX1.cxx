@@ -415,6 +415,19 @@ static int memory_channel = 0;
 static std::string memory_channel_id_str;
 static std::string memory_channel_tag;
 
+
+/**
+ * Retrieves the memory tag (label/description) for a given memory channel.
+ *
+ * @param memory_channel_id_str_ The memory channel ID as a string (e.g., "00001")
+ * @return The memory tag/label for the specified channel, trimmed of whitespace.
+ *         If the tag is empty, returns the memory_channel_id_str_ as a fallback.
+ *
+ * This function sends the MT (Memory Tag) command to the transceiver with the
+ * specified channel number and parses the response to extract the 12-character
+ * tag field. The tag is trimmed of leading and trailing whitespace before being
+ * returned.
+ */
 std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
 {
 	cmd = rsp = "MT";
@@ -435,6 +448,19 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
 	return memory_channel_tag;
 }
 
+/**
+ * Parses a memory response string from the transceiver.
+ *
+ * @param replystr The complete response string from the transceiver
+ * @param offset The starting position in replystr where the memory data begins
+ * @param parsedResponse Reference to MemoryResponse structure to be populated with parsed data
+ * @return true if parsing was successful, false otherwise
+ *
+ * This function extracts memory channel configuration from the transceiver's response,
+ * including channel number, frequency, clarifier settings, mode, VFO/memory status,
+ * repeater mode, and shift settings. The function expects a specific format in the
+ * response string with fixed-position fields.
+ */
 bool RIG_FTX1::parse_memory_response(const std::string replystr, const size_t offset, MemoryResponse &parsedResponse)
 {
 	size_t p = offset;
@@ -457,6 +483,17 @@ bool RIG_FTX1::parse_memory_response(const std::string replystr, const size_t of
 	return false;
 }
 
+/**
+ * Retrieves the memory configuration for a given memory channel.
+ *
+ * @param memory_channel_id_str_ The memory channel ID as a string (e.g., "00001")
+ * @param parsedResponse Reference to MemoryResponse structure to be populated with parsed data
+ * @return true if parsing was successful, false otherwise
+ *
+ * This function sends the MR (Memory Read) command to the transceiver with the
+ * specified channel number and parses the response to extract the memory channel
+ * configuration including frequency, mode, clarifier settings, and repeater information.
+ */
 bool RIG_FTX1::get_memory_config(const std::string memory_channel_id_str_, MemoryResponse &parsedResponse)
 {
 	cmd = rsp = "MR";
@@ -467,6 +504,74 @@ bool RIG_FTX1::get_memory_config(const std::string memory_channel_id_str_, Memor
 	return parsed;
 }
 
+/**
+ * Load a range of memory channels into a list.
+ *
+ * Each entry contains the parsed memory configuration plus the memory tag.
+ */
+std::vector<MemoryResponse> RIG_FTX1::get_memory_range(int start_channel, int end_channel)
+{
+    std::vector<MemoryResponse> memories;
+    int emptyCount = 0;
+
+    if (start_channel > end_channel) {
+        std::swap(start_channel, end_channel);
+    }
+
+    for (int ch = start_channel; ch <= end_channel; ++ch) {
+        char ch_buf[6] = {0};
+        std::snprintf(ch_buf, sizeof(ch_buf), "%05d", ch);
+
+        MemoryResponse memory;
+        if (!get_memory_config(ch_buf, memory)) {
+            if (++emptyCount > 3) {
+                break;
+            }
+            continue;
+        } else {
+            emptyCount = 0;
+        }
+
+        // If MemoryResponse does not already have a tag field,
+        // add one in the header or store it separately.
+        memory.Tag = get_memory_tag(ch_buf);
+
+// TRACE_STREAM(1, "get_memory_range() ch=" << ch
+//     << ", ChannelNum=" << memory.ChannelNum
+//     << ", Frequency=" << memory.Frequency
+//     << ", Clarifier=" << memory.Clarifier
+//     << ", RxClarifier=" << memory.RxClarifier
+//     << ", TxClarifier=" << memory.TxClarifier
+//     << ", Mode=" << memory.Mode
+//     << ", VfoMem=" << memory.VfoMem
+//     << ", RepeaterMode=" << memory.RepeaterMode
+//     << ", Shift=" << memory.Shift
+//     << ", Tag=" << memory.Tag);
+
+        memories.push_back(memory);
+    }
+
+    return memories;
+}
+
+std::vector<MemoryResponse> RIG_FTX1::get_memory_channels() {
+    std::vector<MemoryResponse> channels = get_memory_range(1, 9999);
+    return channels;
+}
+
+/**
+ * Retrieves the current memory channel and memory mode status.
+ *
+ * @param memory_channel_ Reference to store the current memory channel number (0 if in VFO mode)
+ * @param memory_channel_tag_ Reference to store the memory channel tag/label
+ * @return true if the transceiver is in memory mode, false if in VFO mode
+ *
+ * This function queries the transceiver to determine if it is operating in memory mode
+ * or VFO mode. For VFO A, it uses the IF command; for VFO B, it uses the OI command.
+ * If in memory mode (VfoMem != '0'), it retrieves the memory channel number and its
+ * associated tag/label. The function updates both the local state variables and the
+ * output parameters with the current memory configuration.
+ */
 bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_channel_tag_)
 {
 	int in_memory_mode_ = false;
