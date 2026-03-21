@@ -449,7 +449,10 @@ bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_chan
     		if (p != std::string::npos) {
 				memory_channel_tag = replystr.substr(p + 7, 12);
 			}
-//           TRACE_STREAM(1, "get_current_memory_tag() replystr=" << replystr << ", memory_channel_tag=" << memory_channel_tag << ", memory_channel_id_str=" << memory_channel_id_str);
+//            TRACE_STREAM(1, "get_current_memory_tag() replystr=" << replystr << ", memory_channel_tag=" << memory_channel_tag << ", memory_channel_id_str='" << memory_channel_id_str << "'");
+			memory_channel_tag.erase(0, memory_channel_tag.find_first_not_of(" \t\n\r"));
+			memory_channel_tag.erase(memory_channel_tag.find_last_not_of(" \t\n\r") + 1);
+//            TRACE_STREAM(1, "get_current_memory_tag() trimmed memory_channel_tag='" << memory_channel_tag << "'");
 			if (memory_channel_tag.empty()) {
 				memory_channel_tag = memory_channel_id_str;
 //                TRACE_STREAM(1, "get_current_memory_tag() fall back to using memory_channel_id_str=" << memory_channel_id_str);
