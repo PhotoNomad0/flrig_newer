@@ -107,6 +107,8 @@ extern Fl_Button *btn_KX3_A2B;
 extern Fl_Light_Button *btnB;
 extern Fl_Box *labelMEMORY;
 extern Fl_Box *label_mem_channel;
+extern Fl_ComboBox *channel_selector;
+
 extern Fl_Button *btnTune;
 extern Fl_Light_Button *btn_tune_on_off;
 extern Fl_Box *bx_row0_expander;

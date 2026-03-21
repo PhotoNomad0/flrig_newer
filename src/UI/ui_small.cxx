@@ -1823,6 +1823,21 @@ Fl_Double_Window *tabs_window()
 			btn_channel_down->tooltip(_("Move down to lower Channel Number"));
 			btn_channel_down->callback((Fl_Callback*)cb_btn_channel_down);
 
+			channel_selector = new Fl_ComboBox(215, 35, 100, 22, _("Channel"));
+			channel_selector->tooltip(_("Select Channel"));
+			channel_selector->box(FL_NO_BOX);
+			channel_selector->color(FL_BACKGROUND2_COLOR);
+			channel_selector->selection_color(FL_BACKGROUND_COLOR);
+			channel_selector->labeltype(FL_NORMAL_LABEL);
+			channel_selector->labelfont(0);
+			channel_selector->labelsize(12);
+			channel_selector->labelcolor(FL_FOREGROUND_COLOR);
+			channel_selector->callback((Fl_Callback*)cb_channel_selector);
+			channel_selector->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
+			channel_selector->when(FL_WHEN_RELEASE);
+			channel_selector->readonly();
+			channel_selector->end();
+
 			label_mem_channel = new Fl_Box(320, 60, 90, 22, _("CHANNEL"));
 			label_mem_channel->box(FL_DOWN_BOX);
 			label_mem_channel->color(FL_WHITE);

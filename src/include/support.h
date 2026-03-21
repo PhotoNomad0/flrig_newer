@@ -152,6 +152,7 @@ extern void update_power_control(void *);
 extern void update_compression(void *);
 
 extern void setMode();
+extern void setChannel();
 extern void setBW();
 extern void setDSP();
 extern void selectDSP();
@@ -318,6 +319,7 @@ extern void vfo_mem_toggle_now();
 extern void power_off_now();
 extern void channel_up_now();
 extern void channel_down_now();
+extern void saveChannels(std::vector<MemoryResponse> memories);
 
 // Display Dialog
 extern void cbUSBaudio();

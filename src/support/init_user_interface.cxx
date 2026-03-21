@@ -23,6 +23,15 @@
 #include "ptt.h"
 #include "xmlrpc_rig.h"
 
+// use like this to trace data: `TRACE_STREAM(1, "execute_setPower()-spnrPOWER, progStatus.power_level=" << progStatus.power_level);`
+#define TRACE_STREAM(level, streamExpr)                           \
+    do {                                                          \
+        std::ostringstream _trace_os_;                             \
+        _trace_os_ << streamExpr;                                  \
+        const std::string _trace_s_ = _trace_os_.str();            \
+        trace((level), _trace_s_.c_str());                         \
+    } while (0)
+
 extern bool testmode;
 
 void TRACED(update_UI_PTT, void *d)
@@ -2315,6 +2324,19 @@ void TRACED(init_ftx1_tab)
         btn_vfo_mem->show();
         btn_channel_up->show();
         btn_channel_down->show();
+
+        // get list of memories from rig and add to channel selector combo box
+        std::vector<MemoryResponse> memories = selrig->get_memory_channels();
+        saveChannels(memories);
+        channel_selector->show();
+
+        for (size_t i = 0; i < memories.size(); i++) {
+            std::string name = memories[i].Tag.empty() ? memories[i].ChannelNum : memories[i].Tag;
+            int channel = std::stoi(memories[i].ChannelNum);
+            std::string label = std::to_string(channel) + " - " + name;
+            TRACE_STREAM(1, "init_ftx1_tab() - adding channel=" << label );
+            channel_selector->add(label.c_str());
+        }
     }
 }
 
@@ -2591,6 +2613,7 @@ trace(1, "selrig->initialize()");
 		init_auto_notch();
 		init_swr_control();
 		init_split_control();
+        init_ftx1_tab();
 
 		if (selrig->name_ == rig_QCXP.name_) read_menus();
 

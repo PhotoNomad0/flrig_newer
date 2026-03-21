@@ -409,6 +409,23 @@ void RIG_FTX1::power(bool on)
 	}
 }
 
+/**
+ * Removes leading and trailing whitespace from a string.
+ *
+ * @param str The input string to be trimmed
+ * @return A new string with all leading and trailing whitespace characters removed
+ *
+ * This function removes spaces, tabs, newlines, and carriage returns from both
+ * the beginning and end of the input string. The original string is copied and
+ * modified, leaving the input unchanged.
+ */
+std::string trim_whitespace(const std::string& str)
+{
+	std::string result = str;
+	result.erase(0, result.find_first_not_of(" \t\n\r"));
+	result.erase(result.find_last_not_of(" \t\n\r") + 1);
+	return result;
+}
 
 static bool in_memory_mode = false;
 static int memory_channel = 0;
@@ -438,8 +455,9 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
 		memory_channel_tag = replystr.substr(p + 7, 12);
 	}
 	//			TRACE_STREAM(1, "get_current_memory_tag() replystr=" << replystr << ", memory_channel_tag=" << memory_channel_tag << ", memory_channel_id_str='" << memory_channel_id_str << "'");
-	memory_channel_tag.erase(0, memory_channel_tag.find_first_not_of(" \t\n\r"));
-	memory_channel_tag.erase(memory_channel_tag.find_last_not_of(" \t\n\r") + 1);
+
+	memory_channel_tag = trim_whitespace(memory_channel_tag);
+
 	//			TRACE_STREAM(1, "get_current_memory_tag() trimmed memory_channel_tag='" << memory_channel_tag << "'");
 	if (memory_channel_tag.empty()) {
 		memory_channel_tag = memory_channel_id_str;
@@ -536,17 +554,19 @@ std::vector<MemoryResponse> RIG_FTX1::get_memory_range(int start_channel, int en
         // add one in the header or store it separately.
         memory.Tag = get_memory_tag(ch_buf);
 
-// TRACE_STREAM(1, "get_memory_range() ch=" << ch
-//     << ", ChannelNum=" << memory.ChannelNum
-//     << ", Frequency=" << memory.Frequency
-//     << ", Clarifier=" << memory.Clarifier
-//     << ", RxClarifier=" << memory.RxClarifier
-//     << ", TxClarifier=" << memory.TxClarifier
-//     << ", Mode=" << memory.Mode
-//     << ", VfoMem=" << memory.VfoMem
-//     << ", RepeaterMode=" << memory.RepeaterMode
-//     << ", Shift=" << memory.Shift
-//     << ", Tag=" << memory.Tag);
+/*
+ TRACE_STREAM(1, "get_memory_range() ch=" << ch
+     << ", ChannelNum=" << memory.ChannelNum
+     << ", Frequency=" << memory.Frequency
+     << ", Clarifier=" << memory.Clarifier
+     << ", RxClarifier=" << memory.RxClarifier
+     << ", TxClarifier=" << memory.TxClarifier
+     << ", Mode=" << memory.Mode
+     << ", VfoMem=" << memory.VfoMem
+     << ", RepeaterMode=" << memory.RepeaterMode
+     << ", Shift=" << memory.Shift
+     << ", Tag=" << memory.Tag);
+*/
 
         memories.push_back(memory);
     }
@@ -554,8 +574,22 @@ std::vector<MemoryResponse> RIG_FTX1::get_memory_range(int start_channel, int en
     return memories;
 }
 
+/**
+ * Retrieves all memory channels from the transceiver.
+ *
+ * @return A vector of MemoryResponse structures containing all memory channels
+ *
+ * This function retrieves memory channels from two ranges:
+ * - Regular memory channels (1-9999)
+ * - 60m channels (50000-50020)
+ *
+ * The function combines both ranges into a single vector and returns all
+ * available memory channels with their configuration and tags.
+ */
 std::vector<MemoryResponse> RIG_FTX1::get_memory_channels() {
     std::vector<MemoryResponse> channels = get_memory_range(1, 9999);
+    std::vector<MemoryResponse> channels2 = get_memory_range(50000, 50020);
+    channels.insert(channels.end(), channels2.begin(), channels2.end());
     return channels;
 }
 

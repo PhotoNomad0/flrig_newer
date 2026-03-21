@@ -78,6 +78,8 @@ Fl_Group *tcpip_box = (Fl_Group *)0;
 
 Fl_Box *labelMEMORY = (Fl_Box *)0;
 Fl_Box *label_mem_channel = (Fl_Box *)0;
+Fl_ComboBox *channel_selector = (Fl_ComboBox *)0;
+
 Fl_Output *txt_encA=(Fl_Output *)0;
 
 Fl_Group *sm_grp1 = (Fl_Group *)0;
@@ -776,6 +778,10 @@ static void cb_opDSP_hi(Fl_ComboBox*, void*) {
 
 static void cb_opMODE(Fl_ComboBox*, void*) {
 	setMode();
+}
+
+static void cb_channel_selector(Fl_ComboBox*, void*) {
+	setChannel();
 }
 
 static void cb_btnAttenuator(Fl_Light_Button*, void*) {
