@@ -415,7 +415,7 @@ static int memory_channel = 0;
 static std::string memory_channel_id_str;
 static std::string memory_channel_tag;
 
-std:string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
+std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
 {
 	cmd = rsp = "MT";
 	cmd = cmd + memory_channel_id_str_ + ';'; // add the memory channel number to the MT command to get the memory channel tag
@@ -435,20 +435,9 @@ std:string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
 	return memory_channel_tag;
 }
 
-struct MemoryResponse {
-	std::string ChannelNum;  // channel number (5 bytes)
-	std::string Frequency;  // frequency (9 bytes)
-	std::string Clarifier;  // clarifier (5 bytes)
-	std::string RxClarifier;  // RX clarifier (1 byte)
-	std::string TxClarifier;  // TX clarifier (1 byte)
-	std::string Mode;  // mode (1 byte)
-	std::string VfoMem;  // VFO/memory mode (1 byte)
-	std::string RepeaterMode;  // repeater mode (1 byte)
-	std::string Shift; // shift (1 byte)
-};
-
-bool RIG_FTX1::parse_memory_response(const std::string replystr, const size_t offset, const MemoryResponse &parsedResponse)
+bool RIG_FTX1::parse_memory_response(const std::string replystr, const size_t offset, MemoryResponse &parsedResponse)
 {
+	size_t p = offset;
 	if (p != std::string::npos) {
 		// get channel number
 		parsedResponse.ChannelNum = replystr.substr(p + 2, 5); // P1 = 5 bytes representing current memory channel. NOTE - the numbers get strange on Emergency channels - seeing semicolons
@@ -463,18 +452,18 @@ bool RIG_FTX1::parse_memory_response(const std::string replystr, const size_t of
 		parsedResponse.Shift = replystr.substr(p + 28, 1); // P10 = shift
 		return true;
 	}
-	
+
 	// not valid response
 	return false;
 }
 
-bool RIG_FTX1::get_memory_config(const std::string memory_channel_id_str_, const MemoryResponse &parsedResponse)
+bool RIG_FTX1::get_memory_config(const std::string memory_channel_id_str_, MemoryResponse &parsedResponse)
 {
 	cmd = rsp = "MR";
 	cmd = cmd + memory_channel_id_str_ + ';'; // add the memory channel number to the MR command to get the memory channel config
 	wait_char(';', 30, 100, "get_memory_config", ASC);
 	size_t p = replystr.rfind(rsp);
-	const bool parsed = parse_memory_response(replystr, p, parsedResponse)
+	const bool parsed = parse_memory_response(replystr, p, parsedResponse);
 	return parsed;
 }
 
@@ -495,8 +484,8 @@ bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_chan
 // 	sett("get_current_memory");
 
 	size_t p = replystr.rfind(rsp);
-	const MemoryResponse parsedResponse;
-	const bool parsed = parse_memory_response(replystr, p, parsedResponse)
+    MemoryResponse parsedResponse;
+	const bool parsed = parse_memory_response(replystr, p, parsedResponse);
     if (p != std::string::npos) {
         memory_channel_id_str = parsedResponse.ChannelNum;
         memory_channel_ = std::stoi(memory_channel_id_str);
@@ -506,9 +495,9 @@ bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_chan
             in_memory_mode_ = true;
         }
  	}
-	
+
 	if (in_memory_mode_) {
-		memory_channel_tag = get_memory_tag(const std::string memory_channel_id_str_)
+		memory_channel_tag = get_memory_tag(parsedResponse.ChannelNum);
 	}
 
  	in_memory_mode = in_memory_mode_;
