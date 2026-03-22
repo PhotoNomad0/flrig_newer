@@ -397,6 +397,24 @@ void RIG_FTX1::change_channel(bool channel_up)
 	}
 }
 
+void RIG_FTX1::scan_operation(bool start)
+{
+	if (inuse == onA)
+		cmd = "SC0";
+	else // onB
+		cmd = "SC1";
+
+	const char * operation = start ? "1" : "0";
+
+	cmd = cmd + operation + ";";
+	sendCommand(cmd);
+	if (start) {
+		sett("scan_operation START");
+	} else {
+		sett("scan_operation STOP");
+	}
+}
+
 void RIG_FTX1::power(bool on)
 {
 	cmd = on ? "PS1;" : "PS0;";
@@ -408,6 +426,7 @@ void RIG_FTX1::power(bool on)
 		sett("power off");
 	}
 }
+
 
 /**
  * Removes leading and trailing whitespace from a string.
@@ -461,14 +480,20 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
 	//			TRACE_STREAM(1, "get_current_memory_tag() trimmed memory_channel_tag='" << memory_channel_tag << "'");
 	if (memory_channel_tag.empty()) {
 		std::string tag = memory_channel_id_str; // default
-		int channel_number = std::stoi(memory_channel_id_str);
-		if (channel_number >= 50001 && channel_number <= 50005) {
-			tag = "60m ch" + std::to_string(channel_number - 50000) + " (USB)";
-		} else if (channel_number >= 50006 && channel_number <= 50010) {
-			tag = "60m ch" + std::to_string(channel_number - 50005) + " (CW-U)";
-		} else if (channel_number >= 50011 && channel_number <= 50015) {
-			tag = "60m ch" + std::to_string(channel_number - 50010) + " (DATA-U)";
+		try {
+			int channel_number = std::stoi(memory_channel_id_str_);
+			if (channel_number >= 50001 && channel_number <= 50005) {
+				tag = "60m ch" + std::to_string(channel_number - 50000) + " (USB)";
+			} else if (channel_number >= 50006 && channel_number <= 50010) {
+				tag = "60m ch" + std::to_string(channel_number - 50005) + " (CW-U)";
+			} else if (channel_number >= 50011 && channel_number <= 50015) {
+				tag = "60m ch" + std::to_string(channel_number - 50010) + " (DATA-U)";
+			}
+		} catch (const std::exception& e) {
+			// Handle invalid conversion - keep default tag as memory_channel_id_str
+			TRACE_STREAM(1, "get_current_memory_tag() exception converting memory_channel_id_str='" << memory_channel_id_str << "', exception=" << e.what());
 		}
+
 		memory_channel_tag = tag;
 		//				TRACE_STREAM(1, "get_current_memory_tag() fall back to using memory_channel_id_str=" << memory_channel_id_str);
 	}

@@ -792,6 +792,7 @@ double vfo_;
 	virtual void vfo_mem_toggle() {}
 	virtual void power_off() {}
 	virtual void change_channel(bool channel_up) {}
+	virtual void scan_operation(bool start) {}
 	virtual void power(bool on) {}
     virtual std::vector<MemoryResponse> get_memory_channels() { return std::vector<MemoryResponse>(); }
 	virtual bool get_current_memory(int &memory_channel, std::string &memory_channel_tag) { return false; }

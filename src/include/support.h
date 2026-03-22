@@ -318,7 +318,7 @@ extern void synchronize_now();
 extern void vfo_mem_toggle_now();
 extern void power_off_now();
 extern void channel_up_down_now(void *);
-extern void channel_down_now();
+extern void scan_stop_start_now(void *);
 extern void saveChannels(std::vector<MemoryResponse> memories);
 
 // Display Dialog

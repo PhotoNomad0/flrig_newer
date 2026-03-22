@@ -1819,11 +1819,11 @@ Fl_Double_Window *tabs_window()
 			btn_channel_up_dn->tooltip(_("Move Channel Number UP, or DOWN on SHIFT"));
 			btn_channel_up_dn->callback((Fl_Callback*)cb_btn_channel_up_dn);
 
-			btn_channel_down = new Fl_Button(100, 60, 100, 22, _("Channel DOWN"));
-			btn_channel_down->tooltip(_("Move down to lower Channel Number"));
-			btn_channel_down->callback((Fl_Callback*)cb_btn_channel_down);
+			btn_scan_stop_start = new Fl_Button(100, 60, 100, 22, _("Scan STOP/START"));
+			btn_scan_stop_start->tooltip(_("Start/Stop Channel Scan"));
+			btn_scan_stop_start->callback((Fl_Callback*)cb_btn_scan_stop_start);
 
-			channel_selector = new Fl_ComboBox(215, 35, 100, 22, _("Channel"));
+			channel_selector = new Fl_ComboBox(320, 35, 100, 22, _("Channel"));
 			channel_selector->tooltip(_("Select Channel"));
 			channel_selector->box(FL_NO_BOX);
 			channel_selector->color(FL_BACKGROUND2_COLOR);
@@ -1838,7 +1838,7 @@ Fl_Double_Window *tabs_window()
 			channel_selector->readonly();
 			channel_selector->end();
 
-			label_mem_channel = new Fl_Box(320, 60, 90, 22, _("CHANNEL"));
+			label_mem_channel = new Fl_Box(320, 60, 100, 22, _("CHANNEL"));
 			label_mem_channel->box(FL_DOWN_BOX);
 			label_mem_channel->color(FL_WHITE);
 			label_mem_channel->align(FL_ALIGN_CENTER);

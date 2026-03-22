@@ -172,6 +172,7 @@ public:
 	virtual void get_band_selection(int v);
     virtual void vfo_mem_toggle();
 	virtual void change_channel(bool channel_up);
+	virtual void scan_operation(bool start);
 	virtual void power(bool on);
 
 	void get_nr_min_max_step(int &min, int &max, int &step) {

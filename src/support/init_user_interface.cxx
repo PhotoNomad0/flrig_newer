@@ -2323,7 +2323,7 @@ void TRACED(init_ftx1_tab)
         trace(1, "init_ftx1_tab() - has_vfo_mem support");
         btn_vfo_mem->show();
         btn_channel_up_dn->show();
-        btn_channel_down->show();
+        btn_scan_stop_start->show();
 
         // get list of memories from rig and add to channel selector combo box
         std::vector<MemoryResponse> memories = selrig->get_memory_channels();

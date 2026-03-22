@@ -4102,8 +4102,8 @@ void power_off( void *) {
 	selrig->power(false);
 }
 
-void channel_down(void *) {
-	trace(1, "channel_down()");
+void scan_stop_start(void *) {
+	trace(1, "scan_stop_start()");
 	selrig->change_channel(false);
 }
 
@@ -4119,14 +4119,16 @@ void TRACED(power_off_now)
 
 void TRACED(channel_up_down_now, void *d)
 	size_t shift = reinterpret_cast<size_t>(d);
-	bool shift_up = (shift != 0);
-	TRACE_STREAM(1, "channel_up_down_now(): shift_up=" << shift_up);
-	selrig->change_channel(shift_up);
+	bool shift_down = (shift != 0);
+	TRACE_STREAM(1, "channel_up_down_now(): shift_down=" << shift_down);
+	selrig->change_channel(!shift_down);
 }
 
-void TRACED(channel_down_now)
-	Fl::remove_timeout(channel_down);
-	Fl::add_timeout(0, channel_down);
+void TRACED(scan_stop_start_now, void *d)
+	size_t shift = reinterpret_cast<size_t>(d);
+	bool shift_start = (shift != 0);
+	TRACE_STREAM(1, "scan_stop_start_now(): shift_start=" << shift_start);
+	selrig->scan_operation(shift_start);
 }
 
 void TRACED(start_commands)
