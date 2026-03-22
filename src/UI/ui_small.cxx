@@ -1815,9 +1815,9 @@ Fl_Double_Window *tabs_window()
 			btn_power_off->tooltip(_("Toggle between VFO and MEM"));
 			btn_power_off->callback((Fl_Callback*)cb_btn_power_off);
 
-			btn_channel_up = new Fl_Button(100, 35, 100, 22, _("Channel UP"));
-			btn_channel_up->tooltip(_("Move up to greater Channel Number"));
-			btn_channel_up->callback((Fl_Callback*)cb_btn_channel_up);
+			btn_channel_up_dn = new Fl_Button(100, 35, 100, 22, _("Channel UP/DN"));
+			btn_channel_up_dn->tooltip(_("Move Channel Number UP, or DOWN on SHIFT"));
+			btn_channel_up_dn->callback((Fl_Callback*)cb_btn_channel_up_dn);
 
 			btn_channel_down = new Fl_Button(100, 60, 100, 22, _("Channel DOWN"));
 			btn_channel_down->tooltip(_("Move down to lower Channel Number"));

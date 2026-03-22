@@ -4102,11 +4102,6 @@ void power_off( void *) {
 	selrig->power(false);
 }
 
-void channel_up(void *) {
-	trace(1, "channel_up()");
-	selrig->change_channel(true);
-}
-
 void channel_down(void *) {
 	trace(1, "channel_down()");
 	selrig->change_channel(false);
@@ -4122,9 +4117,11 @@ void TRACED(power_off_now)
 	Fl::add_timeout(0, power_off);
 }
 
-void TRACED(channel_up_now)
-	Fl::remove_timeout(channel_up);
-	Fl::add_timeout(0, channel_up);
+void TRACED(channel_up_down_now, void *d)
+	size_t shift = reinterpret_cast<size_t>(d);
+	bool shift_up = (shift != 0);
+	TRACE_STREAM(1, "channel_up_down_now(): shift_up=" << shift_up);
+	selrig->change_channel(shift_up);
 }
 
 void TRACED(channel_down_now)
