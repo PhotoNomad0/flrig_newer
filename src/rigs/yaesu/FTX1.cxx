@@ -460,7 +460,16 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
 
 	//			TRACE_STREAM(1, "get_current_memory_tag() trimmed memory_channel_tag='" << memory_channel_tag << "'");
 	if (memory_channel_tag.empty()) {
-		memory_channel_tag = memory_channel_id_str;
+		std::string tag = memory_channel_id_str; // default
+		int channel_number = std::stoi(memory_channel_id_str);
+		if (channel_number >= 50001 && channel_number <= 50005) {
+			tag = "60m ch" + std::to_string(channel_number - 50000) + " (USB)";
+		} else if (channel_number >= 50006 && channel_number <= 50010) {
+			tag = "60m ch" + std::to_string(channel_number - 50005) + " (CW-U)";
+		} else if (channel_number >= 50011 && channel_number <= 50015) {
+			tag = "60m ch" + std::to_string(channel_number - 50010) + " (DATA-U)";
+		}
+		memory_channel_tag = tag;
 		//				TRACE_STREAM(1, "get_current_memory_tag() fall back to using memory_channel_id_str=" << memory_channel_id_str);
 	}
 	return memory_channel_tag;
@@ -643,6 +652,35 @@ bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_chan
  	memory_channel = memory_channel_;
 	memory_channel_tag_ = memory_channel_tag;
  	return in_memory_mode_;
+}
+
+/**
+ * Selects a specific memory channel on the transceiver.
+ *
+ * @param channel The memory channel number to select (1-9999 for regular channels,
+ *                50000-50020 for 60m channels)
+ *
+ * This function sends the MC (Memory Channel) command to the transceiver to recall
+ * a specific memory channel. The command format differs based on which VFO is active:
+ * - MC0 for VFO A (when inuse == onA)
+ * - MC1 for VFO B (when inuse == onB)
+ *
+ * The channel number is formatted as a 5-digit zero-padded string and appended to
+ * the MC command before transmission.
+ */
+void RIG_FTX1::select_channel(int channel)
+{
+	sett("select_channel");
+	if (inuse == onB)
+		cmd = "MC1";
+	else // onA
+		cmd = "MC0";
+
+	char ch_buf[6] = {0};
+    std::snprintf(ch_buf, sizeof(ch_buf), "%05d", channel);
+	cmd = cmd + ch_buf + ';';
+	sendCommand(cmd);
+	TRACE_STREAM(1, "select_channel() cmd=" << cmd);
 }
 
 void RIG_FTX1::get_band_selection(int v)

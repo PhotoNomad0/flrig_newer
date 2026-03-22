@@ -2234,10 +2234,10 @@ void setChannel() {
 	guard_lock serlock( &mutex_serial );
 	unsigned int pos = channel_selector->index();
 	TRACE_STREAM(1, "setChannel() - selected index pos=" << pos );
-	if (selrig->inuse == onB) {
-		//TODO select channel
-	} else { // onA
-		//TODO select channel
+	if (pos < memories.size() && pos >= 0) {
+		MemoryResponse memory = memories[pos];
+		int channel_number = atoi(memory.ChannelNum.c_str());
+		selrig->select_channel(channel_number);
 	}
 }
 
