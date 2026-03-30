@@ -1812,19 +1812,19 @@ Fl_Double_Window *tabs_window()
 			btn_vfo_mem->callback((Fl_Callback*)cb_btn_vfo_mem);
 
 			btn_power_off = new Fl_Button(5, 60, 75, 22, _("Power Off"));
-			btn_power_off->tooltip(_("Toggle between VFO and MEM"));
+			btn_power_off->tooltip(_("Power off Rig"));
 			btn_power_off->callback((Fl_Callback*)cb_btn_power_off);
 
-			btn_channel_up_dn = new Fl_Button(85, 35, 80, 22, _("Channel UP/DN"));
-			btn_channel_up_dn->tooltip(_("Move Channel Number UP, or DOWN on SHIFT"));
+			btn_channel_up_dn = new Fl_Button(85, 35, 90, 22, _("Channel UP/SHIFT-DN"));
+			btn_channel_up_dn->tooltip(_("Move Channel Number UP, or DOWN on SHIFT click"));
 			btn_channel_up_dn->callback((Fl_Callback*)cb_btn_channel_up_dn);
 
-			btn_scan_stop_start = new Fl_Button(85, 60, 80, 22, _("Scan STOP/START"));
-			btn_scan_stop_start->tooltip(_("Start/Stop Channel Scan"));
+			btn_scan_stop_start = new Fl_Button(85, 60, 90, 22, _("Scan STOP/SHF-START"));
+			btn_scan_stop_start->tooltip(_("Stop Channel Scan/or start on SHIFT click"));
 			btn_scan_stop_start->callback((Fl_Callback*)cb_btn_scan_stop_start);
 
 			channel_selector = new Fl_ComboBox(320, 35, 100, 22, _("Channel"));
-			channel_selector->tooltip(_("Select Channel"));
+			channel_selector->tooltip(_("Select Channel from Programmed Memories"));
 			channel_selector->box(FL_NO_BOX);
 			channel_selector->color(FL_BACKGROUND2_COLOR);
 			channel_selector->selection_color(FL_BACKGROUND_COLOR);
@@ -1839,6 +1839,7 @@ Fl_Double_Window *tabs_window()
 			channel_selector->end();
 
 			label_mem_channel = new Fl_Box(320, 60, 100, 22, _("CHANNEL"));
+			label_mem_channel->tooltip(_("Show Current Channel Number"));
 			label_mem_channel->box(FL_DOWN_BOX);
 			label_mem_channel->color(FL_WHITE);
 			label_mem_channel->align(FL_ALIGN_CENTER);
