@@ -1815,11 +1815,11 @@ Fl_Double_Window *tabs_window()
 			btn_power_off->tooltip(_("Toggle between VFO and MEM"));
 			btn_power_off->callback((Fl_Callback*)cb_btn_power_off);
 
-			btn_channel_up_dn = new Fl_Button(100, 35, 100, 22, _("Channel UP/DN"));
+			btn_channel_up_dn = new Fl_Button(85, 35, 80, 22, _("Channel UP/DN"));
 			btn_channel_up_dn->tooltip(_("Move Channel Number UP, or DOWN on SHIFT"));
 			btn_channel_up_dn->callback((Fl_Callback*)cb_btn_channel_up_dn);
 
-			btn_scan_stop_start = new Fl_Button(100, 60, 100, 22, _("Scan STOP/START"));
+			btn_scan_stop_start = new Fl_Button(85, 60, 80, 22, _("Scan STOP/START"));
 			btn_scan_stop_start->tooltip(_("Start/Stop Channel Scan"));
 			btn_scan_stop_start->callback((Fl_Callback*)cb_btn_scan_stop_start);
 
