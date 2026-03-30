@@ -78,6 +78,8 @@ Fl_Group *tcpip_box = (Fl_Group *)0;
 
 Fl_Box *labelMEMORY = (Fl_Box *)0;
 Fl_Box *label_mem_channel = (Fl_Box *)0;
+Fl_ComboBox *channel_selector = (Fl_ComboBox *)0;
+
 Fl_Output *txt_encA=(Fl_Output *)0;
 
 Fl_Group *sm_grp1 = (Fl_Group *)0;
@@ -312,8 +314,8 @@ Hspinner *spnr_line_out = (Hspinner *)0;
 Fl_Light_Button *btnSpecial = (Fl_Light_Button *)0;
 Fl_Button *btn_vfo_mem = (Fl_Button *)0;
 Fl_Button *btn_power_off = (Fl_Button *)0;
-Fl_Button *btn_channel_up = (Fl_Button *)0;
-Fl_Button *btn_channel_down = (Fl_Button *)0;
+Fl_Button *btn_channel_up_dn = (Fl_Button *)0;
+Fl_Button *btn_scan_stop_start = (Fl_Button *)0;
 Fl_Check_Button *btn_ext_tuner = (Fl_Check_Button *)0;
 Fl_Check_Button *btn_xcvr_auto_on = (Fl_Check_Button *)0;
 Fl_Check_Button *btn_xcvr_auto_off = (Fl_Check_Button *)0;
@@ -778,6 +780,10 @@ static void cb_opMODE(Fl_ComboBox*, void*) {
 	setMode();
 }
 
+static void cb_channel_selector(Fl_ComboBox*, void*) {
+	setChannel();
+}
+
 static void cb_btnAttenuator(Fl_Light_Button*, void*) {
 	cbAttenuator();
 }
@@ -1038,12 +1044,18 @@ static void cb_btn_power_off( Fl_Button *o, void *) {
 	power_off_now();
 }
 
-static void cb_btn_channel_up( Fl_Button *o, void *) {
-	channel_up_now();
+static void cb_btn_channel_up_dn( Fl_Button *o, void *) {
+	bool shift = (((Fl::event_state() & FL_SHIFT) == FL_SHIFT) ||
+		(Fl::event_button() == FL_RIGHT_MOUSE));
+	size_t shift_ = shift ? 1 : 0;
+	channel_up_down_now((void *) shift_);
 }
 
-static void cb_btn_channel_down( Fl_Button *o, void *) {
-	channel_down_now();
+static void cb_btn_scan_stop_start( Fl_Button *o, void *) {
+	bool shift = (((Fl::event_state() & FL_SHIFT) == FL_SHIFT) ||
+		(Fl::event_button() == FL_RIGHT_MOUSE));
+	size_t shift_ = shift ? 1 : 0;
+	scan_stop_start_now((void *) shift_);
 }
 
 //static void cb_kxpa_enabled(Fl_Check_Button* o, void *) {

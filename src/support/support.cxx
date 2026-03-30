@@ -120,6 +120,8 @@ int meter_image = SWR_IMAGE;
 
 bool xcvr_online = false;
 
+std::vector<MemoryResponse> memories;
+
 // meter values passed to display functions
 
 double smtrval = 0;
@@ -341,11 +343,13 @@ void read_vfo()
 // 			TRACE_STREAM(1, "read_vfo() - get_current_memory tag_=" << tag_ );
 			label_mem_channel->label(tag_);
 			label_mem_channel->redraw_label();
+			channel_selector->show();
 		} else  {
 			labelMEMORY->hide();
 			label_mem_channel->label("");
 			label_mem_channel->redraw_label();
 			label_mem_channel->hide();
+			channel_selector->hide();
 		}
 	}
 
@@ -2222,6 +2226,21 @@ void TRACED ( updateBandwidthControl, void *d )
 //	}
 }
 
+void saveChannels(std::vector<MemoryResponse> memories_) {
+	memories = memories_;
+}
+
+void setChannel() {
+	guard_lock serlock( &mutex_serial );
+	unsigned int pos = channel_selector->index();
+	TRACE_STREAM(1, "setChannel() - selected index pos=" << pos );
+	if (pos < memories.size() && pos >= 0) {
+		MemoryResponse memory = memories[pos];
+		int channel_number = atoi(memory.ChannelNum.c_str());
+		selrig->select_channel(channel_number);
+	}
+}
+
 void setMode()
 {
 	guard_lock serlock( &mutex_serial );
@@ -4083,13 +4102,8 @@ void power_off( void *) {
 	selrig->power(false);
 }
 
-void channel_up(void *) {
-	trace(1, "channel_up()");
-	selrig->change_channel(true);
-}
-
-void channel_down(void *) {
-	trace(1, "channel_down()");
+void scan_stop_start(void *) {
+	trace(1, "scan_stop_start()");
 	selrig->change_channel(false);
 }
 
@@ -4103,14 +4117,18 @@ void TRACED(power_off_now)
 	Fl::add_timeout(0, power_off);
 }
 
-void TRACED(channel_up_now)
-	Fl::remove_timeout(channel_up);
-	Fl::add_timeout(0, channel_up);
+void TRACED(channel_up_down_now, void *d)
+	size_t shift = reinterpret_cast<size_t>(d);
+	bool shift_down = (shift != 0);
+	TRACE_STREAM(1, "channel_up_down_now(): shift_down=" << shift_down);
+	selrig->change_channel(!shift_down);
 }
 
-void TRACED(channel_down_now)
-	Fl::remove_timeout(channel_down);
-	Fl::add_timeout(0, channel_down);
+void TRACED(scan_stop_start_now, void *d)
+	size_t shift = reinterpret_cast<size_t>(d);
+	bool shift_start = (shift != 0);
+	TRACE_STREAM(1, "scan_stop_start_now(): shift_start=" << shift_start);
+	selrig->scan_operation(shift_start);
 }
 
 void TRACED(start_commands)

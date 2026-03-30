@@ -67,6 +67,20 @@ extern const char *szbtnlabel;
 
 struct meterpair {float mtr; float val;};
 
+struct MemoryResponse {
+    std::string ChannelNum;  // channel number (5 bytes)
+    std::string Frequency;  // frequency (9 bytes)
+    std::string Clarifier;  // clarifier (5 bytes)
+    std::string RxClarifier;  // RX clarifier (1 byte)
+    std::string TxClarifier;  // TX clarifier (1 byte)
+    std::string Mode;  // mode (1 byte)
+    std::string VfoMem;  // VFO/memory mode (1 byte)
+    std::string RepeaterMode;  // repeater mode (1 byte)
+    std::string Shift; // shift (1 byte)
+    std::string Tag;
+};
+
+
 struct XCVR_STATE {
 	unsigned long long freq;
 	int  imode;
@@ -778,8 +792,12 @@ double vfo_;
 	virtual void vfo_mem_toggle() {}
 	virtual void power_off() {}
 	virtual void change_channel(bool channel_up) {}
+	virtual void scan_operation(bool start) {}
 	virtual void power(bool on) {}
-	virtual bool get_current_memory(int &memory_channel, std::string &memory_channel_tag){return false;}
+    virtual std::vector<MemoryResponse> get_memory_channels() { return std::vector<MemoryResponse>(); }
+	virtual bool get_current_memory(int &memory_channel, std::string &memory_channel_tag) { return false; }
+	virtual void select_channel(int channel) {}
+
 	virtual void set_xcvr_auto_on() {}
 	virtual void set_xcvr_auto_off() {}
 

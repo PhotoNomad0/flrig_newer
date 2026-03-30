@@ -161,10 +161,18 @@ public:
 	void set_break_in();
 	int  get_break_in();
 
+    virtual std::vector<MemoryResponse> get_memory_channels();
+    std::vector<MemoryResponse> get_memory_range(int start_channel, int end_channel);
+    std::string get_memory_tag(const std::string memory_channel_id_str_);
+    bool parse_memory_response(const std::string replystr, const size_t offset, MemoryResponse &parsedResponse);
+    bool get_memory_config(const std::string memory_channel_id_str_, MemoryResponse &parsedResponse);
+	virtual void select_channel(int channel);
+
     virtual bool get_current_memory(int &memory_channel, std::string &memory_channel_tag);
 	virtual void get_band_selection(int v);
     virtual void vfo_mem_toggle();
 	virtual void change_channel(bool channel_up);
+	virtual void scan_operation(bool start);
 	virtual void power(bool on);
 
 	void get_nr_min_max_step(int &min, int &max, int &step) {
