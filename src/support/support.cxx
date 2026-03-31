@@ -330,26 +330,33 @@ void read_vfo()
 		std::string memory_channel_tag = "";
 		bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
 		if (in_memory_mode) {
-			labelMEMORY->show();
-			txt_xcvr_synch->hide();
-			label_mem_channel->show();
+			if (labelMEMORY) labelMEMORY->show();
+			if (txt_xcvr_synch) txt_xcvr_synch->hide();
+			if (label_mem_channel) label_mem_channel->show();
 // 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel=" << memory_channel );
 			std::string memory_channel_str = std::to_string(memory_channel);
 // 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
 
-			labelMEMORY->label(memory_channel_str.c_str());
-			labelMEMORY->redraw_label();
+            if (labelMEMORY) {
+                labelMEMORY->label(memory_channel_str.c_str());
+                labelMEMORY->redraw_label();
+			}
+
 			snprintf(tag_, sizeof(tag_), "%s", memory_channel_tag.c_str());
 // 			TRACE_STREAM(1, "read_vfo() - get_current_memory tag_=" << tag_ );
-			label_mem_channel->label(tag_);
-			label_mem_channel->redraw_label();
-			channel_selector->show();
+            if (label_mem_channel) {
+                label_mem_channel->label(tag_);
+                label_mem_channel->redraw_label();
+			}
+            if (channel_selector) channel_selector->show();
 		} else  {
 			labelMEMORY->hide();
-			label_mem_channel->label("");
-			label_mem_channel->redraw_label();
-			label_mem_channel->hide();
-			channel_selector->hide();
+			if (label_mem_channel) {
+                label_mem_channel->label("");
+                label_mem_channel->redraw_label();
+                label_mem_channel->hide();
+			}
+			if (channel_selector) channel_selector->hide();
 		}
 	}
 
@@ -648,8 +655,10 @@ void read_voltmeter()
 int tunerval = 0;
 void update_UI_TUNER(void *)
 {
-	btn_tune_on_off->value(tunerval);
-	btn_tune_on_off->redraw();
+    if (btn_tune_on_off) {
+        btn_tune_on_off->value(tunerval);
+        btn_tune_on_off->redraw();
+	}
 }
 
 void read_tuner()
@@ -752,8 +761,10 @@ void update_noise(void *d)
 	btnNOISE->value(progStatus.noise);
 	btnNOISE->redraw_label();
 	btnNOISE->redraw();
-	sldr_nb_level->value(progStatus.nb_level);
-	sldr_nb_level->redraw();
+	if (sldr_nb_level) {
+        sldr_nb_level->value(progStatus.nb_level);
+        sldr_nb_level->redraw();
+	}
 }
 
 void read_noise()
@@ -2232,12 +2243,14 @@ void saveChannels(std::vector<MemoryResponse> memories_) {
 
 void setChannel() {
 	guard_lock serlock( &mutex_serial );
-	unsigned int pos = channel_selector->index();
-	TRACE_STREAM(1, "setChannel() - selected index pos=" << pos );
-	if (pos < memories.size() && pos >= 0) {
-		MemoryResponse memory = memories[pos];
-		int channel_number = atoi(memory.ChannelNum.c_str());
-		selrig->select_channel(channel_number);
+	if (channel_selector) {
+        unsigned int pos = channel_selector->index();
+        TRACE_STREAM(1, "setChannel() - selected index pos=" << pos );
+        if (pos < memories.size() && pos >= 0) {
+            MemoryResponse memory = memories[pos];
+            int channel_number = atoi(memory.ChannelNum.c_str());
+            selrig->select_channel(channel_number);
+        }
 	}
 }
 
@@ -4576,10 +4589,11 @@ void cbNoise()
 
     if (selrig->name_ == rig_FTX1.name_) {
 
-        vfo->nb_level = progStatus.nb_level = selrig->get_nb_level();
-        vfo->noise = progStatus.noise = vfo->nb_level > 0;
-//         TRACE_STREAM(1, "cbNoise(): FTX1, vfo->nb_level=" << vfo->nb_level);
-
+        if (vfo) {
+            vfo->nb_level = progStatus.nb_level = selrig->get_nb_level();
+            vfo->noise = progStatus.noise = vfo->nb_level > 0;
+    //         TRACE_STREAM(1, "cbNoise(): FTX1, vfo->nb_level=" << vfo->nb_level);
+        }
     } else {
 
         get = selrig->get_noise();
