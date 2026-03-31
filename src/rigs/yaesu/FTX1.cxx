@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <cstring>
 
 #include "yaesu/FTX1.h"
 #include "debug.h"
@@ -845,7 +846,7 @@ int RIG_FTX1::get_vfoAorB()
 	gett("get vfoAorB()");
 	size_t p = replystr.rfind(rsp);
 
-	if (p != std::string::npos)
+	if (p != std::string::npos && p + 2 < replystr.length())
 		inuse = (replystr[p + 2] == '1') ? onB : onA;
 	return inuse;
 }
@@ -904,6 +905,7 @@ int RIG_FTX1::get_split()
 	gett("get split()");
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return 0;
+	if (p + 2 >= replystr.length()) return 0;
 	int split = replystr[p+2] - '0';
 
 	return (split > 0);
@@ -919,14 +921,20 @@ void RIG_FTX1::swapAB()
 
 int RIG_FTX1::get_smeter()
 {
-	cmd = rsp = "SM0";
+	if (inuse == onA)
+		cmd = rsp = "SM0";
+	else // onB
+		cmd = rsp = "SM1";
+		
 	cmd += ';';
 	wait_char(';', 7, 100, "get smeter", ASC);
 
 	gett("get_smeter()");
 
 	int mtr = 0;
-	sscanf(replystr.c_str(), "SM0%d", &mtr);
+    if (replystr.rfind(rsp) == std::string::npos) return 0;
+    std::string searchStr = rsp + "%d";
+	sscanf(replystr.c_str(), searchStr.c_str(), &mtr);
 	mtr = mtr * 100.0 / 256.0;
 	return mtr;
 }
@@ -940,8 +948,10 @@ int RIG_FTX1::get_swr()
 	gett("get_swr()");
 
 	int mtr = 0, dmy = 0;
-	size_t p = replystr.rfind("RM6");
-	sscanf(&replystr[p], "RM6%3d%3d", &mtr, &dmy);
+	size_t p = replystr.rfind(rsp);
+	if (p == std::string::npos || p + 9 >= replystr.length()) return 0;
+	std::string searchStr = rsp + "%3d%3d";
+	sscanf(&replystr[p], searchStr.c_str(), &mtr, &dmy);
 
 	return mtr / 2.56;
 }
@@ -970,7 +980,7 @@ double RIG_FTX1::get_idd()
 	int mtr = 0, dmy = 0;
 	double idd = 0;
 	size_t p = replystr.rfind("RM7");
-	if (p != std::string::npos) {
+	if (p != std::string::npos && p + 9 < replystr.length()) {
 		sscanf(&replystr[p], "RM7%3d%3d", &mtr, &dmy);
 		size_t i = 0;
 		for (i = 0; i < sizeof(iddtbl) / sizeof(meterpair) - 1; i++)
@@ -998,10 +1008,10 @@ double RIG_FTX1::get_voltmeter()
 	double val = 0;
 
 	size_t p = replystr.rfind("RM8");
-	if (p != std::string::npos) {
+	if (p != std::string::npos && p + 9 < replystr.length()) {
 		sscanf(&replystr[p], "RM8%3d%3d", &mtr, &dmy);
-		// initial: val = 13.8 * mtr / 190;
-		val = 0.028 * mtr + 7.46; // through measurement
+		// previously: val = 13.8 * mtr / 190;
+		val = 0.028 * mtr + 7.46; // determined through direct measurement
 		return val;
 	}
 
@@ -1026,6 +1036,7 @@ int RIG_FTX1::get_power_out()
 
 	int mtr = 0, dmy = 0;
 	size_t p = replystr.rfind("RM5");
+	if (p == std::string::npos || p + 9 >= replystr.length()) return 0;
 
 	sscanf(&replystr[p], "RM5%3d%3d", &mtr, &dmy);
 
@@ -1052,6 +1063,8 @@ int RIG_FTX1::get_alc()
 
 	int mtr = 0, dmy = 0;
 	size_t p = replystr.rfind("RM4");
+	if (p == std::string::npos || p + 9 >= replystr.length()) return 0;
+
 	sscanf(&replystr[p], "RM4%3d%3d", &mtr, &dmy);
 
 	return (int)ceil(mtr / 2.56);
@@ -1140,6 +1153,7 @@ int RIG_FTX1::get_PTT()
 
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return ptt_;
+	if (p + 3 > replystr.length()) return ptt_;
 	ptt_ =  (replystr[p+2] != '0' ? 1 : 0);
 	return ptt_;
 }
@@ -1174,6 +1188,7 @@ int RIG_FTX1::get_tune()
 
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return 0;
+	if (p + 4 >= replystr.length()) return 0;
 	if (replystr[p+4] == '0') return 0;
 	return 1;
 }
@@ -1228,6 +1243,7 @@ int RIG_FTX1::get_agc()
 
 	size_t p = replystr.rfind(rsp);
     if (p == std::string::npos) return agcval;
+	if (p + 3 >= replystr.length()) return agcval;
 
 	agcval = replystr[p+3] - '0';
 	if (agcval > 4) {
@@ -1345,7 +1361,7 @@ int RIG_FTX1::get_preamp()
 	gett("get_preamp()");
 
 	size_t p = replystr.rfind(rsp);
-	if (p != std::string::npos)
+	if (p != std::string::npos && p + 4 < replystr.length())
 		preamp_state = replystr[p+3] - '0';
 	return preamp_state;
 }
@@ -1448,15 +1464,13 @@ int RIG_FTX1::get_modeA()
 	gett("get_modeA()");
 
 	size_t p = replystr.rfind(rsp);
-	if (p != std::string::npos) {
-		if (p + 3 < replystr.length()) {
-			int md = replystr[p+3];
-			int n = 0;
-			for (n = 0; n < NUM_MODES; n++)
-				if (md == FTX1_mode_chr[n])
-					break;
-			modeA = n;
-		}
+	if (p != std::string::npos && p + 3 < replystr.length()) {
+		int md = replystr[p+3];
+		int n = 0;
+		for (n = 0; n < NUM_MODES; n++)
+			if (md == FTX1_mode_chr[n])
+				break;
+		modeA = n;
 	}
 	adjust_bandwidth(modeA);
 	return modeA;
@@ -1536,6 +1550,7 @@ int RIG_FTX1::get_bwA()
 
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return bwA;
+	if (p + 6 >= replystr.length()) return bwA;
 
 	replystr[p+6] = 0;
 	int bw_idx = fm_decimal(replystr.substr(p+4), 2);
@@ -1589,10 +1604,10 @@ int RIG_FTX1::get_bwB()
 	size_t p = replystr.rfind(rsp);
 	p = replystr.find(rsp);
 	if (p == std::string::npos) return bwB;
+	if (p + 6 >= replystr.length()) return bwB;
 
 	replystr[p+6] = 0;
 	int bw_idx = fm_decimal(replystr.substr(p+4),2);
-
 	const int *idx = bw_vals_;
 	int i = 0;
 	while (*idx != WVALS_LIMIT) {
@@ -1659,7 +1674,7 @@ bool RIG_FTX1::get_if_shift(int &val)
 
 	size_t p = replystr.rfind(rsp);
 	val = progStatus.shift_val;
-	if (p == std::string::npos) return progStatus.shift;
+	if (p == std::string::npos || p + 8 >= replystr.length()) return progStatus.shift;
 	val = atoi(&replystr[p+5]);
 	if (replystr[p+4] == '-') val = -val;
 	return (val != 0);
@@ -1724,7 +1739,7 @@ bool  RIG_FTX1::get_notch(int &val)
 	rsp = "BP";
 	wait_char(';', 8, 100, "get notch on/off", ASC);
 	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) return ison;
+	if (p == std::string::npos || p + 6 >= replystr.length()) return ison;
 
 	gett("get_notch()");
 
@@ -1739,7 +1754,7 @@ bool  RIG_FTX1::get_notch(int &val)
 	gett("get_notch_val()");
 
 	p = replystr.rfind(rsp);
-	if (p == std::string::npos)
+	if (p == std::string::npos || p + 7 >= replystr.length())
 		val = 10;
 	else
 		val = fm_decimal(replystr.substr(p+4), 3) * 10;
@@ -1774,6 +1789,7 @@ int  RIG_FTX1::get_auto_notch()
 
 	size_t p = replystr.rfind("BC");
 	if (p == std::string::npos) return 0;
+	if (p + 3 >= replystr.length()) return 0;
 	if (replystr[p+3] == '1') return 1;
 	return 0;
 }
@@ -1820,8 +1836,8 @@ int RIG_FTX1::get_nb_level()
 
  	gett("get_nb_level()");
 
- 	size_t p = replystr.rfind(rsp);
- 	if (p == std::string::npos) return nb_state;
+	size_t p = replystr.rfind(rsp);
+	if (p == std::string::npos || p + 5 >= replystr.length()) return nb_state;
 
     // Parse 2 digits starting at p+4 (i.e., replystr[p+4] and replystr[p+5])
     // Example: "NL0007;" -> nb_state = 7, "NL0010;" -> nb_state = 10
@@ -1898,6 +1914,7 @@ int RIG_FTX1::get_mic_gain()
 
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return progStatus.mic_gain;
+	if (p + 2 >= replystr.length()) return progStatus.mic_gain;
 	int val = atoi(&replystr[p+2]);
 	return val;
 }
@@ -1932,6 +1949,7 @@ int  RIG_FTX1::get_rf_gain()
 
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return progStatus.rfgain;
+	if (p + 6 > replystr.length()) return progStatus.rfgain;
 	for (int i = 3; i < 6; i++) {
 		rfval *= 10;
 		rfval += replystr[p+i] - '0';
@@ -2005,7 +2023,7 @@ void RIG_FTX1::enable_keyer()
 
 bool RIG_FTX1::set_cw_spot()
 {
-	if (vfo->imode == 2 || vfo->imode == 6) {
+	if (vfo && (vfo->imode == 2 || vfo->imode == 6)) {
 		cmd = "CS0;";
 		if (progStatus.spot_onoff) cmd[2] = '1';
 		sendCommand(cmd);
@@ -2049,7 +2067,11 @@ int RIG_FTX1::get_break_in()
 {
 	cmd = "BI;";
 	wait_char(';', 4, 100, "get break in", ASC);
-	progStatus.break_in = (replystr[2] == '1');
+	if (replystr.length() > 2) {
+		progStatus.break_in = (replystr[2] == '1');
+	} else {
+    	progStatus.break_in = false;
+	}
 	if (progStatus.break_in) {
 		break_in_label("BK-IN");
 		progStatus.cw_delay = 0;
@@ -2073,14 +2095,14 @@ void RIG_FTX1::set_noise_reduction_val(int val)
 }
 
 // DNR - NR slider value
-int  RIG_FTX1::get_noise_reduction_val()
+int RIG_FTX1::get_noise_reduction_val()
 {
 	int val = 0;
 	cmd = rsp = "RL0";
 	cmd.append(";");
 	wait_char(';',6, 100, "GET noise reduction val", ASC);
 	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) return val;
+	if (p == std::string::npos || p + 5 >= replystr.length()) return val;
 	val = atoi(&replystr[p+3]);
 	return val;
 }
@@ -2118,6 +2140,8 @@ int  RIG_FTX1::get_noise_reduction()
 // ---------------------------------------------------------------------
 void RIG_FTX1::sync_date(char *dt)
 {
+    if (!dt) return;
+	
 	cmd.assign("DT0");
 	cmd.append(dt);
 	cmd += ';';
@@ -2131,6 +2155,8 @@ void RIG_FTX1::sync_date(char *dt)
 // ---------------------------------------------------------------------
 void RIG_FTX1::sync_clock(char *tm)
 {
+    if (!tm || std::strlen(tm) < 8) return;
+
 	cmd.assign("DT1");
 	cmd += tm[0]; cmd += tm[1];
 	cmd += tm[3]; cmd += tm[4];
@@ -2166,6 +2192,7 @@ int  RIG_FTX1::get_squelch()
 
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return progStatus.squelch;
+	if (p + 6 >= replystr.length()) return progStatus.squelch;
 	for (int i = 3; i < 6; i++) {
 		sqval *= 10;
 		sqval += replystr[p+i] - '0';
