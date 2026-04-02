@@ -4618,12 +4618,34 @@ void cbNoise()
 	update_noise( (void*)0 );
 }
 
+
+/**
+ * @brief Callback handler for noise blanker level control
+ *
+ * This function is called when the noise blanker level slider or spinner control
+ * is adjusted by the user. It handles the following:
+ *
+ * - Checks if the transceiver supports noise blanker level control
+ * - Filters out FL_LEAVE and FL_ENTER events to prevent unnecessary updates
+ * - Sets an inhibit flag during drag operations to prevent multiple rapid updates
+ * - Reads the current slider value and sends it to the transceiver
+ * - Uses mutex locking to ensure thread-safe serial communication
+ *
+ * The function implements a debouncing mechanism using the inhibit_nb_level flag
+ * to prevent flooding the serial port with commands during continuous adjustment.
+ *
+ * @note This function should only be called from the FLTK event loop
+ * @note Requires valid sldr_nb_level widget pointer
+ * @note Thread-safe via mutex_serial guard lock
+ */
 void cb_nb_level()
 {
 	if (!selrig->has_nb_level) return;
 	int set = 0;
 
 	trace(1, "cb_nb_level()");
+	set = sldr_nb_level->value();
+// 	TRACE_STREAM(1, "cb_nb_level(): sldr_nb_level->value()=" << set);
 
 	int ev = Fl::event();
 	if (ev == FL_LEAVE || ev == FL_ENTER) return;
@@ -4631,7 +4653,6 @@ void cb_nb_level()
 		inhibit_nb_level = 1;
 		return;
 	}
-	set = sldr_nb_level->value();
 	guard_lock lock(&mutex_serial, "59");
 	selrig->set_nb_level(set);
 }

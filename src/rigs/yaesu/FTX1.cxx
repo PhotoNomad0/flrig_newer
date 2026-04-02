@@ -925,7 +925,7 @@ int RIG_FTX1::get_smeter()
 		cmd = rsp = "SM0";
 	else // onB
 		cmd = rsp = "SM1";
-		
+
 	cmd += ';';
 	wait_char(';', 7, 100, "get smeter", ASC);
 
@@ -1794,23 +1794,32 @@ int  RIG_FTX1::get_auto_notch()
 	return 0;
 }
 
-// this is for setting the noise blanker NB analog level
-void RIG_FTX1::set_nb_level(int val)
+// this is for setting the noise blanker NB analog level.  Combines val with nb_state to send to radio
+void RIG_FTX1::set_nb_level(int val) // 0 to 100%
 {
+    int nb_level = (val + 5) / 10; // divide by 10 and round
+	if (nb_level < 0) {
+		nb_level = 0;
+	} else if (nb_level > 10) {
+		nb_level = 10;
+	}
+	int newVal = nb_level;
+
  	if (inuse == onB)
  		cmd = "NL10";
  	else
  		cmd = "NL00";
 
-	if (nb_state < 0) {
-		nb_state = 0;
-	} else if (nb_state > 10) {
-		nb_state = 10;
-		noise_blanker_label(nb_label(), true);
-	}
+    if (nb_state == 0 || nb_level == 0) {
+        newVal = 0;
+        nb_state = 0;
+        noise_blanker_label("NB", false);
+    } else {
+        noise_blanker_label(nb_label(), true);
+    }
 
     char buf[3];
-    std::snprintf(buf, sizeof(buf), "%02d", nb_state);
+    std::snprintf(buf, sizeof(buf), "%02d", newVal);
 	cmd = cmd + buf + ";";
 
     // trace the command
@@ -1842,54 +1851,41 @@ int RIG_FTX1::get_nb_level()
     // Parse 2 digits starting at p+4 (i.e., replystr[p+4] and replystr[p+5])
     // Example: "NL0007;" -> nb_state = 7, "NL0010;" -> nb_state = 10
     std::string stateStr = replystr.substr(4, 2);
-    nb_state = sToInt(stateStr);
+    nb_level = sToInt(stateStr);
 
-// trace the command
-//     std::stringstream s;
-//     s << " response" << rsp << ", stateStr=" << stateStr << ", nb_state=" << nb_state;
-//     set_trace(3,"get_noise", cmd.c_str(), replystr.c_str());
-//     set_trace(2,"get_noise2", s.str().c_str());
-
- 	if (nb_state) {
- 	    if (nb_state > 10) {
- 	        nb_state = 10;
+ 	if (nb_level > 0) {
+ 	    if (nb_level > 10) {
+ 	        nb_level = 10;
  	    }
- 		noise_blanker_label(nb_labels_[nb_state].c_str(), true);
- 	} else
+ 	    nb_state = 1;
+ 		noise_blanker_label(nb_label(), true);
+ 	} else {
+     	nb_state = 0;
  		noise_blanker_label("NB", false);
+    }
 
- 	return nb_state;
+ 	return nb_level;
 }
 
-// this is for toggling the noise blanker (NB), each call cycles to next blanking level
-void RIG_FTX1::set_noise(bool b)
+// this is for toggling the noise blanker (NB) on/off
+void RIG_FTX1::set_noise(bool b) // b==0 is off
  {
-    // start with last level and move to next state - jump by 3's
-	if (nb_state == 0) {
-		nb_state = 1; // switch from off to on at level 1
-		noise_blanker_label(nb_label(), true);
-	} else if (nb_state < 8) {
-		nb_state += 3; // bump up by 3
-		noise_blanker_label(nb_label(), true);
-	} else if (nb_state < 10) {
-		nb_state += 1; // bump up by 1
-		noise_blanker_label(nb_label(), true);
+	if (nb_state == 0) { // switch from off to on at last nb_level
+		nb_state = 1;
 	} else {
-		nb_state = 0; // switch off
-		noise_blanker_label(nb_label(), false);
+		nb_state = 0;
+		noise_blanker_label("NB", false);
 	}
 
-    this->set_nb_level(nb_state);
+    this->set_nb_level(nb_level); // send state and level to radio
  }
 
  // this is for the noise blanker NB - boolean true if on
  int RIG_FTX1::get_noise()
  {
  	gett("get_noise()");
-
  	int noiseLevel = this->get_nb_level();
-
- 	return noiseLevel > 0; // return boolean for on/off
+ 	return nb_state; // return 0 for off and 1 for on
  }
 
 // val 0 .. 100
@@ -2141,7 +2137,7 @@ int  RIG_FTX1::get_noise_reduction()
 void RIG_FTX1::sync_date(char *dt)
 {
     if (!dt) return;
-	
+
 	cmd.assign("DT0");
 	cmd.append(dt);
 	cmd += ';';
