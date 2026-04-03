@@ -1816,7 +1816,7 @@ const char *RIG_FTX1::nb_label() {
         }
 
         currentLabel = nb_labels_.at(level);
-        TRACE_STREAM(1, "nb_label() newLabel=''" << currentLabel << "'', nb_level='" << nb_level << ", nb_state=" << nb_state);
+//         TRACE_STREAM(1, "nb_label() newLabel=''" << currentLabel << "'', nb_level='" << nb_level << ", nb_state=" << nb_state);
 
         return currentLabel.c_str();
     } catch (...) {
@@ -1883,7 +1883,7 @@ int RIG_FTX1::get_nb_level()
     std::string stateStr = replystr.substr(4, 2);
     int level = sToInt(stateStr);
 
-    TRACE_STREAM(1, "get_nb_level() replystr='" << replystr << "', level=" << level);
+//     TRACE_STREAM(1, "get_nb_level() replystr='" << replystr << "', level=" << level);
 
  	if (level > 0) {
  	    if (level > 10) {
@@ -1895,9 +1895,9 @@ int RIG_FTX1::get_nb_level()
 
         if (nb_state == 0) {
             nb_state = 1;  // if greater than zero NB is actually on
-            TRACE_STREAM(1, "get_nb_level() level greater than 0, forcing nb_state on, nb_level=" << nb_level << ", nb_state=" << nb_state);
+//             TRACE_STREAM(1, "get_nb_level() level greater than 0, forcing nb_state on, nb_level=" << nb_level << ", nb_state=" << nb_state);
         } else {
-            TRACE_STREAM(1, "get_nb_level() level greater than 0, nb_level=" << nb_level << ", nb_state=" << nb_state);
+//             TRACE_STREAM(1, "get_nb_level() level greater than 0, nb_level=" << nb_level << ", nb_state=" << nb_state);
         }
  	} else { // not greater than zero, so NB currently off
  	    level = 0;
@@ -1905,13 +1905,13 @@ int RIG_FTX1::get_nb_level()
 
      	if (nb_state != 0) { // saved nb_state was on, but actually is off
             nb_state = 0;
-            TRACE_STREAM(1, "get_nb_level() level 0 so using previous nb_level and nb_state forced on, nb_level=" << nb_level << ", nb_state=" << nb_state);
+//             TRACE_STREAM(1, "get_nb_level() level 0 so using previous nb_level and nb_state forced on, nb_level=" << nb_level << ", nb_state=" << nb_state);
      	} else {
-            TRACE_STREAM(1, "get_nb_level() level 0 so using previous nb_level, nb_state already off, nb_level=" << nb_level << ", nb_state=" << nb_state);
+//             TRACE_STREAM(1, "get_nb_level() level 0 so using previous nb_level, nb_state already off, nb_level=" << nb_level << ", nb_state=" << nb_state);
      	}
         if (nb_level < 1) { // sanity check
             nb_level = 1;
-            TRACE_STREAM(1, "get_nb_level() sanity check for nb_level, setting to 1, nb_level=" << nb_level << ", nb_state=" << nb_state);
+//             TRACE_STREAM(1, "get_nb_level() sanity check for nb_level, setting to 1, nb_level=" << nb_level << ", nb_state=" << nb_state);
         }
  		noise_blanker_label("NB", false);
     }
@@ -1926,23 +1926,23 @@ void RIG_FTX1::set_noise(bool b) // b==0 is off
 
 	if (b == 0) { // b is off
 	    if (nb_state == 0) {
-            TRACE_STREAM(1, "set_noise(" << b <<") nb_state already off, nb_level=" << nb_level << ", nb_state=" << nb_state);
+//             TRACE_STREAM(1, "set_noise(" << b <<") nb_state already off, nb_level=" << nb_level << ", nb_state=" << nb_state);
 	    } else {
-            TRACE_STREAM(1, "set_noise(" << b <<") nb_state was on so toggling off, nb_level=" << nb_level << ", nb_state=" << nb_state);
+//             TRACE_STREAM(1, "set_noise(" << b <<") nb_state was on so toggling off, nb_level=" << nb_level << ", nb_state=" << nb_state);
 		    nb_state = 0;
 	    }
 		noise_blanker_label("NB", false);
 	} else { // b is on
         if (nb_state == 0) {
             nb_state = 1;
-            TRACE_STREAM(1, "set_noise(" << b <<") nb_state was off so toggling on, nb_level=" << nb_level << ", nb_state=" << nb_state);
+//             TRACE_STREAM(1, "set_noise(" << b <<") nb_state was off so toggling on, nb_level=" << nb_level << ", nb_state=" << nb_state);
         } else {
-            TRACE_STREAM(1, "set_noise(" << b <<") nb_state already on, nb_level=" << nb_level << ", nb_state=" << nb_state);
+//             TRACE_STREAM(1, "set_noise(" << b <<") nb_state already on, nb_level=" << nb_level << ", nb_state=" << nb_state);
         }
 
        if (level < 1) { // sanity check
             level = 1; // has to be at least 1 for NB to be on
-            TRACE_STREAM(1, "set_noise() sanity check for nb_level, setting to 1, nb_level=" << nb_level << ", nb_state=" << nb_state);
+//             TRACE_STREAM(1, "set_noise() sanity check for nb_level, setting to 1, nb_level=" << nb_level << ", nb_state=" << nb_state);
         }
 	}
 
