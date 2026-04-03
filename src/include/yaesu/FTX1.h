@@ -134,6 +134,7 @@ public:
 		min = 1; max = 10; step = 1; }
 	void set_nb_level(int val);
 	int  get_nb_level();
+    const char *nb_label();
 
 	virtual void set_mic_gain(int val);
 	virtual int  get_mic_gain();

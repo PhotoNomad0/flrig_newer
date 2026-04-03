@@ -1794,6 +1794,34 @@ int  RIG_FTX1::get_auto_notch()
 	return 0;
 }
 
+/**
+ * Retrieves the noise blanker (NB) label based on current state.
+ *
+ * @return A C-string pointer to the noise blanker label:
+ *         - Returns the label from nb_labels_ vector corresponding to nb_state
+ *         - If nb_state is 0, returns label for level 0 (typically "NB off")
+ *         - Returns "NB" as a fallback if any exception occurs during lookup
+ *
+ * This function provides a safe way to access noise blanker labels, handling
+ * potential out-of-range errors gracefully by catching exceptions and returning
+ * a default "NB" label.
+ */
+const char *RIG_FTX1::nb_label() {
+    try {
+        int level = nb_level;
+        if (nb_state == 0) {
+            level = 0;
+        }
+
+        std::string newLabel = nb_labels_.at(nb_state);
+        TRACE_STREAM(1, "nb_label() newLabel=" << newLabel << ", nb_level='" << nb_level << ", nb_state=" << nb_state);
+
+        return newLabel.c_str();
+    } catch (...) {
+        return "NB";
+    }
+}
+
 // this is for setting the noise blanker NB analog level.  Combines val with nb_state to send to radio
 void RIG_FTX1::set_nb_level(int val) // 0 to 10
 {
