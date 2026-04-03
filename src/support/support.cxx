@@ -4645,7 +4645,7 @@ void cb_nb_level()
 
 	trace(1, "cb_nb_level()");
 	set = sldr_nb_level->value();
-// 	TRACE_STREAM(1, "cb_nb_level(): sldr_nb_level->value()=" << set);
+	TRACE_STREAM(1, "cb_nb_level(): sldr_nb_level->value()=" << set);
 
 	int ev = Fl::event();
 	if (ev == FL_LEAVE || ev == FL_ENTER) return;

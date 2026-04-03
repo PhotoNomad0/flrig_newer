@@ -1795,9 +1795,9 @@ int  RIG_FTX1::get_auto_notch()
 }
 
 // this is for setting the noise blanker NB analog level.  Combines val with nb_state to send to radio
-void RIG_FTX1::set_nb_level(int val) // 0 to 100%
+void RIG_FTX1::set_nb_level(int val) // 0 to 10
 {
-    int nb_level = (val + 5) / 10; // divide by 10 and round
+    int nb_level = val;
 	if (nb_level < 0) {
 		nb_level = 0;
 	} else if (nb_level > 10) {
@@ -1805,14 +1805,13 @@ void RIG_FTX1::set_nb_level(int val) // 0 to 100%
 	}
 	int newVal = nb_level;
 
- 	if (inuse == onB)
- 		cmd = "NL10";
- 	else
- 		cmd = "NL00";
+    if (inuse == onB)
+        cmd = "NL10";
+    else
+        cmd = "NL00";
 
-    if (nb_state == 0 || nb_level == 0) {
+    if (nb_state == 0 || newVal <= 0) {
         newVal = 0;
-        nb_state = 0;
         noise_blanker_label("NB", false);
     } else {
         noise_blanker_label(nb_label(), true);
@@ -1820,16 +1819,17 @@ void RIG_FTX1::set_nb_level(int val) // 0 to 100%
 
     char buf[3];
     std::snprintf(buf, sizeof(buf), "%02d", newVal);
-	cmd = cmd + buf + ";";
+    cmd = cmd + buf + ";";
 
-    // trace the command
-    //     std::stringstream s;
-    //     s << "final  nb_state=" << nb_state;
-    //     set_trace(3,"set_noise", cmd.c_str(), s.str().c_str());
+//     trace the command
+        std::stringstream s;
+        s << "final  nb_state=" << nb_state;
+        set_trace(3,"set_noise", cmd.c_str(), s.str().c_str());
 
- 	sendCommand (cmd);
- 	showresp(WARN, ASC, "SET NB Level", cmd, replystr);
+    sendCommand (cmd);
+    showresp(WARN, ASC, "SET NB Level", cmd, replystr);
 }
+
 
 // this is for getting the noise blanker NB analog level
 int RIG_FTX1::get_nb_level()
@@ -1851,40 +1851,79 @@ int RIG_FTX1::get_nb_level()
     // Parse 2 digits starting at p+4 (i.e., replystr[p+4] and replystr[p+5])
     // Example: "NL0007;" -> nb_state = 7, "NL0010;" -> nb_state = 10
     std::string stateStr = replystr.substr(4, 2);
-    nb_level = sToInt(stateStr);
+    int level = sToInt(stateStr);
 
- 	if (nb_level > 0) {
- 	    if (nb_level > 10) {
- 	        nb_level = 10;
+    TRACE_STREAM(1, "get_nb_level() replystr='" << replystr << "', level=" << level);
+
+ 	if (level > 0) {
+ 	    if (level > 10) {
+ 	        level = 10;
  	    }
- 	    nb_state = 1;
+
+ 	    nb_level = level; // save current value
  		noise_blanker_label(nb_label(), true);
- 	} else {
-     	nb_state = 0;
+
+        if (nb_state == 0) {
+            nb_state = 1;  // if greater than zero NB is actually on
+            TRACE_STREAM(1, "get_nb_level() level greater than 0, forcing nb_state on, nb_level='" << nb_level << ", nb_state=" << nb_state);
+        } else {
+            TRACE_STREAM(1, "get_nb_level() level greater than 0, nb_level='" << nb_level << ", nb_state=" << nb_state);
+        }
+ 	} else { // not greater than zero, so NB currently off
+ 	    level = 0;
+        // if NB toggled on we continue to use the last saved value for nb_level
+
+     	if (nb_state != 0) { // saved nb_state was on, but actually is off
+            nb_state = 0;
+            TRACE_STREAM(1, "get_nb_level() level 0 so using previous nb_level and nb_state forced on, nb_level='" << nb_level << ", nb_state=" << nb_state);
+     	} else {
+            TRACE_STREAM(1, "get_nb_level() level 0 so using previous nb_level, nb_state already off, nb_level='" << nb_level << ", nb_state=" << nb_state);
+     	}
+        if (nb_level < 1) { // sanity check
+            nb_level = 1;
+            TRACE_STREAM(1, "get_nb_level() sanity check for nb_level, setting to 1, nb_level='" << nb_level << ", nb_state=" << nb_state);
+        }
  		noise_blanker_label("NB", false);
     }
 
  	return nb_level;
 }
 
-// this is for toggling the noise blanker (NB) on/off
+// this is for setting the noise blanker (NB) state
 void RIG_FTX1::set_noise(bool b) // b==0 is off
  {
-	if (nb_state == 0) { // switch from off to on at last nb_level
-		nb_state = 1;
-	} else {
-		nb_state = 0;
+     int level = nb_level;
+
+	if (b == 0) { // b is off
+	    if (nb_state == 0) {
+            TRACE_STREAM(1, "set_noise(" << b <<") nb_state already off, nb_level='" << nb_level << ", nb_state=" << nb_state);
+	    } else {
+            TRACE_STREAM(1, "set_noise(" << b <<") nb_state was on so toggling off, nb_level='" << nb_level << ", nb_state=" << nb_state);
+		    nb_state = 0;
+	    }
 		noise_blanker_label("NB", false);
+	} else { // b is on
+        if (nb_state == 0) {
+            nb_state = 1;
+            TRACE_STREAM(1, "set_noise(" << b <<") nb_state was off so toggling on, nb_level='" << nb_level << ", nb_state=" << nb_state);
+        } else {
+            TRACE_STREAM(1, "set_noise(" << b <<") nb_state already on, nb_level='" << nb_level << ", nb_state=" << nb_state);
+        }
+
+       if (level < 1) { // sanity check
+            level = 1; // has to be at least 1 for NB to be on
+            TRACE_STREAM(1, "set_noise() sanity check for nb_level, setting to 1, nb_level='" << nb_level << ", nb_state=" << nb_state);
+        }
 	}
 
-    this->set_nb_level(nb_level); // send state and level to radio
+    this->set_nb_level(level); // send new level (and nb_state) to radio
  }
 
  // this is for the noise blanker NB - boolean true if on
  int RIG_FTX1::get_noise()
  {
  	gett("get_noise()");
- 	int noiseLevel = this->get_nb_level();
+ 	this->get_nb_level(); // get current level and update nb_state
  	return nb_state; // return 0 for off and 1 for on
  }
 
