@@ -1852,9 +1852,9 @@ void RIG_FTX1::set_nb_level(int val) // 0 to 10
     cmd = cmd + buf + ";";
 
 //     trace the command
-    std::stringstream s;
-    s << "final  nb_state=" << nb_state << ", nb_level=" << nb_level << ", parameter val=" << val;
-    set_trace(3,"set_nb_level", cmd.c_str(), s.str().c_str());
+//     std::stringstream s;
+//     s << "final  nb_state=" << nb_state << ", nb_level=" << nb_level << ", parameter val=" << val;
+//     set_trace(3,"set_nb_level", cmd.c_str(), s.str().c_str());
 
     sendCommand (cmd);
     showresp(WARN, ASC, "SET NB Level", cmd, replystr);
