@@ -490,14 +490,14 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
 {
 	cmd = rsp = "MT";
 	cmd = cmd + memory_channel_id_str_ + ';'; // add the memory channel number to the MT command to get the memory channel tag
+    memory_channel_tag = "";
 	wait_char(';', 30, 100, "get_current_memory_tag", ASC);
 	size_t p = replystr.rfind(rsp);
 	if (p != std::string::npos) {
 		memory_channel_tag = replystr.substr(p + 7, 12);
-	}
 	//			TRACE_STREAM(1, "get_current_memory_tag() replystr=" << replystr << ", memory_channel_tag=" << memory_channel_tag << ", memory_channel_id_str='" << memory_channel_id_str << "'");
-
-	memory_channel_tag = trim_whitespace(memory_channel_tag);
+    	memory_channel_tag = trim_whitespace(memory_channel_tag);
+	}
 
 	//			TRACE_STREAM(1, "get_current_memory_tag() trimmed memory_channel_tag='" << memory_channel_tag << "'");
 	if (memory_channel_tag.empty()) {
@@ -534,23 +534,30 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
 bool RIG_FTX1::parse_memory_response(const std::string replystr, const size_t offset, MemoryResponse &parsedResponse)
 {
 	size_t p = offset;
-	if (p != std::string::npos) {
-		// get channel number
-		parsedResponse.ChannelNum = replystr.substr(p + 2, 5); // P1 = 5 bytes representing current memory channel. NOTE - the numbers get strange on Emergency channels - seeing semicolons
-		parsedResponse.Frequency = replystr.substr(p + 7, 9); // P1 = 5 bytes representing frequency
-		parsedResponse.Clarifier = replystr.substr(p + 16, 5); // P3 = clarifier
-		parsedResponse.RxClarifier = replystr.substr(p + 21, 1); // P4 - RX clarifier
-		parsedResponse.TxClarifier = replystr.substr(p + 22, 1); // P5 - TX clarifier
-		parsedResponse.Mode = replystr.substr(p + 23, 1); // P6 - mode
+    if (p == std::string::npos) {
+        // not valid response
+        return false;
+    }
 
-		parsedResponse.VfoMem = replystr.substr(p + 24, 1); // P7 = 0 means VFO mode, otherwise assume memory mode
-		parsedResponse.RepeaterMode = replystr.substr(p + 25, 1); // P8 = repeater mode
-		parsedResponse.Shift = replystr.substr(p + 28, 1); // P10 = shift
-		return true;
-	}
+    // Fixed-field parsing needs the reply to be long enough.
+    // The last field read is at p + 28, length 1.
+    if (p + 29 > replystr.length()) {
+        // not valid response
+        return false;
+    }
 
-	// not valid response
-	return false;
+    // get channel number
+    parsedResponse.ChannelNum = replystr.substr(p + 2, 5); // P1 = 5 bytes representing current memory channel. NOTE - the numbers get strange on Emergency channels - seeing semicolons in channel #
+    parsedResponse.Frequency = replystr.substr(p + 7, 9); // P1 = 5 bytes representing frequency
+    parsedResponse.Clarifier = replystr.substr(p + 16, 5); // P3 = clarifier
+    parsedResponse.RxClarifier = replystr.substr(p + 21, 1); // P4 - RX clarifier
+    parsedResponse.TxClarifier = replystr.substr(p + 22, 1); // P5 - TX clarifier
+    parsedResponse.Mode = replystr.substr(p + 23, 1); // P6 - mode
+
+    parsedResponse.VfoMem = replystr.substr(p + 24, 1); // P7 = 0 means VFO mode, otherwise assume memory mode
+    parsedResponse.RepeaterMode = replystr.substr(p + 25, 1); // P8 = repeater mode
+    parsedResponse.Shift = replystr.substr(p + 28, 1); // P10 = shift
+    return true;
 }
 
 /**
@@ -589,38 +596,44 @@ std::vector<MemoryResponse> RIG_FTX1::get_memory_range(int start_channel, int en
     }
 
     for (int ch = start_channel; ch <= end_channel; ++ch) {
-        char ch_buf[6] = {0};
-        std::snprintf(ch_buf, sizeof(ch_buf), "%05d", ch);
+        try {
+            char ch_buf[6] = {0};
+            std::snprintf(ch_buf, sizeof(ch_buf), "%05d", ch);
 
-        MemoryResponse memory;
-        if (!get_memory_config(ch_buf, memory)) {
-            if (++emptyCount > 3) {
-                break;
+            MemoryResponse memory;
+            if (!get_memory_config(ch_buf, memory)) {
+                if (++emptyCount > 3) {
+                    break;
+                }
+                continue;
+            } else {
+                emptyCount = 0;
             }
-            continue;
-        } else {
-            emptyCount = 0;
+
+            // If MemoryResponse does not already have a tag field,
+            // add one in the header or store it separately.
+            memory.Tag = get_memory_tag(ch_buf);
+
+
+            TRACE_STREAM(1, "get_memory_range() ch=" << ch
+                 << ", ChannelNum=" << memory.ChannelNum
+                 << ", Frequency=" << memory.Frequency
+//                  << ", Clarifier=" << memory.Clarifier
+//                  << ", RxClarifier=" << memory.RxClarifier
+//                  << ", TxClarifier=" << memory.TxClarifier
+//                  << ", Mode=" << memory.Mode
+//                  << ", VfoMem=" << memory.VfoMem
+//                  << ", RepeaterMode=" << memory.RepeaterMode
+//                  << ", Shift=" << memory.Shift
+                 << ", Tag=" << memory.Tag);
+
+
+            memories.push_back(memory);
+        } catch (const std::exception& e) {
+            TRACE_STREAM(1, "get_memory_range() exception for ch=" << ch << ": " << e.what());
+        } catch (...) {
+            TRACE_STREAM(1, "get_memory_range() unknown exception for ch=" << ch);
         }
-
-        // If MemoryResponse does not already have a tag field,
-        // add one in the header or store it separately.
-        memory.Tag = get_memory_tag(ch_buf);
-
-/*
- TRACE_STREAM(1, "get_memory_range() ch=" << ch
-     << ", ChannelNum=" << memory.ChannelNum
-     << ", Frequency=" << memory.Frequency
-     << ", Clarifier=" << memory.Clarifier
-     << ", RxClarifier=" << memory.RxClarifier
-     << ", TxClarifier=" << memory.TxClarifier
-     << ", Mode=" << memory.Mode
-     << ", VfoMem=" << memory.VfoMem
-     << ", RepeaterMode=" << memory.RepeaterMode
-     << ", Shift=" << memory.Shift
-     << ", Tag=" << memory.Tag);
-*/
-
-        memories.push_back(memory);
     }
 
     return memories;
@@ -660,9 +673,10 @@ std::vector<MemoryResponse> RIG_FTX1::get_memory_channels() {
  */
 bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_channel_tag_)
 {
-	int in_memory_mode_ = false;
+	bool in_memory_mode_result = false;
+	in_memory_mode = false;
 	memory_channel_ = 0;
-	memory_channel_tag = "";
+    memory_channel_tag_.clear();
 
 	if (inuse == onA)
 		cmd = rsp = "IF";
@@ -670,31 +684,43 @@ bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_chan
 		cmd = rsp = "OI";
 
 	cmd += ';';
-	wait_char(';', 30, 100, "get_current_memory", ASC);
+	const int nread = wait_char(';', 30, 100, "get_current_memory", ASC);
+	if (nread <= 0 || replystr.empty()) {
+		return false;
+	}
 
 // 	sett("get_current_memory");
 
 	size_t p = replystr.rfind(rsp);
-    MemoryResponse parsedResponse;
-	const bool parsed = parse_memory_response(replystr, p, parsedResponse);
-    if (p != std::string::npos) {
-        memory_channel_id_str = parsedResponse.ChannelNum;
-        memory_channel_ = sToInt(memory_channel_id_str);
-        char vfoMem = parsedResponse.VfoMem[0];
-//         TRACE_STREAM(1, "get_current_memory() replystr=" << replystr << ", memory_channel_id_str='" << memory_channel_id_str << "', vfoMem=" << vfoMem);
-        if (vfoMem != '0') {
-            in_memory_mode_ = true;
-        }
- 	}
+    if (p == std::string::npos) {
+        return false;
+    }
 
-	if (in_memory_mode_) {
-		memory_channel_tag = get_memory_tag(parsedResponse.ChannelNum);
+    MemoryResponse parsedResponse;
+    if (!parse_memory_response(replystr, p, parsedResponse)) {
+        return false;
+    }
+
+	if (parsedResponse.VfoMem.empty()) {
+		return false;
 	}
 
- 	in_memory_mode = in_memory_mode_;
- 	memory_channel = memory_channel_;
-	memory_channel_tag_ = memory_channel_tag;
- 	return in_memory_mode_;
+    memory_channel_id_str = parsedResponse.ChannelNum;
+    memory_channel = sToInt(memory_channel_id_str);
+    char vfoMem = parsedResponse.VfoMem[0];
+
+//         TRACE_STREAM(1, "get_current_memory() replystr=" << replystr << ", memory_channel_id_str='" << memory_channel_id_str << "', vfoMem=" << vfoMem);
+
+    if (vfoMem != '0') {
+        in_memory_mode = true;
+        memory_channel_tag = get_memory_tag(parsedResponse.ChannelNum);
+    }
+
+	in_memory_mode_result = in_memory_mode;
+    memory_channel_ = memory_channel;
+    memory_channel_tag_ = memory_channel_tag;
+
+	return in_memory_mode_result;
 }
 
 /**
