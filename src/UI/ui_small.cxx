@@ -1823,7 +1823,7 @@ Fl_Double_Window *tabs_window()
 			btn_scan_stop_start->tooltip(_("Stop Channel Scan/or start on SHIFT click"));
 			btn_scan_stop_start->callback((Fl_Callback*)cb_btn_scan_stop_start);
 
-			channel_selector = new Fl_ComboBox(320, 35, 100, 22, _("Channel"));
+            channel_selector = new Fl_ComboBox(300, 35, 120, 22, _("Channel"));
 			channel_selector->tooltip(_("Select Channel from Programmed Memories"));
 			channel_selector->box(FL_NO_BOX);
 			channel_selector->color(FL_BACKGROUND2_COLOR);
@@ -1838,7 +1838,7 @@ Fl_Double_Window *tabs_window()
 			channel_selector->readonly();
 			channel_selector->end();
 
-			label_mem_channel = new Fl_Box(320, 60, 100, 22, _("CHANNEL"));
+            label_mem_channel = new Fl_Box(300, 60, 120, 22, _("CHANNEL"));
 			label_mem_channel->tooltip(_("Show Current Channel Number"));
 			label_mem_channel->box(FL_DOWN_BOX);
 			label_mem_channel->color(FL_WHITE);

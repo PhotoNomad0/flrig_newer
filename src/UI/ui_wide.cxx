@@ -515,7 +515,7 @@ Fl_Group *wide_main_group(int X, int Y, int W, int H)
 
 						btnNOISE = new Fl_Light_Button(
 							grp_row1b1b->x(), ypos, 70, 20, _("NB"));
-						btnNOISE->tooltip(_("Noise Blanker On/Off"));
+						btnNOISE->tooltip(_("Noise Blanker On/Off\nThe Noise Blanker Slider is on the RX tab"));
 						btnNOISE->down_box(FL_THIN_DOWN_BOX);
 						btnNOISE->labelsize(12);
 						btnNOISE->callback((Fl_Callback*)cb_btnNOISE);
