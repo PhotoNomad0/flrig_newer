@@ -493,7 +493,7 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
     memory_channel_tag = "";
 	wait_char(';', 30, 100, "get_current_memory_tag", ASC);
 	size_t p = replystr.rfind(rsp);
-	if (p != std::string::npos) {
+    if (p != std::string::npos && p + 19 <= replystr.length()) {
 		memory_channel_tag = replystr.substr(p + 7, 12);
 	//			TRACE_STREAM(1, "get_current_memory_tag() replystr=" << replystr << ", memory_channel_tag=" << memory_channel_tag << ", memory_channel_id_str='" << memory_channel_id_str << "'");
     	memory_channel_tag = trim_whitespace(memory_channel_tag);
@@ -871,8 +871,7 @@ int RIG_FTX1::get_vfoAorB()
 	wait_char(';', 4, 100, "get vfoAorB()", ASC);
 	gett("get vfoAorB()");
 	size_t p = replystr.rfind(rsp);
-
-	if (p != std::string::npos && p + 2 < replystr.length())
+    if (p != std::string::npos && p + 3 < replystr.length())
 		inuse = (replystr[p + 2] == '1') ? onB : onA;
 	return inuse;
 }
@@ -930,8 +929,7 @@ int RIG_FTX1::get_split()
 	wait_char(';', 4, 100, "Get split", ASC);
 	gett("get split()");
 	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) return 0;
-	if (p + 2 >= replystr.length()) return 0;
+    if (p == std::string::npos || p + 3 >= replystr.length()) return 0;
 	int split = replystr[p+2] - '0';
 
 	return (split > 0);
@@ -958,7 +956,8 @@ int RIG_FTX1::get_smeter()
 	gett("get_smeter()");
 
 	int mtr = 0;
-    if (replystr.rfind(rsp) == std::string::npos) return 0;
+	size_t p = replystr.rfind(rsp);
+    if (p == std::string::npos || p + 6 >= replystr.length()) return 0;
     std::string searchStr = rsp + "%d";
 	sscanf(replystr.c_str(), searchStr.c_str(), &mtr);
 	mtr = mtr * 100.0 / 256.0;
@@ -1528,15 +1527,13 @@ int RIG_FTX1::get_modeB()
 	gett("get_modeB()");
 
 	size_t p = replystr.rfind(rsp);
-	if (p != std::string::npos) {
-		if (p + 3 < replystr.length()) {
-			int md = replystr[p+3];
-			int n = 0;
-			for (n = 0; n < NUM_MODES; n++)
-				if (md == FTX1_mode_chr[n])
-					break;
-			modeB = n;
-		}
+	if (p != std::string::npos && p + 4 < replystr.length()) {
+        int md = replystr[p+3];
+        int n = 0;
+        for (n = 0; n < NUM_MODES; n++)
+            if (md == FTX1_mode_chr[n])
+                break;
+        modeB = n;
 	}
 	adjust_bandwidth(modeB);
 	return modeB;
@@ -1902,7 +1899,7 @@ int RIG_FTX1::get_nb_level()
  	gett("get_nb_level()");
 
 	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos || p + 5 >= replystr.length()) return nb_state;
+	if (p == std::string::npos || p + 6 >= replystr.length()) return nb_state;
 
     // Parse 2 digits starting at p+4 (i.e., replystr[p+4] and replystr[p+5])
     // Example: "NL0007;" -> nb_state = 7, "NL0010;" -> nb_state = 10
