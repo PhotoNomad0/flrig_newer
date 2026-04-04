@@ -491,7 +491,7 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
 	cmd = rsp = "MT";
 	cmd = cmd + memory_channel_id_str_ + ';'; // add the memory channel number to the MT command to get the memory channel tag
     memory_channel_tag = "";
-	wait_char(';', 30, 100, "get_current_memory_tag", ASC);
+	wait_char(';', 20, 100, "get_current_memory_tag", ASC);
 	size_t p = replystr.rfind(rsp);
     if (p != std::string::npos && p + 19 <= replystr.length()) {
 		memory_channel_tag = replystr.substr(p + 7, 12);
@@ -602,7 +602,10 @@ std::vector<MemoryResponse> RIG_FTX1::get_memory_range(int start_channel, int en
 
             MemoryResponse memory;
             if (!get_memory_config(ch_buf, memory)) {
+                TRACE_STREAM(1, "get_memory_range() ch=" << ch
+                     << " is empty");
                 if (++emptyCount > 3) {
+                    TRACE_STREAM(1, "get_memory_range() too many empty channels in a row, quitting");
                     break;
                 }
                 continue;
@@ -1903,7 +1906,7 @@ int RIG_FTX1::get_nb_level()
 
     // Parse 2 digits starting at p+4 (i.e., replystr[p+4] and replystr[p+5])
     // Example: "NL0007;" -> nb_state = 7, "NL0010;" -> nb_state = 10
-    std::string stateStr = replystr.substr(4, 2);
+	std::string stateStr = replystr.substr(p + 4, 2);
     int level = sToInt(stateStr);
 
 //     TRACE_STREAM(1, "get_nb_level() replystr='" << replystr << "', level=" << level);
