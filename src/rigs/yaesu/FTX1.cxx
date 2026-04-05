@@ -486,7 +486,7 @@ int sToInt(const std::string& str, int deflt_value = 0) {
  * tag field. The tag is trimmed of leading and trailing whitespace before being
  * returned.
  */
-std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
+std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_, int frequency = 0)
 {
 	cmd = rsp = "MT";
 	cmd = cmd + memory_channel_id_str_ + ';'; // add the memory channel number to the MT command to get the memory channel tag
@@ -497,6 +497,12 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_)
 		memory_channel_tag = replystr.substr(p + 7, 12);
 	//			TRACE_STREAM(1, "get_current_memory_tag() replystr=" << replystr << ", memory_channel_tag=" << memory_channel_tag << ", memory_channel_id_str='" << memory_channel_id_str << "'");
     	memory_channel_tag = trim_whitespace(memory_channel_tag);
+	}
+	
+	if (((frequency > 999) && (frequency < 50001)) ||
+    	(frequency > 50015) )
+	{
+        memory_channel_tag = std::to_string(frequency) + " - " + memory_channel_tag;
 	}
 
 	//			TRACE_STREAM(1, "get_current_memory_tag() trimmed memory_channel_tag='" << memory_channel_tag << "'");
@@ -615,7 +621,7 @@ std::vector<MemoryResponse> RIG_FTX1::get_memory_range(int start_channel, int en
 
             // If MemoryResponse does not already have a tag field,
             // add one in the header or store it separately.
-            memory.Tag = get_memory_tag(ch_buf);
+            memory.Tag = get_memory_tag(ch_buf, ch);
 
 
             TRACE_STREAM(1, "get_memory_range() ch=" << ch
