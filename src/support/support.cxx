@@ -326,7 +326,7 @@ void read_vfo()
 	if (xcvr_name == rig_FTX1.name_) {
 //     	trace(2,"read_vfo(), rig_FTX1.name_", rig_FTX1.name_.c_str());
 		static char tag_[20];
-		int memory_channel = 0;
+		long long memory_channel = 0;
 		std::string memory_channel_tag = "";
 		bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
 		if (in_memory_mode) {
