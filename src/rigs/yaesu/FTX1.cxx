@@ -529,7 +529,7 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_, i
 	if (memory_channel_tag.empty()) {
 		std::string tag = memory_channel_id_str; // default
 
-		int channel_number = sToInt(memory_channel_id_str_);
+		int channel_number = strToI(memory_channel_id_str_);
 		if (channel_number >= 50001 && channel_number <= 50005) {
 			tag = "60m ch" + std::to_string(channel_number - 50000) + " (USB)";
 		} else if (channel_number >= 50006 && channel_number <= 50010) {
