@@ -597,7 +597,7 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_, l
   } catch (...) {
     TRACE_STREAM(1, "get_memory_tag() unknown exception getting tag");
   }
-  if (memory_channel_id_str_) {
+  if (!memory_channel_id_str_.empty()) {
       memory_channel_tag = memory_channel_id_str_;
   }
   return memory_channel_tag;
