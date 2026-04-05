@@ -795,7 +795,7 @@ double vfo_;
 	virtual void scan_operation(bool start) {}
 	virtual void power(bool on) {}
     virtual std::vector<MemoryResponse> get_memory_channels() { return std::vector<MemoryResponse>(); }
-	virtual bool get_current_memory(int &memory_channel, std::string &memory_channel_tag) { return false; }
+	virtual bool get_current_memory(long long &memory_channel, std::string &memory_channel_tag) { return false; }
 	virtual void select_channel(int channel) {}
 
 	virtual void set_xcvr_auto_on() {}

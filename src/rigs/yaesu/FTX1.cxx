@@ -476,8 +476,45 @@ int strToI(const std::string& str, int deflt_value = 0) {
 	return value;
 }
 
+/**
+ * Converts a string to an long integer with error handling.
+ *
+ * @param str The string to convert to an integer
+ * @param deflt_value The default value to return if conversion fails (default: 0)
+ * @return The converted long integer value, or deflt_value if conversion fails
+ *
+ * This function safely converts a string to an integer using std::stoi.
+ * If the conversion throws an exception (e.g., invalid format, out of range),
+ * the function catches it, logs a trace message, and returns the default value
+ * instead of propagating the exception.
+ */
+long long strToL(const std::string& str, long long deflt_value = 0) {
+	long long value = deflt_value;
+	try {
+		value = std::stoll(str);
+	} catch (const std::exception& e) {
+		TRACE_STREAM(1, "strToL() exception converting str='" << str << "', exception=" << e.what());
+	} catch (...) {
+		TRACE_STREAM(1, "strToL() unknown exception converting str='" << str << "'");
+    }
+	return value;
+}
+
+/**
+ * Formats a numeric value with comma separators for thousands.
+ *
+ * @param value The numeric value to format
+ * @return A string representation of the value with commas inserted every three digits
+ *         from right to left (e.g., 1234567 becomes "1,234,567")
+ *
+ * This function converts a long integer to a string and inserts commas as
+ * thousand separators. The commas are inserted from right to left, starting three
+ * positions from the end of the string and continuing every three digits until
+ * the beginning is reached.
+ */
 std::string format_with_commas(long long value)
 {
+  try {
     std::string s = std::to_string(value);
     int insertPos = static_cast<int>(s.length()) - 3;
 
@@ -487,6 +524,18 @@ std::string format_with_commas(long long value)
     }
 
     return s;
+  } catch (...) {
+//     TRACE_STREAM(1, "format_with_commas() unknown exception getting str");
+  }
+
+  // on error fall back to simple conversion
+  try {
+      std::string s = std::to_string(value);
+      return s;
+  } catch (...) {
+   //     TRACE_STREAM(1, "format_with_commas() unknown exception getting str");
+  }
+  return "0";
 }
 
 /**
@@ -501,7 +550,7 @@ std::string format_with_commas(long long value)
  * tag field. The tag is trimmed of leading and trailing whitespace before being
  * returned.
  */
-std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_, int frequency = 0)
+std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_, long long frequency = 0)
 {
   memory_channel_tag = "";
   try {
@@ -529,7 +578,7 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_, i
 	if (memory_channel_tag.empty()) {
 		std::string tag = memory_channel_id_str; // default
 
-		int channel_number = strToI(memory_channel_id_str_);
+		long long channel_number = strToL(memory_channel_id_str_);
 		if (channel_number >= 50001 && channel_number <= 50005) {
 			tag = "60m ch" + std::to_string(channel_number - 50000) + " (USB)";
 		} else if (channel_number >= 50006 && channel_number <= 50010) {
@@ -541,10 +590,15 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_, i
 		memory_channel_tag = tag;
 		//				TRACE_STREAM(1, "get_current_memory_tag() fall back to using memory_channel_id_str=" << memory_channel_id_str);
 	}
+    return memory_channel_tag;
+
   } catch(const std::exception& e) {
     TRACE_STREAM(1, "get_memory_tag() exception getting tag, exception=" << e.what());
   } catch (...) {
     TRACE_STREAM(1, "get_memory_tag() unknown exception getting tag");
+  }
+  if (memory_channel_id_str_) {
+      memory_channel_tag = memory_channel_id_str_;
   }
   return memory_channel_tag;
 }
@@ -626,7 +680,7 @@ std::vector<MemoryResponse> RIG_FTX1::get_memory_range(int start_channel, int en
         std::swap(start_channel, end_channel);
     }
 
-    for (int ch = start_channel; ch <= end_channel; ++ch) {
+    for (long long ch = start_channel; ch <= end_channel; ++ch) {
         try {
             char ch_buf[6] = {0};
             std::snprintf(ch_buf, sizeof(ch_buf), "%05d", ch);
@@ -705,7 +759,7 @@ std::vector<MemoryResponse> RIG_FTX1::get_memory_channels() {
  * associated tag/label. The function updates both the local state variables and the
  * output parameters with the current memory configuration.
  */
-bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_channel_tag_)
+bool RIG_FTX1::get_current_memory(long long &memory_channel_, std::string &memory_channel_tag_)
 {
 	bool in_memory_mode_result = false;
 	in_memory_mode = false;
@@ -740,9 +794,9 @@ bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_chan
 	}
 
     memory_channel_id_str = parsedResponse.ChannelNum;
-    memory_channel = strToI(memory_channel_id_str);
+    memory_channel = strToL(memory_channel_id_str);
     char vfoMem = parsedResponse.VfoMem[0];
-    int freq = strToI(parsedResponse.Frequency);
+    long long freq = strToL(parsedResponse.Frequency);
 
 //         TRACE_STREAM(1, "get_current_memory() replystr=" << replystr << ", memory_channel_id_str='" << memory_channel_id_str << "', vfoMem=" << vfoMem);
 
@@ -789,7 +843,7 @@ void RIG_FTX1::select_channel(int channel)
 
 void RIG_FTX1::get_band_selection(int v)
 {
-	int memory_channel = 0;
+	long long memory_channel = 0;
 	std::string memory_channel_tag;
 	bool inc_60m = get_current_memory(memory_channel, memory_channel_tag);
 	sett("get band");
