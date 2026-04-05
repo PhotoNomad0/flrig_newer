@@ -464,16 +464,31 @@ static std::string memory_channel_tag;
  * the function catches it, logs a trace message, and returns the default value
  * instead of propagating the exception.
  */
-int sToInt(const std::string& str, int deflt_value = 0) {
+int strToI(const std::string& str, int deflt_value = 0) {
 	int value = deflt_value;
 	try {
 		value = std::stoi(str);
 	} catch (const std::exception& e) {
-		TRACE_STREAM(1, "sToInt() exception converting str='" << str << "', exception=" << e.what());
-		value = deflt_value;
-	}
+		TRACE_STREAM(1, "strToI() exception converting str='" << str << "', exception=" << e.what());
+	} catch (...) {
+		TRACE_STREAM(1, "strToI() unknown exception converting str='" << str << "'");
+    }
 	return value;
 }
+
+std::string format_with_commas(long long value)
+{
+    std::string s = std::to_string(value);
+    int insertPos = static_cast<int>(s.length()) - 3;
+
+    while (insertPos > 0) {
+        s.insert(static_cast<std::string::size_type>(insertPos), ",");
+        insertPos -= 3;
+    }
+
+    return s;
+}
+
 /**
  * Retrieves the memory tag (label/description) for a given memory channel.
  *
@@ -488,9 +503,10 @@ int sToInt(const std::string& str, int deflt_value = 0) {
  */
 std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_, int frequency = 0)
 {
+  memory_channel_tag = "";
+  try {
 	cmd = rsp = "MT";
 	cmd = cmd + memory_channel_id_str_ + ';'; // add the memory channel number to the MT command to get the memory channel tag
-    memory_channel_tag = "";
 	wait_char(';', 20, 100, "get_current_memory_tag", ASC);
 	size_t p = replystr.rfind(rsp);
     if (p != std::string::npos && p + 19 <= replystr.length()) {
@@ -498,11 +514,15 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_, i
 	//			TRACE_STREAM(1, "get_current_memory_tag() replystr=" << replystr << ", memory_channel_tag=" << memory_channel_tag << ", memory_channel_id_str='" << memory_channel_id_str << "'");
     	memory_channel_tag = trim_whitespace(memory_channel_tag);
 	}
-	
-	if (((frequency > 999) && (frequency < 50001)) ||
-    	(frequency > 50015) )
+
+	if (
+	    (frequency >  54000000 && frequency < 144000000) ||
+    	(frequency > 148000000 && frequency < 420000000) ||
+    	(frequency > 45000000)
+     )
 	{
-        memory_channel_tag = std::to_string(frequency) + " - " + memory_channel_tag;
+        memory_channel_tag = format_with_commas(frequency) + " - " + memory_channel_tag;
+//     	TRACE_STREAM(1, "get_current_memory_tag() undocumented frequency, memory_channel_tag='" << memory_channel_tag << "'");
 	}
 
 	//			TRACE_STREAM(1, "get_current_memory_tag() trimmed memory_channel_tag='" << memory_channel_tag << "'");
@@ -521,7 +541,12 @@ std::string RIG_FTX1::get_memory_tag(const std::string memory_channel_id_str_, i
 		memory_channel_tag = tag;
 		//				TRACE_STREAM(1, "get_current_memory_tag() fall back to using memory_channel_id_str=" << memory_channel_id_str);
 	}
-	return memory_channel_tag;
+  } catch(const std::exception& e) {
+    TRACE_STREAM(1, "get_memory_tag() exception getting tag, exception=" << e.what());
+  } catch (...) {
+    TRACE_STREAM(1, "get_memory_tag() unknown exception getting tag");
+  }
+  return memory_channel_tag;
 }
 
 /**
@@ -715,14 +740,15 @@ bool RIG_FTX1::get_current_memory(int &memory_channel_, std::string &memory_chan
 	}
 
     memory_channel_id_str = parsedResponse.ChannelNum;
-    memory_channel = sToInt(memory_channel_id_str);
+    memory_channel = strToI(memory_channel_id_str);
     char vfoMem = parsedResponse.VfoMem[0];
+    int freq = strToI(parsedResponse.Frequency);
 
 //         TRACE_STREAM(1, "get_current_memory() replystr=" << replystr << ", memory_channel_id_str='" << memory_channel_id_str << "', vfoMem=" << vfoMem);
 
     if (vfoMem != '0') {
         in_memory_mode = true;
-        memory_channel_tag = get_memory_tag(parsedResponse.ChannelNum);
+        memory_channel_tag = get_memory_tag(parsedResponse.ChannelNum, freq);
     }
 
 	in_memory_mode_result = in_memory_mode;
@@ -1913,7 +1939,7 @@ int RIG_FTX1::get_nb_level()
     // Parse 2 digits starting at p+4 (i.e., replystr[p+4] and replystr[p+5])
     // Example: "NL0007;" -> nb_state = 7, "NL0010;" -> nb_state = 10
 	std::string stateStr = replystr.substr(p + 4, 2);
-    int level = sToInt(stateStr);
+    int level = strToI(stateStr);
 
 //     TRACE_STREAM(1, "get_nb_level() replystr='" << replystr << "', level=" << level);
 

@@ -166,7 +166,7 @@ public:
 
     virtual std::vector<MemoryResponse> get_memory_channels();
     std::vector<MemoryResponse> get_memory_range(int start_channel, int end_channel);
-    std::string get_memory_tag(const std::string memory_channel_id_str_);
+    std::string get_memory_tag(const std::string memory_channel_id_str_, int frequency);
     bool parse_memory_response(const std::string replystr, const size_t offset, MemoryResponse &parsedResponse);
     bool get_memory_config(const std::string memory_channel_id_str_, MemoryResponse &parsedResponse);
 	virtual void select_channel(int channel);
