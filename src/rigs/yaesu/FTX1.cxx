@@ -77,7 +77,7 @@ static const char *vmd[] = {
   "C4FM_N", "C4FM_VW" };
 
 static const char FTX1_mode_chr[] =  { '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I' };
-static const char FTX1_mode_type[] = { 'L', 'U', 'U', 'U', 'U', 'L', 'L', 'L', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U' };
+static const char FTX1_mode_type[] = { 'L', 'U', 'U', 'U', 'U', 'L', 'L', 'L', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U' }; // upper or lower type
 
 static std::vector<std::string>FTX1_widths_SSB;
 static const char *vssb[] = {
@@ -1488,21 +1488,21 @@ int RIG_FTX1::adjust_bandwidth(int val)
 	if (val == mCW_U || val == mCW_L) {
 		bandwidths_ = FTX1_widths_CW;
 		bw_vals_ = FTX1_wvals_CW;
-	} else if (val == mFM || val == mAM || val == mFM_N || val == mDATA_FM || val == mAM_N) {
+	} else if (val == mFM || val == mAM || val == mFM_N || val == mDATA_FM || val == mAM_N || val == mC4FM_N || val == mC4FM_VW) {
 		if (val == mFM) bandwidths_ = FTX1_widths_FMwide;
 		else if (val ==  mAM) bandwidths_ = FTX1_widths_AMwide;
 		else if (val == mAM_N) bandwidths_ = FTX1_widths_AMnar;
 		else if (val == mFM_N) bandwidths_ = FTX1_widths_FMnar;
-		else if (val == mDATA_FM) bandwidths_ = FTX1_widths_DATA_FM;
+		else if (val == mDATA_FM || val == mC4FM_N || val == mC4FM_VW ) bandwidths_ = FTX1_widths_DATA_FM;
 		else if (val == mDATA_FMN) bandwidths_ = FTX1_widths_DATA_FMN;
 		bw_vals_ = FTX1_wvals_AMFM;
 	} else if (val == mRTTY_L || val == mRTTY_U) { // RTTY
 		bandwidths_ = FTX1_widths_RTTY;
 		bw_vals_ = FTX1_wvals_RTTY;
-	} else if (val == mDATA_L || val == mDATA_U) { // PSK
+	} else if (val == mDATA_L || val == mDATA_U || val == mPSK) {
 		bandwidths_ = FTX1_widths_DATA;
 		bw_vals_ = FTX1_wvals_PSK;
-	} else {
+	} else { // SSB, 
 		bandwidths_ = FTX1_widths_SSB;
 		bw_vals_ = FTX1_wvals_SSB;
 	}
@@ -1537,15 +1537,15 @@ std::vector<std::string>& RIG_FTX1::bwtable(int n)
 			return FTX1_widths_FMwide;
 		case mAM:
 			return FTX1_widths_AMwide;
-		case mAM_N :
+		case mAM_N:
 			return FTX1_widths_AMnar;
 		case mRTTY_L: case mRTTY_U:
 			return FTX1_widths_RTTY;
-		case mDATA_L: case mDATA_U:
+		case mDATA_L: case mDATA_U: case mPSK:
 			return FTX1_widths_DATA;
 		case mFM_N:
 			return FTX1_widths_DATA_FMN;
-		case mDATA_FM:
+		case mDATA_FM: case mC4FM_N: case mC4FM_VW:
 			return FTX1_widths_DATA_FM;
 		default: ;
 	}
