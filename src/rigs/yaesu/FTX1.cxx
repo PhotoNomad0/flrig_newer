@@ -1669,7 +1669,7 @@ void RIG_FTX1::get_bandwidth_data(const int mode, std::vector<std::string>& band
     while (bw_vals[count] != WVALS_LIMIT) {
         ++count;
     }
-    TRACE_STREAM(1, "get_bandwidth_data() mode=" << mode << ", str='" << FTX1modes_[mode] << "', bandwidths.len=" << bandwidths.size() << ", bw_vals.len=" << count);
+//     TRACE_STREAM(1, "get_bandwidth_data() mode=" << mode << ", str='" << FTX1modes_[mode] << "', bandwidths.len=" << bandwidths.size() << ", bw_vals.len=" << count);
 }
 
 /**
@@ -1689,7 +1689,7 @@ void RIG_FTX1::get_bandwidth_data(const int mode, std::vector<std::string>& band
  */
 int RIG_FTX1::adjust_bandwidth(int val)
 {
-    TRACE_STREAM(1, "adjust_bandwidth() val=" << val );
+//     TRACE_STREAM(1, "adjust_bandwidth() val=" << val );
 
 	int bw = 0;
 	get_bandwidth_data(val, bandwidths_, bw_vals_);
@@ -1717,7 +1717,7 @@ int RIG_FTX1::def_bandwidth(int m)
 
 std::vector<std::string>& RIG_FTX1::bwtable(int n)
 {
-    TRACE_STREAM(1, "bwtable() mode=" << n );
+//     TRACE_STREAM(1, "bwtable() mode=" << n );
 
     get_bandwidth_data(n, bandwidths_, bw_vals_);
     return bandwidths_;
@@ -1817,20 +1817,20 @@ int RIG_FTX1::parse_bw_index_from_reply(int mode, const std::string& prefix, int
         i++;
     }
     if (*idx == WVALS_LIMIT){
-        TRACE_STREAM(1, "parse_bw_index_from_reply() hit limit looking for bw_idx='" << bw_idx << "', i ='" << i << ", nb_state=" << nb_state);
+//         TRACE_STREAM(1, "parse_bw_index_from_reply() hit limit looking for bw_idx='" << bw_idx << "', i ='" << i << ", nb_state=" << nb_state);
 
-        std::ostringstream bw_vals_dump;
-        bw_vals_dump << "bw_vals_ contents: [";
-        const int *dump_idx = bw_vals_;
-        bool first = true;
-        while (*dump_idx != WVALS_LIMIT) {
-            if (!first) bw_vals_dump << ", ";
-            bw_vals_dump << *dump_idx;
-            first = false;
-            dump_idx++;
-        }
-        bw_vals_dump << "]";
-        TRACE_STREAM(1, "parse_bw_index_from_reply() " << bw_vals_dump.str());
+//         std::ostringstream bw_vals_dump;
+//         bw_vals_dump << "bw_vals_ contents: [";
+//         const int *dump_idx = bw_vals_;
+//         bool first = true;
+//         while (*dump_idx != WVALS_LIMIT) {
+//             if (!first) bw_vals_dump << ", ";
+//             bw_vals_dump << *dump_idx;
+//             first = false;
+//             dump_idx++;
+//         }
+//         bw_vals_dump << "]";
+//         TRACE_STREAM(1, "parse_bw_index_from_reply() " << bw_vals_dump.str());
 
         i = 0; // default to first
     }
