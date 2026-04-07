@@ -76,6 +76,8 @@ public:
 	virtual void set_BANDWIDTHS(std::string s);
 	virtual std::string get_BANDWIDTHS();
 
+    void get_bandwidth_data(const int mode, std::vector<std::string>& bandwidths, const int *&bw_vals);
+
 	virtual int  get_smeter();
 	virtual int  get_swr();
 	virtual int  get_alc();

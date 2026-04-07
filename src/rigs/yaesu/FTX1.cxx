@@ -123,7 +123,7 @@ static const char *vdata[] = {
 static int FTX1_wvals_PSK[] = {
 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18, 19, 20, 21, WVALS_LIMIT };
 
-static const int FTX1_wvals_AMFM[] = { 0, WVALS_LIMIT };
+static const int FTX1_wvals_AMFM[] = { 0, WVALS_LIMIT }; // generic for only one acceptable value
 
 static std::vector<std::string>FTX1_widths_AMwide;
 static const char *vamw[] = { "9000" };
@@ -1482,30 +1482,106 @@ int RIG_FTX1::get_preamp()
 
 static bool narrow = 0; // 0 - wide, 1 - narrow
 
+/**
+ * Retrieves bandwidth configuration data for a given mode.
+ *
+ * @param mode The operating mode for which to retrieve bandwidth data (e.g., mCW_U, mLSB, mFM)
+ * @param bandwidths Reference to a pointer that will be set to the appropriate bandwidth labels vector
+ * @param bw_vals Reference to a pointer that will be set to the appropriate bandwidth values array
+ *
+ * This function maps operating modes to their corresponding bandwidth options. Each mode has
+ * specific bandwidth choices available:
+ * - CW modes (CW-U, CW-L): Narrow bandwidths from 50Hz to 4000Hz
+ * - AM/FM modes: Fixed bandwidths (wide/narrow variants)
+ * - RTTY modes: Similar to CW bandwidth options
+ * - DATA modes: PSK-style bandwidth options
+ * - SSB modes (LSB, USB): Wide range from 300Hz to 4000Hz
+ *
+ * The function modifies the input pointer references to point to the appropriate static
+ * vectors and arrays containing bandwidth labels and values for the specified mode.
+ */
+void RIG_FTX1::get_bandwidth_data(const int mode, std::vector<std::string>& bandwidths, const int *&bw_vals)
+{
+	switch (mode) {
+		case mCW_U:
+		case mCW_L:
+            bandwidths = FTX1_widths_CW;
+            bw_vals = FTX1_wvals_CW;
+			break;
+
+		case mAM:
+			bandwidths = FTX1_widths_AMwide;
+		    bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mAM_N:
+			bandwidths = FTX1_widths_AMnar;
+			bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mFM:
+			bandwidths = FTX1_widths_FMwide;
+			bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mFM_N:
+			bandwidths = FTX1_widths_FMnar;
+			bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mDATA_FM:
+		case mC4FM_N:
+		case mC4FM_VW:
+			bandwidths = FTX1_widths_DATA_FM;
+			bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mDATA_FMN:
+			bandwidths = FTX1_widths_DATA_FMN;
+			bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mRTTY_L:
+		case mRTTY_U:
+            bandwidths = FTX1_widths_RTTY;
+            bw_vals = FTX1_wvals_RTTY;
+			break;
+
+		case mDATA_L:
+		case mDATA_U:
+		case mPSK:
+            bandwidths = FTX1_widths_DATA;
+            bw_vals = FTX1_wvals_PSK;
+			break;
+
+		case mLSB:
+		case mUSB:
+		default:
+            bandwidths = FTX1_widths_SSB;
+            bw_vals = FTX1_wvals_SSB;
+			break;
+	}
+}
+
+/**
+ * Adjusts the bandwidth index for a given mode.
+ *
+ * @param val The operating mode for which to adjust bandwidth (e.g., mCW_U, mLSB, mFM)
+ * @return The bandwidth index appropriate for the mode and current narrow/wide setting
+ *
+ * This function retrieves the bandwidth configuration data for the specified mode
+ * and returns the default bandwidth index based on the current narrow/wide state.
+ * The narrow/wide state is determined by the global 'narrow' variable:
+ * - When narrow is true (1): Returns the narrow bandwidth index from defBW_narrow[]
+ * - When narrow is false (0): Returns the wide bandwidth index from defBW_wide[]
+ *
+ * The function also updates the class member variables bandwidths_ and bw_vals_
+ * to point to the appropriate bandwidth tables for the specified mode.
+ */
 int RIG_FTX1::adjust_bandwidth(int val)
 {
 	int bw = 0;
-	if (val == mCW_U || val == mCW_L) {
-		bandwidths_ = FTX1_widths_CW;
-		bw_vals_ = FTX1_wvals_CW;
-	} else if (val == mFM || val == mAM || val == mFM_N || val == mDATA_FM || val == mAM_N || val == mC4FM_N || val == mC4FM_VW) {
-		if (val == mFM) bandwidths_ = FTX1_widths_FMwide;
-		else if (val ==  mAM) bandwidths_ = FTX1_widths_AMwide;
-		else if (val == mAM_N) bandwidths_ = FTX1_widths_AMnar;
-		else if (val == mFM_N) bandwidths_ = FTX1_widths_FMnar;
-		else if (val == mDATA_FM || val == mC4FM_N || val == mC4FM_VW ) bandwidths_ = FTX1_widths_DATA_FM;
-		else if (val == mDATA_FMN) bandwidths_ = FTX1_widths_DATA_FMN;
-		bw_vals_ = FTX1_wvals_AMFM;
-	} else if (val == mRTTY_L || val == mRTTY_U) { // RTTY
-		bandwidths_ = FTX1_widths_RTTY;
-		bw_vals_ = FTX1_wvals_RTTY;
-	} else if (val == mDATA_L || val == mDATA_U || val == mPSK) {
-		bandwidths_ = FTX1_widths_DATA;
-		bw_vals_ = FTX1_wvals_PSK;
-	} else { // SSB, 
-		bandwidths_ = FTX1_widths_SSB;
-		bw_vals_ = FTX1_wvals_SSB;
-	}
+	get_bandwidth_data(val, bandwidths_, bw_vals_);
 
 	if (narrow)
 		bw = defBW_narrow[val];
@@ -1530,26 +1606,8 @@ int RIG_FTX1::def_bandwidth(int m)
 
 std::vector<std::string>& RIG_FTX1::bwtable(int n)
 {
-	switch (n) {
-		case mCW_U: case mCW_L:
-			return FTX1_widths_CW;
-		case mFM:
-			return FTX1_widths_FMwide;
-		case mAM:
-			return FTX1_widths_AMwide;
-		case mAM_N:
-			return FTX1_widths_AMnar;
-		case mRTTY_L: case mRTTY_U:
-			return FTX1_widths_RTTY;
-		case mDATA_L: case mDATA_U: case mPSK:
-			return FTX1_widths_DATA;
-		case mFM_N:
-			return FTX1_widths_DATA_FMN;
-		case mDATA_FM: case mC4FM_N: case mC4FM_VW:
-			return FTX1_widths_DATA_FM;
-		default: ;
-	}
-	return FTX1_widths_SSB;
+    get_bandwidth_data(n, bandwidths_, bw_vals_);
+    return bandwidths_;
 }
 
 void RIG_FTX1::set_modeA(int val)
