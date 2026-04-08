@@ -795,9 +795,9 @@ double vfo_;
 	virtual void change_channel(bool channel_up) {}
 	virtual void scan_operation(bool start) {}
 
-	virtual bool read_rx_dual() {}
+	virtual bool read_rx_dual() { return false; }
 	virtual void set_rx_dual(bool dual) {}
-	virtual bool read_tx_destination() {}
+	virtual bool read_tx_destination() { return false; }
 	virtual void set_tx_destination(bool sub_side) {}
 
     virtual std::vector<MemoryResponse> get_memory_channels() { return std::vector<MemoryResponse>(); }
