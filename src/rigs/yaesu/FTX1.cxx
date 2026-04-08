@@ -1548,7 +1548,10 @@ void RIG_FTX1::set_preamp(int val)
 
 	if (preamp_range > 0) {
       cmd[2] = '0' + preamp_range;
-      preamp_state = 1;
+
+	  if (preamp_state > 1) { // limit preamp for higher bands
+		preamp_state = 1;
+	  }
 	}
 
 	cmd[3] = '0' + preamp_state;
