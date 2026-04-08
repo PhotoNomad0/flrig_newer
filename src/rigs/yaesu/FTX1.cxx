@@ -77,7 +77,7 @@ static const char *vmd[] = {
   "C4FM_N", "C4FM_VW" };
 
 static const char FTX1_mode_chr[] =  { '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I' };
-static const char FTX1_mode_type[] = { 'L', 'U', 'U', 'U', 'U', 'L', 'L', 'L', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U' };
+static const char FTX1_mode_type[] = { 'L', 'U', 'U', 'U', 'U', 'L', 'L', 'L', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U' }; // upper or lower type
 
 static std::vector<std::string>FTX1_widths_SSB;
 static const char *vssb[] = {
@@ -123,7 +123,7 @@ static const char *vdata[] = {
 static int FTX1_wvals_PSK[] = {
 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18, 19, 20, 21, WVALS_LIMIT };
 
-static const int FTX1_wvals_AMFM[] = { 0, WVALS_LIMIT };
+static const int FTX1_wvals_AMFM[] = { 0, WVALS_LIMIT }; // generic for only one acceptable value
 
 static std::vector<std::string>FTX1_widths_AMwide;
 static const char *vamw[] = { "9000" };
@@ -1421,19 +1421,107 @@ int  RIG_FTX1::agc_val()
 	return (agcval);
 }
 
+const unsigned long long VHF = 144000000ULL;
+const unsigned long long UHF = 400000000ULL;
 
-bool RIG_FTX1::is_two_meter_plus()
+/**
+ * Retrieves the frequency of the currently active VFO.
+ *
+ * @return The frequency in Hz as an unsigned long long integer
+ *
+ * This function determines which VFO (A or B) is currently in use and retrieves
+ * its frequency. The active VFO is determined by the 'inuse' member variable:
+ * - If inuse == onB: Returns the frequency from VFO B
+ * - Otherwise: Returns the frequency from VFO A (default)
+ *
+ * The returned frequency value is in Hz and represents the current operating
+ * frequency of the transceiver on the active VFO.
+ */
+unsigned long long RIG_FTX1::getFreqForCurrentVfo()
 {
     unsigned long long freq = 0;
     if (inuse == onB)
         freq = get_vfoB();
     else
         freq = get_vfoA();
+    return freq;
+}
 
-    const bool two_meter_plus = freq >= 144000000ULL;
+/**
+ * Checks if the current VFO frequency is in the VHF band or higher (≥144 MHz).
+ *
+ * @return true if the current VFO frequency is 144 MHz or above (VHF/UHF/higher bands),
+ *         false if below 144 MHz (HF bands)
+ *
+ * This function retrieves the frequency from the currently active VFO (A or B) and
+ * compares it against the VHF threshold constant (144 MHz). This check is commonly
+ * used to determine:
+ * - Available preamplifier options (VHF/UHF bands have different preamp configurations)
+ * - Band-specific feature availability
+ * - Frequency-dependent operating constraints
+ *
+ * The VHF constant is defined as 144000000 Hz (144 MHz), which is the traditional
+ * boundary between HF and VHF amateur radio bands.
+ */
+bool RIG_FTX1::is_two_meter_plus()
+{
+    unsigned long long freq = getFreqForCurrentVfo();
+    const bool two_meter_plus = freq >= VHF;
     return two_meter_plus;
 }
 
+/**
+ * Determines the appropriate preamplifier range based on the current VFO frequency.
+ *
+ * @return The preamplifier range index:
+ *         - 0: HF bands (below 144 MHz) - standard preamp range
+ *         - 1: VHF band (144-400 MHz) - VHF preamp range
+ *         - 2: UHF band (400 MHz and above) - UHF preamp range
+ *
+ * This function retrieves the current frequency from the active VFO and determines
+ * which preamplifier range should be used based on the band:
+ * - Frequencies below 144 MHz (VHF threshold) use range 0
+ * - Frequencies from 144 MHz to 400 MHz (UHF threshold) use range 1
+ * - Frequencies at or above 400 MHz use range 2
+ *
+ * The preamplifier range affects which preamp settings are available and how
+ * the transceiver configures its front-end amplification circuitry for optimal
+ * performance in each frequency band.
+ */
+int RIG_FTX1::get_range_for_preamp()
+{
+    int preamp_range = 0;
+    unsigned long long freq = getFreqForCurrentVfo();
+    if (freq >= VHF) {
+        if (freq >= UHF) {
+            preamp_range = 2;
+        } else { // VHF
+            preamp_range = 1;
+        }
+    }
+    return preamp_range;
+}
+
+/**
+ * Determines the next preamp state based on current state and frequency band.
+ *
+ * @return The next preamp state value (0, 1, or 2)
+ *
+ * This function cycles through available preamp (preamplifier) states based on:
+ * - Current preamp_state value (0 = IPO/off, 1 = Amp 1, 2 = Amp 2)
+ * - Operating frequency band (VHF/UHF bands have limited preamp options)
+ *
+ * Behavior:
+ * - State 0 (IPO): Always transitions to state 1 (Amp 1)
+ * - State 1 (Amp 1):
+ *   - For VHF/UHF bands (≥144 MHz): Returns to state 0 (only one amp level available)
+ *   - For HF bands: Transitions to state 2 (Amp 2)
+ * - State 2 or higher: Returns to state 0 (IPO)
+ *
+ * The function checks if the current frequency is in the VHF/UHF range using
+ * is_two_meter_plus(), which determines whether only one amplifier level is
+ * available instead of two.
+ */
 int  RIG_FTX1::next_preamp()
 {
     const bool two_meter_plus = is_two_meter_plus();
@@ -1454,11 +1542,16 @@ int  RIG_FTX1::next_preamp()
 void RIG_FTX1::set_preamp(int val)
 {
 	preamp_state = val;
+    const int preamp_range = get_range_for_preamp();
+
 	cmd = "PA00;";
 
-	const bool two_meter_plus = is_two_meter_plus();
-	if (two_meter_plus && (preamp_state > 1)) { // limit preamp for higher bands
+	if (preamp_range > 0) {
+      cmd[2] = '0' + preamp_range;
+
+	  if (preamp_state > 1) { // limit preamp for higher bands
 		preamp_state = 1;
+	  }
 	}
 
 	cmd[3] = '0' + preamp_state;
@@ -1468,44 +1561,136 @@ void RIG_FTX1::set_preamp(int val)
 
 int RIG_FTX1::get_preamp()
 {
-	cmd = rsp = "PA0";
-	cmd += ';';
-	wait_char(';', 5, 100, "get pre", ASC);
+	const int preamp_range = get_range_for_preamp();
+
+	cmd = "PA0";
+    if (preamp_range > 0) {
+      cmd[2] = '0' + preamp_range;
+    }
+
+    rsp = cmd;
+    cmd += ';';
+
+	wait_char(';', 4, 100, "get pre", ASC);
 
 	gett("get_preamp()");
 
 	size_t p = replystr.rfind(rsp);
-	if (p != std::string::npos && p + 4 < replystr.length())
+	if (p != std::string::npos && p + 3 < replystr.length())
 		preamp_state = replystr[p+3] - '0';
 	return preamp_state;
 }
 
 static bool narrow = 0; // 0 - wide, 1 - narrow
 
+/**
+ * Retrieves bandwidth configuration data for a given mode.
+ *
+ * @param mode The operating mode for which to retrieve bandwidth data (e.g., mCW_U, mLSB, mFM)
+ * @param bandwidths Reference to a pointer that will be set to the appropriate bandwidth labels vector
+ * @param bw_vals Reference to a pointer that will be set to the appropriate bandwidth values array
+ *
+ * This function maps operating modes to their corresponding bandwidth options. Each mode has
+ * specific bandwidth choices available:
+ * - CW modes (CW-U, CW-L): Narrow bandwidths from 50Hz to 4000Hz
+ * - AM/FM modes: Fixed bandwidths (wide/narrow variants)
+ * - RTTY modes: Similar to CW bandwidth options
+ * - DATA modes: PSK-style bandwidth options
+ * - SSB modes (LSB, USB): Wide range from 300Hz to 4000Hz
+ *
+ * The function modifies the input pointer references to point to the appropriate static
+ * vectors and arrays containing bandwidth labels and values for the specified mode.
+ */
+void RIG_FTX1::get_bandwidth_data(const int mode, std::vector<std::string>& bandwidths, const int *&bw_vals)
+{
+	switch (mode) {
+		case mCW_U:
+		case mCW_L:
+            bandwidths = FTX1_widths_CW;
+            bw_vals = FTX1_wvals_CW;
+			break;
+
+		case mAM:
+			bandwidths = FTX1_widths_AMwide;
+		    bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mAM_N:
+			bandwidths = FTX1_widths_AMnar;
+			bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mFM:
+			bandwidths = FTX1_widths_FMwide;
+			bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mFM_N:
+			bandwidths = FTX1_widths_FMnar;
+			bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mDATA_FM:
+		case mC4FM_N:
+		case mC4FM_VW:
+			bandwidths = FTX1_widths_DATA_FM;
+			bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mDATA_FMN:
+			bandwidths = FTX1_widths_DATA_FMN;
+			bw_vals = FTX1_wvals_AMFM;
+			break;
+
+		case mRTTY_L:
+		case mRTTY_U:
+            bandwidths = FTX1_widths_RTTY;
+            bw_vals = FTX1_wvals_RTTY;
+			break;
+
+		case mDATA_L:
+		case mDATA_U:
+		case mPSK:
+            bandwidths = FTX1_widths_DATA;
+            bw_vals = FTX1_wvals_PSK;
+			break;
+
+		case mLSB:
+		case mUSB:
+		default:
+            bandwidths = FTX1_widths_SSB;
+            bw_vals = FTX1_wvals_SSB;
+			break;
+	}
+
+    int count = 0;
+    while (bw_vals[count] != WVALS_LIMIT) {
+        ++count;
+    }
+//     TRACE_STREAM(1, "get_bandwidth_data() mode=" << mode << ", str='" << FTX1modes_[mode] << "', bandwidths.len=" << bandwidths.size() << ", bw_vals.len=" << count);
+}
+
+/**
+ * Adjusts the bandwidth index for a given mode.
+ *
+ * @param val The operating mode for which to adjust bandwidth (e.g., mCW_U, mLSB, mFM)
+ * @return The bandwidth index appropriate for the mode and current narrow/wide setting
+ *
+ * This function retrieves the bandwidth configuration data for the specified mode
+ * and returns the default bandwidth index based on the current narrow/wide state.
+ * The narrow/wide state is determined by the global 'narrow' variable:
+ * - When narrow is true (1): Returns the narrow bandwidth index from defBW_narrow[]
+ * - When narrow is false (0): Returns the wide bandwidth index from defBW_wide[]
+ *
+ * The function also updates the class member variables bandwidths_ and bw_vals_
+ * to point to the appropriate bandwidth tables for the specified mode.
+ */
 int RIG_FTX1::adjust_bandwidth(int val)
 {
+//     TRACE_STREAM(1, "adjust_bandwidth() val=" << val );
+
 	int bw = 0;
-	if (val == mCW_U || val == mCW_L) {
-		bandwidths_ = FTX1_widths_CW;
-		bw_vals_ = FTX1_wvals_CW;
-	} else if (val == mFM || val == mAM || val == mFM_N || val == mDATA_FM || val == mAM_N) {
-		if (val == mFM) bandwidths_ = FTX1_widths_FMwide;
-		else if (val ==  mAM) bandwidths_ = FTX1_widths_AMwide;
-		else if (val == mAM_N) bandwidths_ = FTX1_widths_AMnar;
-		else if (val == mFM_N) bandwidths_ = FTX1_widths_FMnar;
-		else if (val == mDATA_FM) bandwidths_ = FTX1_widths_DATA_FM;
-		else if (val == mDATA_FMN) bandwidths_ = FTX1_widths_DATA_FMN;
-		bw_vals_ = FTX1_wvals_AMFM;
-	} else if (val == mRTTY_L || val == mRTTY_U) { // RTTY
-		bandwidths_ = FTX1_widths_RTTY;
-		bw_vals_ = FTX1_wvals_RTTY;
-	} else if (val == mDATA_L || val == mDATA_U) { // PSK
-		bandwidths_ = FTX1_widths_DATA;
-		bw_vals_ = FTX1_wvals_PSK;
-	} else {
-		bandwidths_ = FTX1_widths_SSB;
-		bw_vals_ = FTX1_wvals_SSB;
-	}
+	get_bandwidth_data(val, bandwidths_, bw_vals_);
 
 	if (narrow)
 		bw = defBW_narrow[val];
@@ -1530,26 +1715,10 @@ int RIG_FTX1::def_bandwidth(int m)
 
 std::vector<std::string>& RIG_FTX1::bwtable(int n)
 {
-	switch (n) {
-		case mCW_U: case mCW_L:
-			return FTX1_widths_CW;
-		case mFM:
-			return FTX1_widths_FMwide;
-		case mAM:
-			return FTX1_widths_AMwide;
-		case mAM_N :
-			return FTX1_widths_AMnar;
-		case mRTTY_L: case mRTTY_U:
-			return FTX1_widths_RTTY;
-		case mDATA_L: case mDATA_U:
-			return FTX1_widths_DATA;
-		case mFM_N:
-			return FTX1_widths_DATA_FMN;
-		case mDATA_FM:
-			return FTX1_widths_DATA_FM;
-		default: ;
-	}
-	return FTX1_widths_SSB;
+//     TRACE_STREAM(1, "bwtable() mode=" << n );
+
+    get_bandwidth_data(n, bandwidths_, bw_vals_);
+    return bandwidths_;
 }
 
 void RIG_FTX1::set_modeA(int val)
@@ -1628,12 +1797,76 @@ int RIG_FTX1::get_modeB()
 	return modeB;
 }
 
+int RIG_FTX1::parse_bw_index_from_reply(int mode, const std::string& prefix, int &bw_out)
+{
+    size_t p = replystr.rfind(prefix);
+    if (p == std::string::npos) return -1;
+    if (p + 6 >= replystr.length()) return -1;
+
+    replystr[p+6] = 0;
+    int bw_idx = fm_decimal(replystr.substr(p+4), 2);
+    get_bandwidth_data(mode, bandwidths_, bw_vals_);
+
+    const int *idx = bw_vals_;
+    int i = 0;
+    while (*idx != WVALS_LIMIT) {
+        if (*idx == bw_idx) break;
+        idx++;
+        i++;
+    }
+    if (*idx == WVALS_LIMIT){
+//         TRACE_STREAM(1, "parse_bw_index_from_reply() hit limit looking for bw_idx='" << bw_idx << "', i ='" << i << ", nb_state=" << nb_state);
+
+//         std::ostringstream bw_vals_dump;
+//         bw_vals_dump << "bw_vals_ contents: [";
+//         const int *dump_idx = bw_vals_;
+//         bool first = true;
+//         while (*dump_idx != WVALS_LIMIT) {
+//             if (!first) bw_vals_dump << ", ";
+//             bw_vals_dump << *dump_idx;
+//             first = false;
+//             dump_idx++;
+//         }
+//         bw_vals_dump << "]";
+//         TRACE_STREAM(1, "parse_bw_index_from_reply() " << bw_vals_dump.str());
+
+        i = 0; // default to first
+    }
+
+    bw_out = i;
+    return i;
+}
+
+/**
+ * Determines if a mode supports only one bandwidth option.
+ *
+ * @param mode The operating mode to check (e.g., mAM, mFM, mDATA_FM)
+ * @return true if the mode supports only one bandwidth, false otherwise
+ *
+ * This function checks whether a given operating mode has a single fixed
+ * bandwidth option. The following modes support only one bandwidth:
+ * - AM (mAM): Fixed at 9000 Hz
+ * - AM Narrow (mAM_N): Fixed at 6000 Hz
+ * - FM (mFM): Fixed at 16000 Hz
+ * - FM Narrow (mFM_N): Fixed at 9000 Hz
+ * - DATA FM (mDATA_FM): Fixed at 16000 Hz
+ * - DATA FM Narrow (mDATA_FMN): Fixed at 9000 Hz
+ * - C4FM Narrow (mC4FM_N): Fixed bandwidth
+ * - C4FM Voice Wide (mC4FM_VW): Fixed bandwidth
+ *
+ * All other modes (SSB, CW, RTTY, DATA, PSK) support multiple bandwidth options.
+ */
+bool RIG_FTX1::onlyOneBwSupported(int mode) const
+{
+    return mode == mAM || mode == mAM_N || mode == mFM || mode == mFM_N || mode == mDATA_FM || mode == mDATA_FMN || mode == mC4FM_N || mode == mC4FM_VW;
+}
+
 void RIG_FTX1::set_bwA(int val)
 {
 	int bw_indx = bw_vals_[val];
 	bwA = val;
 
-	if (modeA == mFM || modeA == mAM || modeA == mFM_N || modeA == mDATA_FM ) {
+	if (onlyOneBwSupported(modeA)) {
 		return;
 	}
 	cmd.clear();
@@ -1649,7 +1882,7 @@ void RIG_FTX1::set_bwA(int val)
 
 int RIG_FTX1::get_bwA()
 {
-	if (modeA == mFM || modeA == mAM || modeA == mFM_N || modeA == mDATA_FM) {
+	if (onlyOneBwSupported(modeA)) {
 		bwA = 0;
 		mode_bwA[modeA] = bwA;
 		return bwA;
@@ -1660,22 +1893,8 @@ int RIG_FTX1::get_bwA()
 
 	gett("get_bwA()");
 
-	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) return bwA;
-	if (p + 6 >= replystr.length()) return bwA;
+    if (parse_bw_index_from_reply(modeA, rsp, bwA) < 0) return bwA;
 
-	replystr[p+6] = 0;
-	int bw_idx = fm_decimal(replystr.substr(p+4), 2);
-
-	const int *idx = bw_vals_;
-	int i = 0;
-	while (*idx != WVALS_LIMIT) {
-		if (*idx == bw_idx) break;
-		idx++;
-		i++;
-	}
-	if (*idx == WVALS_LIMIT) i = 0;
-	bwA = i;
 	mode_bwA[modeA] = bwA;
 	return bwA;
 }
@@ -1685,12 +1904,12 @@ void RIG_FTX1::set_bwB(int val)
 	int bw_indx = bw_vals_[val];
 	bwB = val;
 
-	if (modeB == mFM || modeB == mAM || modeB == mFM_N || modeB == mDATA_FM) {
+	if (onlyOneBwSupported(modeB)) {
 		mode_bwB[modeB] = 0;
 		return;
 	}
 	cmd.clear();
-	cmd.append("SH00");
+	cmd.append("SH10");
 	cmd += '0' + bw_indx / 10;
 	cmd += '0' + bw_indx % 10;
 	cmd += ';';
@@ -1702,33 +1921,19 @@ void RIG_FTX1::set_bwB(int val)
 
 int RIG_FTX1::get_bwB()
 {
-	if (modeB == mFM || modeB == mAM || modeB == mFM_N || modeB == mDATA_FM) {
+	if (onlyOneBwSupported(modeB)) {
 		bwB = 0;
 		mode_bwB[modeB] = bwB;
 		return bwB;
 	}
-	cmd = rsp = "SH0";
+	cmd = rsp = "SH1";
 	cmd += ';';
 	wait_char(';', 7, 100, "get bw B", ASC);
 
 	gett("get_bwB()");
 
-	size_t p = replystr.rfind(rsp);
-	p = replystr.find(rsp);
-	if (p == std::string::npos) return bwB;
-	if (p + 6 >= replystr.length()) return bwB;
+    if (parse_bw_index_from_reply(modeB, rsp, bwB) < 0) return bwB;
 
-	replystr[p+6] = 0;
-	int bw_idx = fm_decimal(replystr.substr(p+4),2);
-	const int *idx = bw_vals_;
-	int i = 0;
-	while (*idx != WVALS_LIMIT) {
-		if (*idx == bw_idx) break;
-		idx++;
-		i++;
-	}
-	if (*idx == WVALS_LIMIT) i = 0;
-	bwB = i;
 	mode_bwB[modeB] = bwB;
 	return bwB;
 }

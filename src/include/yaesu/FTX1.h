@@ -44,6 +44,9 @@ public:
 	virtual unsigned long long get_vfoB();
 	virtual void set_vfoB(unsigned long long);
 
+    virtual unsigned long long getFreqForCurrentVfo();
+    virtual int get_range_for_preamp();
+
 	virtual int get_vfoAorB();
 
 	virtual bool twovfos();
@@ -75,6 +78,10 @@ public:
 
 	virtual void set_BANDWIDTHS(std::string s);
 	virtual std::string get_BANDWIDTHS();
+
+    void get_bandwidth_data(const int mode, std::vector<std::string>& bandwidths, const int *&bw_vals);
+    bool onlyOneBwSupported(int mode) const;
+    int parse_bw_index_from_reply(int mode, const std::string& prefix, int &bw_out);
 
 	virtual int  get_smeter();
 	virtual int  get_swr();
