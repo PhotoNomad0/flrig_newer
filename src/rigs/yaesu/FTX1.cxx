@@ -1797,6 +1797,36 @@ int RIG_FTX1::get_modeB()
 	return modeB;
 }
 
+/**
+ * Parses bandwidth index from transceiver reply string and maps it to the UI bandwidth index.
+ *
+ * @param mode The operating mode (e.g., mLSB, mCW_U, mFM) to determine which bandwidth table to use
+ * @param prefix The command prefix to search for in the reply string (e.g., "SH0", "SH1")
+ * @param bw_out Reference parameter that will be set to the resolved bandwidth index (0-based UI index)
+ * @return The bandwidth index on success, or -1 if parsing fails
+ *
+ * This function extracts the bandwidth index from a transceiver reply string and converts it from
+ * the radio's internal bandwidth value to the corresponding UI bandwidth index. The process involves:
+ *
+ * 1. Locating the command prefix in replystr (e.g., "SH0" for VFO A bandwidth)
+ * 2. Extracting the 2-digit bandwidth value at offset +4 from the prefix
+ * 3. Loading the appropriate bandwidth tables for the given mode
+ * 4. Searching the bandwidth values array (bw_vals_) to find a matching value
+ * 5. Returning the array index corresponding to that value
+ *
+ * Example reply string: "SH00013;" where:
+ * - "SH0" is the prefix (VFO A bandwidth)
+ * - "13" at position [p+4, p+5] is the bandwidth index from the radio
+ * - The function maps this to the UI index (e.g., 13 -> index 12 in the bandwidth array)
+ *
+ * If the bandwidth value from the radio is not found in the expected table (hits WVALS_LIMIT),
+ * the function defaults to index 0 (first/narrowest bandwidth). This can occur when:
+ * - The noise blanker state affects available bandwidths
+ * - The radio reports an unexpected/unsupported bandwidth value
+ *
+ * @note The function modifies replystr by null-terminating at position p+6
+ * @note Returns -1 if: prefix not found, reply string too short, or parsing fails
+ */
 int RIG_FTX1::parse_bw_index_from_reply(int mode, const std::string& prefix, int &bw_out)
 {
     size_t p = replystr.rfind(prefix);
