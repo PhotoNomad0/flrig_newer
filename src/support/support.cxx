@@ -4144,6 +4144,38 @@ void TRACED(scan_stop_start_now, void *d)
 	selrig->scan_operation(shift_start);
 }
 
+void TRACED(rx_selection_now, void *d)
+	TRACE_STREAM(1, "rx_selection_now() - called");
+	bool dual_rx = selrig->read_rx_dual();
+// 	TRACE_STREAM(1, "rx_selection_now() - currently dual_rx=" << dual_rx << ", toggling");
+	selrig->set_rx_dual(!dual_rx);
+	bool dual_rx_new = selrig->read_rx_dual();
+	if (dual_rx_new != !dual_rx){
+	    TRACE_STREAM(1, "rx_selection_now() - failed to toggle dual_rx to " << !dual_rx << "");
+	} else {
+	    TRACE_STREAM(1, "rx_selection_now() - dual_rx toggled to " << dual_rx_new << "");
+	}
+	const char *rx_srce = dual_rx_new ? "Dual Receiver" : "Single Receiver";
+    btn_rx_selection->label(rx_srce);
+    btn_rx_selection->redraw_label();
+}
+
+void TRACED(tx_selection_now, void *d)
+	TRACE_STREAM(1, "tx_selection_now() - called");
+	bool main_side_tx = selrig->read_tx_destination();
+// 	TRACE_STREAM(1, "tx_selection_now() - currently main_side_tx=" << main_side_tx << ", toggling");
+	selrig->set_tx_destination(!main_side_tx);
+	bool main_side_tx_new = selrig->read_tx_destination();
+    if (main_side_tx_new != !main_side_tx){
+        TRACE_STREAM(1, "tx_selection_nows() - failed to toggle main_side_tx to " << !main_side_tx << "");
+    } else {
+        TRACE_STREAM(1, "tx_selection_nows() - main_side_tx toggled to " << main_side_tx_new << "");
+    }
+    const char *tx_dest = main_side_tx_new ? "Main-Side TX" : "Sub-Side TX";
+    btn_tx_selection->label(tx_dest);
+    btn_tx_selection->redraw_label();
+}
+
 void TRACED(start_commands)
 
 	if (!progStatus.cmd_on_start1.empty()) send_st_ex_command(progStatus.cmd_on_start1);

@@ -185,6 +185,11 @@ public:
 	virtual void scan_operation(bool start);
 	virtual void power(bool on);
 
+	virtual bool read_rx_dual();
+	virtual void set_rx_dual(bool dual);
+	virtual bool read_tx_destination();
+	virtual void set_tx_destination(bool sub_side);
+
 	void get_nr_min_max_step(int &min, int &max, int &step) {
 		min = 1; max = 15; step = 1; }
 	void set_noise_reduction_val(int val);

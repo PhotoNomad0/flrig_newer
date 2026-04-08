@@ -791,9 +791,15 @@ double vfo_;
 	virtual void get_band_selection(int v) {}
 	virtual void vfo_mem_toggle() {}
 	virtual void power_off() {}
+	virtual void power(bool on) {}
 	virtual void change_channel(bool channel_up) {}
 	virtual void scan_operation(bool start) {}
-	virtual void power(bool on) {}
+
+	virtual bool read_rx_dual() {}
+	virtual void set_rx_dual(bool dual) {}
+	virtual bool read_tx_destination() {}
+	virtual void set_tx_destination(bool sub_side) {}
+
     virtual std::vector<MemoryResponse> get_memory_channels() { return std::vector<MemoryResponse>(); }
 	virtual bool get_current_memory(long long &memory_channel, std::string &memory_channel_tag) { return false; }
 	virtual void select_channel(int channel) {}
