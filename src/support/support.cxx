@@ -763,16 +763,39 @@ void read_auto_notch()
 	}
 }
 
+const char *last_nb_label = "";
+int last_nb_level = -1;
+
 // NOISE blanker
 void update_noise(void *d)
 {
-	btnNOISE->label(selrig->nb_label());
-	btnNOISE->value(progStatus.noise);
-	btnNOISE->redraw_label();
-	btnNOISE->redraw();
+    const char *currentLabel = selrig->nb_label();
+
+    if (currentLabel == last_nb_label) {
+         TRACE_STREAM(1, "update_noise() nb_label is unchanged at ''" << currentLabel << "'', skipping");
+    } else {
+        TRACE_STREAM(1, "update_noise() nb_label changed from '" << last_imode << "' to '" << currentLabel << "'");
+
+        last_nb_label = currentLabel;
+        btnNOISE->label(currentLabel);
+        btnNOISE->value(progStatus.noise);
+        btnNOISE->redraw_label();
+        btnNOISE->redraw();
+	}
+
 	if (sldr_nb_level) {
-        sldr_nb_level->value(progStatus.nb_level);
-        sldr_nb_level->redraw();
+	   int currentNbLevel = progStatus.nb_level;
+
+	   if (currentNbLevel == last_nb_level) {
+             TRACE_STREAM(1, "update_noise() nb_level is unchanged at ''" << currentNbLevel << "'', skipping");
+        } else {
+            TRACE_STREAM(1, "update_noise() nb_level changed from '" << last_nb_level << "' to '" << currentNbLevel << "'");
+
+            last_nb_level = currentNbLevel;
+
+            sldr_nb_level->value(currentNbLevel);
+            sldr_nb_level->redraw();
+        }
 	}
 }
 
