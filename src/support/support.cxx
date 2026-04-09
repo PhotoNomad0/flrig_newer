@@ -432,7 +432,16 @@ void TRACED(updateUI, void *)
 
 }
 
+int  last_imode = -1;
+
 void TRACED(set_Mode_BW_control, void *)
+    if (vfo->imode == last_imode) {
+//         TRACE_STREAM(1, "set_Mode_BW_control() mode is unchanged at " << vfo->imode << ", skipping");
+        return;
+    }
+
+    TRACE_STREAM(1, "set_Mode_BW_control() mode changed from " << last_imode << "' to " << vfo->imode);
+    last_imode = vfo->imode;
 
 	opMODE->index(vfo->imode);
 	opMODE->redraw();
