@@ -772,7 +772,7 @@ void update_noise(void *d)
     const char *currentLabel = selrig->nb_label();
 
     if (currentLabel == last_nb_label) {
-         TRACE_STREAM(1, "update_noise() nb_label is unchanged at ''" << currentLabel << "'', skipping");
+//          TRACE_STREAM(1, "update_noise() nb_label is unchanged at ''" << currentLabel << "'', skipping");
     } else {
         TRACE_STREAM(1, "update_noise() nb_label changed from '" << last_imode << "' to '" << currentLabel << "'");
 
@@ -787,7 +787,7 @@ void update_noise(void *d)
 	   int currentNbLevel = progStatus.nb_level;
 
 	   if (currentNbLevel == last_nb_level) {
-             TRACE_STREAM(1, "update_noise() nb_level is unchanged at ''" << currentNbLevel << "'', skipping");
+//              TRACE_STREAM(1, "update_noise() nb_level is unchanged at ''" << currentNbLevel << "'', skipping");
         } else {
             TRACE_STREAM(1, "update_noise() nb_level changed from '" << last_nb_level << "' to '" << currentNbLevel << "'");
 
