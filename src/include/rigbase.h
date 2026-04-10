@@ -794,6 +794,7 @@ double vfo_;
 	virtual void power(bool on) {}
 	virtual void change_channel(bool channel_up) {}
 	virtual void scan_operation(bool start) {}
+	virtual bool is_in_memory_mode() { return false; }
 
 	virtual bool read_rx_dual() { return false; }
 	virtual void set_rx_dual(bool dual) {}

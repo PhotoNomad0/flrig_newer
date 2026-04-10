@@ -2324,8 +2324,15 @@ void TRACED(init_ftx1_tab)
     if (selrig->has_vfo_mem) { // VFO memory control, swap out these buttons
         trace(1, "init_ftx1_tab() - has_vfo_mem support");
         btn_vfo_mem->show();
-        btn_channel_up_dn->show();
-        btn_scan_stop_start->show();
+
+        const bool in_memory_mode = selrig->is_in_memory_mode();
+        if (in_memory_mode) {
+            btn_channel_up_dn->show();
+            btn_scan_stop_start->show();
+        } else { // not in memory mode
+            btn_channel_up_dn->hide();
+            btn_scan_stop_start->hide();
+        }
 
         // get list of memories from rig and add to channel selector combo box
         std::vector<MemoryResponse> memories = selrig->get_memory_channels();

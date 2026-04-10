@@ -183,6 +183,7 @@ public:
     virtual void vfo_mem_toggle();
 	virtual void change_channel(bool channel_up);
 	virtual void scan_operation(bool start);
+	virtual bool is_in_memory_mode();
 	virtual void power(bool on);
 
 	virtual bool read_rx_dual();

@@ -387,6 +387,68 @@ void RIG_FTX1::vfo_mem_toggle()
 	sett("vfo_mem_toggle");
 }
 
+/**
+ * Checks if the transceiver is in memory mode.
+ *
+ * @return true if the transceiver is operating in memory mode (recalling a memory channel),
+ *         false if in VFO mode
+ *
+ * This function queries the transceiver to determine its current operating mode
+ * (VFO or Memory) by sending the VM (VFO/Memory) command. The command format is:
+ * - "VM0;" for VFO A (when inuse == onA)
+ * - "VM1;" for VFO B (when inuse == onB)
+ *
+ * The transceiver responds with "VMx00;" for VFO mode or "VMxnn;" for memory mode,
+ * where 'x' is the VFO selector (0/1) and 'nn' is a non-zero value indicating memory mode.
+ *
+ * The function:
+ * 1. Sends the appropriate VM command based on the active VFO
+ * 2. Waits for a response in the format "VMxnn;"
+ * 3. Extracts the mode indicator (2 characters starting at position p+3)
+ * 4. Returns true if the mode string is not "00" (indicating memory mode)
+ *
+ * @note The function waits up to 100ms for a response with maximum 6 characters
+ * @note Logs trace information at level 1 including the reply string, mode string, and result
+ * @note There is a syntax error in the original code: extra closing parenthesis in the comparison
+ */
+bool RIG_FTX1::is_in_memory_mode()
+{
+	if (inuse == onA)
+		cmd = "VM0";
+	else // onB
+		cmd = "VM1";
+
+	rsp = cmd;
+	cmd += ";";
+	wait_char(';', 6, 100, "is_in_memory_mode()", ASC);
+	size_t p = replystr.rfind(rsp);
+	bool memory_mode = false;
+	std::string mode_str = "";
+    if (p != std::string::npos && p + 5 < replystr.length()) {
+        mode_str = replystr.substr(p+3, 2);
+		memory_mode = (mode_str != "00"); // Fixed: removed extra closing parenthesis
+    }
+    TRACE_STREAM(1, "is_in_memory_mode() replystr='" << replystr << "', mode_str='" << mode_str  << "', memory_mode=" << memory_mode);
+	return memory_mode;
+}
+
+/**
+ * Changes the memory channel up or down.
+ *
+ * @param channel_up true to increment to the next channel, false to decrement to the previous channel
+ *
+ * This function sends a channel change command (CH) to the transceiver to step through
+ * memory channels sequentially. The command format is:
+ * - "CH0;" to increment to the next higher channel
+ * - "CH1;" to decrement to the next lower channel
+ *
+ * The function constructs the appropriate command based on the channel_up parameter,
+ * sends it to the transceiver, and logs the operation using sett() with either
+ * "change_channel UP" or "change_channel DOWN" for tracing purposes.
+ *
+ * @note This function does not verify if the command was successful
+ * @note The actual channel number after the operation is not returned by this function
+ */
 void RIG_FTX1::change_channel(bool channel_up)
 {
 	cmd = channel_up ? "CH0;" : "CH1;";
@@ -398,6 +460,26 @@ void RIG_FTX1::change_channel(bool channel_up)
 	}
 }
 
+/**
+ * Starts or stops the scan operation on the transceiver.
+ *
+ * @param start true to start scanning, false to stop scanning
+ *
+ * This function controls the scan operation by sending the SC (Scan) command to the transceiver.
+ * The command format varies based on which VFO is currently active:
+ * - "SC0x;" for VFO A (when inuse == onA)
+ * - "SC1x;" for VFO B (when inuse == onB)
+ *
+ * where 'x' is:
+ * - '1' to start scanning
+ * - '0' to stop scanning
+ *
+ * The function constructs the appropriate command based on the active VFO and the start parameter,
+ * sends it to the transceiver, and logs the operation for tracing purposes.
+ *
+ * @note This function does not verify if the command was successful
+ * @note The scan operation behavior depends on the transceiver's current configuration
+ */
 void RIG_FTX1::scan_operation(bool start)
 {
 	if (inuse == onA)
