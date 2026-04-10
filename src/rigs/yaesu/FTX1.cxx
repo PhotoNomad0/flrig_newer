@@ -428,7 +428,118 @@ void RIG_FTX1::power(bool on)
 	}
 }
 
+/**
+ * Reads the dual receive (RX) mode status from the transceiver.
+ *
+ * @return true if dual receive mode is enabled (both VFO A and B receiving),
+ *         false if single receive mode (only active VFO receiving)
+ *
+ * This function queries the transceiver using the FR (Function Receive) command
+ * to determine if dual receive mode is active. The transceiver responds with:
+ * - "FR00;" when dual receive is enabled (both VFOs receiving)
+ * - "FR01;" when single receive mode (only active VFO receiving)
+ *
+ * The function sends "FR;" command and waits for a response in the format "FRx;"
+ * where x indicates the receive mode. It parses the response to extract the mode
+ * character at position 3 and returns true if it equals '0' (dual mode).
+ *
+ * @note The function uses ASC (ASCII) format for communication
+ * @note Waits up to 100ms for a response with maximum 5 characters
+ * @note Logs trace information at level 1 including the reply string and result
+ */
+bool RIG_FTX1::read_rx_dual()
+{
+	cmd = rsp = "FR";
+	cmd += ";";
+	wait_char(';', 5, 100, "read_rx_dual()", ASC);
+	size_t p = replystr.rfind(rsp);
+	bool dual = false;
+    if (p != std::string::npos && p + 4 < replystr.length()) {
+		dual = (replystr[p + 3] == '0');
+    }
+    TRACE_STREAM(1, "read_rx_dual() replystr=" << replystr << ", dual=" << dual);
+	return dual;
+}
 
+/**
+ * Sets the dual receive (RX) mode on the transceiver.
+ *
+ * @param dual true to enable dual receive mode (both VFO A and B receiving),
+ *             false to enable single receive mode (only active VFO receiving)
+ *
+ * This function configures the transceiver's receive mode using the FR (Function Receive) command.
+ * The command format is "FR0x;" where x indicates the desired mode:
+ * - '0' enables dual receive mode (both VFOs receive simultaneously)
+ * - '1' enables single receive mode (only the active VFO receives)
+ *
+ * The function constructs the appropriate command string and sends it to the transceiver
+ * without waiting for a response.
+ *
+ * @note This function does not verify if the command was successful
+ * @note The commented trace line can be uncommented for debugging purposes
+ */
+void RIG_FTX1::set_rx_dual(bool dual)
+{
+    const char rxChar = dual ? '0' : '1';
+	cmd = std::string("FR0") + rxChar + ";";
+	sendCommand(cmd);
+	sett("set_rx_dual()");
+//     TRACE_STREAM(1, "set_rx_dual() dual=" << dual << ", cmd=''" << cmd << "'', replystr=''" << replystr << "'");
+}
+
+/**
+ * Reads the transmit (TX) destination setting from the transceiver.
+ *
+ * @return true if main-side is the TX destination,
+ *         false if sub-side is the TX destination
+ *
+ * The function sends "FT;" command and waits for a response in the format "FTx;"
+ * where x indicates the TX destination. It parses the response to extract the
+ * destination character at position 2 and returns true if it equals '0' (main VFO).
+ *
+ * @note The function uses ASC (ASCII) format for communication
+ * @note Waits up to 100ms for a response with maximum 4 characters
+ * @note Logs trace information at level 1 including the reply string and result
+ */
+bool RIG_FTX1::read_tx_destination()
+{
+	cmd = rsp = "FT";
+	cmd += ";";
+	wait_char(';', 4, 100, "read_tx_destination()", ASC);
+	size_t p = replystr.rfind(rsp);
+	bool main_side = false;
+    if (p != std::string::npos && p + 3 < replystr.length()) {
+		main_side = (replystr[p + 2] == '0');
+    }
+    TRACE_STREAM(1, "read_tx_destination() replystr=" << replystr << ", main_side=" << main_side);
+	return main_side;
+}
+
+/**
+ * Sets the transmit (TX) destination VFO on the transceiver.
+ *
+ * @param main_side true to set main VFO as TX destination,
+ *                  false to set sub VFO as TX destination
+ *
+ * This function configures which VFO (main or sub) will be used for transmission
+ * using the FT (Function Transmit) command. The command format is "FTx;" where:
+ * - '0' sets the main VFO as TX destination
+ * - '1' sets the sub VFO as TX destination
+ *
+ * The function constructs the appropriate command string and sends it to the transceiver
+ * without waiting for a response.
+ *
+ * @note This function does not verify if the command was successful
+ * @note The commented trace line can be uncommented for debugging purposes
+ */
+void RIG_FTX1::set_tx_destination(bool main_side)
+{
+    const char mainChar = main_side ? '0' : '1';
+    cmd = std::string("FT") + mainChar + ";";
+	sendCommand(cmd);
+	sett("set_tx_destination()");
+//     TRACE_STREAM(1, "set_tx_destination() main_side=" << main_side << ", cmd=''" << cmd << "'', replystr=''" << replystr << "'");
+}
 /**
  * Removes leading and trailing whitespace from a string.
  *
@@ -1797,6 +1908,36 @@ int RIG_FTX1::get_modeB()
 	return modeB;
 }
 
+/**
+ * Parses bandwidth index from transceiver reply string and maps it to the UI bandwidth index.
+ *
+ * @param mode The operating mode (e.g., mLSB, mCW_U, mFM) to determine which bandwidth table to use
+ * @param prefix The command prefix to search for in the reply string (e.g., "SH0", "SH1")
+ * @param bw_out Reference parameter that will be set to the resolved bandwidth index (0-based UI index)
+ * @return The bandwidth index on success, or -1 if parsing fails
+ *
+ * This function extracts the bandwidth index from a transceiver reply string and converts it from
+ * the radio's internal bandwidth value to the corresponding UI bandwidth index. The process involves:
+ *
+ * 1. Locating the command prefix in replystr (e.g., "SH0" for VFO A bandwidth)
+ * 2. Extracting the 2-digit bandwidth value at offset +4 from the prefix
+ * 3. Loading the appropriate bandwidth tables for the given mode
+ * 4. Searching the bandwidth values array (bw_vals_) to find a matching value
+ * 5. Returning the array index corresponding to that value
+ *
+ * Example reply string: "SH00013;" where:
+ * - "SH0" is the prefix (VFO A bandwidth)
+ * - "13" at position [p+4, p+5] is the bandwidth index from the radio
+ * - The function maps this to the UI index (e.g., 13 -> index 12 in the bandwidth array)
+ *
+ * If the bandwidth value from the radio is not found in the expected table (hits WVALS_LIMIT),
+ * the function defaults to index 0 (first/narrowest bandwidth). This can occur when:
+ * - The noise blanker state affects available bandwidths
+ * - The radio reports an unexpected/unsupported bandwidth value
+ *
+ * @note The function modifies replystr by null-terminating at position p+6
+ * @note Returns -1 if: prefix not found, reply string too short, or parsing fails
+ */
 int RIG_FTX1::parse_bw_index_from_reply(int mode, const std::string& prefix, int &bw_out)
 {
     size_t p = replystr.rfind(prefix);

@@ -2319,6 +2319,8 @@ void TRACED(init_special_controls)
 
 void TRACED(init_ftx1_tab)
     btn_power_off->show();
+    btn_rx_selection->show();
+    btn_tx_selection->show();
     if (selrig->has_vfo_mem) { // VFO memory control, swap out these buttons
         trace(1, "init_ftx1_tab() - has_vfo_mem support");
         btn_vfo_mem->show();

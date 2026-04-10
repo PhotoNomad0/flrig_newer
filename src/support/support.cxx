@@ -432,7 +432,16 @@ void TRACED(updateUI, void *)
 
 }
 
+int  last_imode = -1;
+
 void TRACED(set_Mode_BW_control, void *)
+    if (vfo->imode == last_imode) {
+//         TRACE_STREAM(1, "set_Mode_BW_control() mode is unchanged at " << vfo->imode << ", skipping");
+        return;
+    }
+
+    TRACE_STREAM(1, "set_Mode_BW_control() mode changed from " << last_imode << "' to " << vfo->imode);
+    last_imode = vfo->imode;
 
 	opMODE->index(vfo->imode);
 	opMODE->redraw();
@@ -754,16 +763,39 @@ void read_auto_notch()
 	}
 }
 
+const char *last_nb_label = "";
+int last_nb_level = -1;
+
 // NOISE blanker
 void update_noise(void *d)
 {
-	btnNOISE->label(selrig->nb_label());
-	btnNOISE->value(progStatus.noise);
-	btnNOISE->redraw_label();
-	btnNOISE->redraw();
+    const char *currentLabel = selrig->nb_label();
+
+    if (currentLabel == last_nb_label) {
+//          TRACE_STREAM(1, "update_noise() nb_label is unchanged at ''" << currentLabel << "'', skipping");
+    } else {
+        TRACE_STREAM(1, "update_noise() nb_label changed from '" << last_imode << "' to '" << currentLabel << "'");
+
+        last_nb_label = currentLabel;
+        btnNOISE->label(currentLabel);
+        btnNOISE->value(progStatus.noise);
+        btnNOISE->redraw_label();
+        btnNOISE->redraw();
+	}
+
 	if (sldr_nb_level) {
-        sldr_nb_level->value(progStatus.nb_level);
-        sldr_nb_level->redraw();
+	   int currentNbLevel = progStatus.nb_level;
+
+	   if (currentNbLevel == last_nb_level) {
+//              TRACE_STREAM(1, "update_noise() nb_level is unchanged at ''" << currentNbLevel << "'', skipping");
+        } else {
+            TRACE_STREAM(1, "update_noise() nb_level changed from '" << last_nb_level << "' to '" << currentNbLevel << "'");
+
+            last_nb_level = currentNbLevel;
+
+            sldr_nb_level->value(currentNbLevel);
+            sldr_nb_level->redraw();
+        }
 	}
 }
 
@@ -4142,6 +4174,38 @@ void TRACED(scan_stop_start_now, void *d)
 	bool shift_start = (shift != 0);
 	TRACE_STREAM(1, "scan_stop_start_now(): shift_start=" << shift_start);
 	selrig->scan_operation(shift_start);
+}
+
+void TRACED(rx_selection_now, void *d)
+	TRACE_STREAM(1, "rx_selection_now() - called");
+	bool dual_rx = selrig->read_rx_dual();
+// 	TRACE_STREAM(1, "rx_selection_now() - currently dual_rx=" << dual_rx << ", toggling");
+	selrig->set_rx_dual(!dual_rx);
+	bool dual_rx_new = selrig->read_rx_dual();
+	if (dual_rx_new != !dual_rx){
+	    TRACE_STREAM(1, "rx_selection_now() - failed to toggle dual_rx to " << !dual_rx << "");
+	} else {
+	    TRACE_STREAM(1, "rx_selection_now() - dual_rx toggled to " << dual_rx_new << "");
+	}
+	const char *rx_srce = dual_rx_new ? "Dual Receiver" : "Single Receiver";
+    btn_rx_selection->label(rx_srce);
+    btn_rx_selection->redraw_label();
+}
+
+void TRACED(tx_selection_now, void *d)
+	TRACE_STREAM(1, "tx_selection_now() - called");
+	bool main_side_tx = selrig->read_tx_destination();
+// 	TRACE_STREAM(1, "tx_selection_now() - currently main_side_tx=" << main_side_tx << ", toggling");
+	selrig->set_tx_destination(!main_side_tx);
+	bool main_side_tx_new = selrig->read_tx_destination();
+    if (main_side_tx_new != !main_side_tx){
+        TRACE_STREAM(1, "tx_selection_nows() - failed to toggle main_side_tx to " << !main_side_tx << "");
+    } else {
+        TRACE_STREAM(1, "tx_selection_nows() - main_side_tx toggled to " << main_side_tx_new << "");
+    }
+    const char *tx_dest = main_side_tx_new ? "Main-Side TX" : "Sub-Side TX";
+    btn_tx_selection->label(tx_dest);
+    btn_tx_selection->redraw_label();
 }
 
 void TRACED(start_commands)

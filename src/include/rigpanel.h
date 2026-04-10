@@ -108,6 +108,8 @@ extern Fl_Light_Button *btnB;
 extern Fl_Box *labelMEMORY;
 extern Fl_Box *label_mem_channel;
 extern Fl_ComboBox *channel_selector;
+extern Fl_Button *btn_rx_selection;
+extern Fl_Button *btn_tx_selection;
 
 extern Fl_Button *btnTune;
 extern Fl_Light_Button *btn_tune_on_off;

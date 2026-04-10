@@ -79,6 +79,8 @@ Fl_Group *tcpip_box = (Fl_Group *)0;
 Fl_Box *labelMEMORY = (Fl_Box *)0;
 Fl_Box *label_mem_channel = (Fl_Box *)0;
 Fl_ComboBox *channel_selector = (Fl_ComboBox *)0;
+Fl_Button *btn_rx_selection = (Fl_Light_Button *)0;
+Fl_Button *btn_tx_selection = (Fl_Light_Button *)0;
 
 Fl_Output *txt_encA=(Fl_Output *)0;
 
@@ -1056,6 +1058,20 @@ static void cb_btn_scan_stop_start( Fl_Button *o, void *) {
 		(Fl::event_button() == FL_RIGHT_MOUSE));
 	size_t shift_ = shift ? 1 : 0;
 	scan_stop_start_now((void *) shift_);
+}
+
+static void cb_rx_selection( Fl_Button *o, void *) {
+	bool shift = (((Fl::event_state() & FL_SHIFT) == FL_SHIFT) ||
+		(Fl::event_button() == FL_RIGHT_MOUSE));
+	size_t shift_ = shift ? 1 : 0;
+	rx_selection_now((void *) shift_);
+}
+
+static void cb_tx_selection( Fl_Button *o, void *) {
+	bool shift = (((Fl::event_state() & FL_SHIFT) == FL_SHIFT) ||
+		(Fl::event_button() == FL_RIGHT_MOUSE));
+	size_t shift_ = shift ? 1 : 0;
+	tx_selection_now((void *) shift_);
 }
 
 //static void cb_kxpa_enabled(Fl_Check_Button* o, void *) {
