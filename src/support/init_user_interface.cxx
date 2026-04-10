@@ -2334,18 +2334,7 @@ void TRACED(init_ftx1_tab)
             btn_scan_stop_start->hide();
         }
 
-        // get list of memories from rig and add to channel selector combo box
-        std::vector<MemoryResponse> memories = selrig->get_memory_channels();
-        saveChannels(memories);
-        channel_selector->show();
-
-        for (size_t i = 0; i < memories.size(); i++) {
-            std::string name = memories[i].Tag.empty() ? memories[i].ChannelNum : memories[i].Tag;
-            int channel = std::stoi(memories[i].ChannelNum);
-            std::string label = std::to_string(channel) + " - " + name;
-            TRACE_STREAM(1, "init_ftx1_tab() - adding channel=" << label );
-            channel_selector->add(label.c_str());
-        }
+    	channel_selector->false();
     }
 }
 

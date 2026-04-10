@@ -319,6 +319,32 @@ void TRACED(update_vfoAorB, void *d)
 bool memory_mode_init = false;
 bool last_in_memory_mode = false;
 
+/**
+* @brief Initializes FTX-1 memory channels by retrieving and populating channel selector
+* 
+* Retrieves the list of memory channels from the transceiver, saves them to storage,
+* and populates the channel selector combo box with channel numbers and names.
+* Each entry is formatted as "channel_number - name", where the name defaults to the
+* channel number if no tag is available.
+*/
+static void init_ftx1_memory_channels()
+{
+	if (channel_selector) {
+		// get list of memories from rig and add to channel selector combo box
+		std::vector<MemoryResponse> memories = selrig->get_memory_channels();
+		saveChannels(memories);
+		channel_selector->show();
+
+		for (size_t i = 0; i < memories.size(); i++) {
+			std::string name = memories[i].Tag.empty() ? memories[i].ChannelNum : memories[i].Tag;
+			int channel = std::stoi(memories[i].ChannelNum);
+			std::string label = std::to_string(channel) + " - " + name;
+			TRACE_STREAM(1, "init_ftx1_memory_channels() - adding channel=" << label );
+			channel_selector->add(label.c_str());
+		}
+	}
+}
+
 void read_vfo()
 {
 	if (xcvr_name == rig_K3.name_) {
@@ -355,6 +381,8 @@ void read_vfo()
                     labelMEMORY->label(memory_channel_str.c_str());
                     labelMEMORY->redraw_label();
                 }
+    			
+    			init_ftx1_memory_channels();
 
                 snprintf(tag_, sizeof(tag_), "%s", memory_channel_tag.c_str());
     // 			TRACE_STREAM(1, "read_vfo() - get_current_memory tag_=" << tag_ );
