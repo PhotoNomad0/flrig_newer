@@ -2334,7 +2334,7 @@ void TRACED(init_ftx1_tab)
             btn_scan_stop_start->hide();
         }
 
-    	channel_selector->false();
+    	channel_selector->hide();
     }
 }
 

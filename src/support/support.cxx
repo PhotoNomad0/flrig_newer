@@ -345,6 +345,8 @@ static void init_ftx1_memory_channels()
 	}
 }
 
+std::string lastTag_ = "";
+
 void read_vfo()
 {
 	if (xcvr_name == rig_K3.name_) {
@@ -354,7 +356,6 @@ void read_vfo()
 
 	if (xcvr_name == rig_FTX1.name_) {
 //     	trace(2,"read_vfo(), rig_FTX1.name_", rig_FTX1.name_.c_str());
-		static char tag_[20];
 		long long memory_channel = 0;
 		std::string memory_channel_tag = "";
 		bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
@@ -381,14 +382,15 @@ void read_vfo()
                     labelMEMORY->label(memory_channel_str.c_str());
                     labelMEMORY->redraw_label();
                 }
-    			
+			
     			init_ftx1_memory_channels();
 
-                snprintf(tag_, sizeof(tag_), "%s", memory_channel_tag.c_str());
-    // 			TRACE_STREAM(1, "read_vfo() - get_current_memory tag_=" << tag_ );
                 if (label_mem_channel) {
-                    label_mem_channel->label(tag_);
-                    label_mem_channel->redraw_label();
+                    if (memory_channel_tag != lastTag_) {
+                        label_mem_channel->label(memory_channel_tag.c_str());
+                        label_mem_channel->redraw_label();
+                        lastTag_ = memory_channel_tag;
+                    }
                 }
                 if (channel_selector) channel_selector->show();
             } else  {
@@ -477,7 +479,8 @@ void TRACED(updateUI, void *)
 
 }
 
-int  last_imode = -1;
+int  last_imode = -1; // for determining when mode has changed
+int lastbw = -1; // for determining when bw has changed
 
 void TRACED(set_Mode_BW_control, void *)
     if (vfo->imode == last_imode) {
@@ -645,7 +648,6 @@ void set_Kx_bandwidths(void *)
 	opBW_B->redraw();
 }
 
-int lastbw = -1;
 void TRACED(read_bandwidth)
 	if (xcvr_name == rig_K2.name_ || xcvr_name == rig_K3.name_ ) {
 		vfoA.iBW = vfo->iBW = selrig->get_bwA();//nu_BW;
