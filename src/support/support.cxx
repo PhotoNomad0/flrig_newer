@@ -375,9 +375,9 @@ void read_vfo()
                 if (labelMEMORY) labelMEMORY->show();
                 if (txt_xcvr_synch) txt_xcvr_synch->hide();
                 if (label_mem_channel) label_mem_channel->show();
-    // 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel=" << memory_channel );
+    			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel=" << memory_channel );
                 std::string memory_channel_str = std::to_string(memory_channel);
-    // 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
+    			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
 
                 if (labelMEMORY) {
                     labelMEMORY->label(memory_channel_str.c_str());
@@ -700,6 +700,7 @@ void TRACED(read_bandwidth)
 	}
 	rig_trace(1, s.str().c_str());
 	if (lastbw != vfo->iBW) {
+        TRACE_STREAM(1, "read_bandwidth() - bw changed from lastbw=" << lastbw << " to " << vfo->iBW );
     	Fl::awake(setBWControl);
 		deb_trace(1, s.str().c_str());
 		lastbw = vfo->iBW;
