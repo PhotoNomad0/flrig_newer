@@ -346,6 +346,7 @@ static void init_ftx1_memory_channels()
 }
 
 std::string lastTag_ = "";
+long long last_memory_channel = -1;
 
 void read_vfo()
 {
@@ -386,14 +387,13 @@ void read_vfo()
     			init_ftx1_memory_channels();
 
                 if (label_mem_channel) {
-                    if (memory_channel_tag != lastTag_) {
-                        label_mem_channel->label(memory_channel_tag.c_str());
-                        label_mem_channel->redraw_label();
-                        lastTag_ = memory_channel_tag;
-                    }
+                    label_mem_channel->label(memory_channel_tag.c_str());
+                    label_mem_channel->redraw_label();
+                    lastTag_ = memory_channel_tag;
                 }
+
                 if (channel_selector) channel_selector->show();
-            } else  {
+            } else  { // in vfo_mode
                 labelMEMORY->hide();
                 if (label_mem_channel) {
                     label_mem_channel->label("");
@@ -406,7 +406,31 @@ void read_vfo()
                 if (channel_selector) channel_selector->hide();
             }
         }
+        
+        if (label_mem_channel) {
+            if (in_memory_mode) {
+              if (memory_channel != last_memory_channel) { // only update if changed
+     			TRACE_STREAM(1, "read_vfo() - memory_channel changed from=" << last_memory_channel << " to " << memory_channel );
+
+                if (memory_channel_tag != lastTag_) {
+        			TRACE_STREAM(1, "read_vfo() - memory_channel_tag changed from=''" << lastTag_ << "'' to ''" << memory_channel_tag << "'" );
+        			
+                    label_mem_channel->label(memory_channel_tag.c_str());
+                    label_mem_channel->redraw_label();
+                    lastTag_ = memory_channel_tag;
+    
+                    if (channel_selector) {
+                        channel_selector->label("");
+                        channel_selector->redraw_label();
+                    }
+                }
+              }
+            } else { // not in memory mode
+                last_memory_channel = -1;
+            }
+        }
     }
+
 // transceiver changed ?
 	trace(1,"read_vfo()");
 	unsigned long long  freq;
@@ -631,8 +655,10 @@ void TRACED(setBWControl, void *)
 		opBW_A->hide();
 		opBW_B->hide();
 
-		if (xcvr_name == rig_KX3.name_ || xcvr_name == rig_K4.name_)
+		if (xcvr_name == rig_KX3.name_ || xcvr_name == rig_K4.name_) {
 			return;
+        }
+
 //		if (vfo->iBW != opBW->index())
 			opBW->index(vfo->iBW);
 		opBW->show();
