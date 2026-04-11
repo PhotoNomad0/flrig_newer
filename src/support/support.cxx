@@ -500,6 +500,7 @@ void TRACED(set_Mode_BW_control, void *)
 		return;
 
 	opBW->index(vfo->iBW);
+	lastbw = vfo->iBW;
 	opBW->redraw();
 	opBW->show();
 
@@ -671,11 +672,11 @@ void TRACED(read_bandwidth)
 	}
 	rig_trace(1, s.str().c_str());
 	if (lastbw != vfo->iBW) {
+    	Fl::awake(setBWControl);
 		deb_trace(1, s.str().c_str());
 		lastbw = vfo->iBW;
 	}
 
-	Fl::awake(setBWControl);
 	Fl::awake(updateTCI);
 	Fl::awake(updateFLEX1500);
 }
