@@ -321,7 +321,7 @@ bool last_in_memory_mode = false;
 
 /**
 * @brief Initializes FTX-1 memory channels by retrieving and populating channel selector
-* 
+*
 * Retrieves the list of memory channels from the transceiver, saves them to storage,
 * and populates the channel selector combo box with channel numbers and names.
 * Each entry is formatted as "channel_number - name", where the name defaults to the
@@ -383,7 +383,7 @@ void read_vfo()
                     labelMEMORY->label(memory_channel_str.c_str());
                     labelMEMORY->redraw_label();
                 }
-			
+
     			init_ftx1_memory_channels();
 
                 if (label_mem_channel) {
@@ -406,7 +406,7 @@ void read_vfo()
                 if (channel_selector) channel_selector->hide();
             }
         }
-        
+
         if (label_mem_channel) {
             if (in_memory_mode) {
               if (memory_channel != last_memory_channel) { // only update if changed
@@ -414,11 +414,12 @@ void read_vfo()
 
                 if (memory_channel_tag != lastTag_) {
         			TRACE_STREAM(1, "read_vfo() - memory_channel_tag changed from=''" << lastTag_ << "'' to ''" << memory_channel_tag << "'" );
-        			
+
                     label_mem_channel->label(memory_channel_tag.c_str());
                     label_mem_channel->redraw_label();
                     lastTag_ = memory_channel_tag;
-    
+                    last_memory_channel = -1;
+
                     if (channel_selector) {
                         channel_selector->label("");
                         channel_selector->redraw_label();
