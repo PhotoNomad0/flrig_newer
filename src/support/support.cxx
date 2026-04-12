@@ -411,6 +411,7 @@ void read_vfo()
             if (in_memory_mode) {
               if (memory_channel != last_memory_channel) { // only update if changed
      			TRACE_STREAM(1, "read_vfo() - memory_channel changed from=" << last_memory_channel << " to " << memory_channel );
+                last_memory_channel = memory_channel;
 
                 if (memory_channel_tag != lastTag_) {
         			TRACE_STREAM(1, "read_vfo() - memory_channel_tag changed from=''" << lastTag_ << "'' to ''" << memory_channel_tag << "'" );
@@ -418,7 +419,6 @@ void read_vfo()
                     label_mem_channel->label(memory_channel_tag.c_str());
                     label_mem_channel->redraw_label();
                     lastTag_ = memory_channel_tag;
-                    last_memory_channel = -1;
 
                     if (channel_selector) {
                         channel_selector->label("");
