@@ -348,6 +348,7 @@ static void init_ftx1_memory_channels()
 std::string lastTag_ = "";
 long long last_memory_channel = -1;
 static char current_memory_tag[20] = "";
+static char current_label_memory[20] = "";
 
 /**
  * @brief Updates the displayed memory-channel label when the active memory tag changes.
@@ -370,6 +371,19 @@ static void update_label_mem_channel(const std::string &memory_channel_tag)
     label_mem_channel->redraw_label();
     lastTag_ = memory_channel_tag;
 }
+
+static void update_label_memory(const std::string &memory_channel_str)
+{
+    if (!labelMEMORY) return;
+    if (current_label_memory == memory_channel_str) return;
+
+    TRACE_STREAM(1, "update_label_memory() - changing labelMEMORY from '" << current_label_memory << "' to '" << memory_channel_str << "'" );
+
+    snprintf(current_label_memory, sizeof(current_label_memory), "%s", memory_channel_str.c_str());
+    labelMEMORY->label(current_label_memory);
+    labelMEMORY->redraw_label();
+}
+
 
 void read_vfo()
 {
@@ -398,26 +412,22 @@ void read_vfo()
                 if (labelMEMORY) labelMEMORY->show();
                 if (txt_xcvr_synch) txt_xcvr_synch->hide();
                 if (label_mem_channel) label_mem_channel->show();
-    			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel=" << memory_channel );
+    			TRACE_STREAM(1, "read_vfo() - get_current_memory changed memory_channel=" << memory_channel );
                 std::string memory_channel_str = std::to_string(memory_channel);
     			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
 
-                if (labelMEMORY) {
-                    labelMEMORY->label(memory_channel_str.c_str());
-                    labelMEMORY->redraw_label();
-                }
+                update_label_memory(memory_channel_str);
 
     			init_ftx1_memory_channels();
 
-                TRACE_STREAM(1, "read_vfo() - in memory mode setting label_mem_channel to '" << label_mem_channel);
+                TRACE_STREAM(1, "read_vfo() - in memory mode setting label_mem_channel to '" << memory_channel_str);
                 update_label_mem_channel(memory_channel_tag);
 
                 if (channel_selector) channel_selector->show();
             } else  { // in vfo_mode
                 labelMEMORY->hide();
                 if (label_mem_channel) {
-                    label_mem_channel->label("");
-                    label_mem_channel->redraw_label();
+                    update_label_memory("");
                     label_mem_channel->hide();
                 }
 
@@ -437,6 +447,9 @@ void read_vfo()
         			TRACE_STREAM(1, "read_vfo() - memory_channel_tag changed from=''" << lastTag_ << "'' to ''" << memory_channel_tag << "'" );
 
                     update_label_mem_channel(memory_channel_tag);
+
+                    std::string memory_channel_str = std::to_string(memory_channel);
+                    update_label_memory(memory_channel_str);
 
                     if (channel_selector) {
                         channel_selector->label("");
