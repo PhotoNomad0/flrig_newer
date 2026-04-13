@@ -347,6 +347,29 @@ static void init_ftx1_memory_channels()
 
 std::string lastTag_ = "";
 long long last_memory_channel = -1;
+static char current_memory_tag[20] = "";
+
+/**
+ * @brief Updates the displayed memory-channel label when the active memory tag changes.
+ *
+ * If the label widget is available and the requested tag differs from the currently
+ * displayed one, this function updates the cached tag, refreshes the widget label,
+ * redraws the label, and remembers the last tag value for later comparisons.
+ *
+ * @param memory_channel_tag The new memory channel tag to display.
+ */
+static void update_label_mem_channel(const std::string &memory_channel_tag)
+{
+    if (!label_mem_channel) return;
+    if (current_memory_tag == memory_channel_tag) return;
+
+    TRACE_STREAM(1, "update_label_mem_channel() - changing label_mem_channe from '" << current_memory_tag << "' to '" << memory_channel_tag << "'" );
+
+    snprintf(current_memory_tag, sizeof(current_memory_tag), "%s", memory_channel_tag.c_str());
+    label_mem_channel->label(current_memory_tag);
+    label_mem_channel->redraw_label();
+    lastTag_ = memory_channel_tag;
+}
 
 void read_vfo()
 {
@@ -386,11 +409,8 @@ void read_vfo()
 
     			init_ftx1_memory_channels();
 
-                if (label_mem_channel) {
-                    label_mem_channel->label(memory_channel_tag.c_str());
-                    label_mem_channel->redraw_label();
-                    lastTag_ = memory_channel_tag;
-                }
+                TRACE_STREAM(1, "read_vfo() - in memory mode setting label_mem_channel to '" << label_mem_channel);
+                update_label_mem_channel(memory_channel_tag);
 
                 if (channel_selector) channel_selector->show();
             } else  { // in vfo_mode
@@ -416,9 +436,7 @@ void read_vfo()
                 if (memory_channel_tag != lastTag_) {
         			TRACE_STREAM(1, "read_vfo() - memory_channel_tag changed from=''" << lastTag_ << "'' to ''" << memory_channel_tag << "'" );
 
-                    label_mem_channel->label(memory_channel_tag.c_str());
-                    label_mem_channel->redraw_label();
-                    lastTag_ = memory_channel_tag;
+                    update_label_mem_channel(memory_channel_tag);
 
                     if (channel_selector) {
                         channel_selector->label("");
