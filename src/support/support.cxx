@@ -363,7 +363,7 @@ static void update_label_mem_channel(const std::string &memory_channel_tag)
     if (!label_mem_channel) return;
     if (current_memory_tag == memory_channel_tag) return;
 
-    TRACE_STREAM(1, "update_label_mem_channel() - changing label_mem_channe from '" << current_memory_tag << "' to '" << memory_channel_tag << "'" );
+    TRACE_STREAM(1, "update_label_mem_channel() - changing label_mem_channel from '" << current_memory_tag << "' to '" << memory_channel_tag << "'" );
 
     snprintf(current_memory_tag, sizeof(current_memory_tag), "%s", memory_channel_tag.c_str());
     label_mem_channel->label(current_memory_tag);
