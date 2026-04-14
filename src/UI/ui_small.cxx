@@ -1849,7 +1849,7 @@ Fl_Double_Window *tabs_window()
             label_mem_channel = new Fl_Box(300, 60, 120, 22, _("CHANNEL"));
 			label_mem_channel->tooltip(_("Show Current Channel Number"));
 			label_mem_channel->box(FL_DOWN_BOX);
-			label_mem_channel->color(FL_WHITE);
+			label_mem_channel->color(FL_BACKGROUND_COLOR);
 			label_mem_channel->align(FL_ALIGN_CENTER);
 			label_mem_channel->hide();
 
