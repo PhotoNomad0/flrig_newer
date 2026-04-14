@@ -1807,29 +1807,29 @@ Fl_Double_Window *tabs_window()
 {
 			ftx1_tab->hide();
 
-			btn_vfo_mem = new Fl_Button(5, 35, 50, 22, _("VFO/MEM"));
-			btn_vfo_mem->tooltip(_("Toggle between VFO and MEM"));
-			btn_vfo_mem->callback((Fl_Callback*)cb_btn_vfo_mem);
-
-			btn_power_off = new Fl_Button(5, 60, 50, 22, _("Power Off"));
-			btn_power_off->tooltip(_("Power off Rig"));
-			btn_power_off->callback((Fl_Callback*)cb_btn_power_off);
-
-			btn_channel_up_dn = new Fl_Button(60, 35, 90, 22, _("Channel UP/SHIFT-DN"));
-			btn_channel_up_dn->tooltip(_("Move Channel Number UP, or DOWN on SHIFT click"));
-			btn_channel_up_dn->callback((Fl_Callback*)cb_btn_channel_up_dn);
-
-			btn_scan_stop_start = new Fl_Button(60, 60, 90, 22, _("Scan STOP/SHF-START"));
-			btn_scan_stop_start->tooltip(_("Stop Channel Scan/or start on SHIFT click"));
-			btn_scan_stop_start->callback((Fl_Callback*)cb_btn_scan_stop_start);
-
-            btn_rx_selection = new Fl_Button(155, 35, 60, 22, _("RX Source"));
+            btn_rx_selection = new Fl_Button(5, 35, 60, 22, _("RX Source"));
             btn_rx_selection->tooltip(_("RX selection - chooses either single or double receiver"));
             btn_rx_selection->callback((Fl_Callback*)cb_rx_selection);
 
-            btn_tx_selection = new Fl_Button(155, 60, 60, 22, _("TX Destination"));
+            btn_vfo_mem = new Fl_Button(70, 35, 50, 22, _("VFO/MEM"));
+			btn_vfo_mem->tooltip(_("Toggle between VFO and MEM"));
+			btn_vfo_mem->callback((Fl_Callback*)cb_btn_vfo_mem);
+
+   			btn_channel_up_dn = new Fl_Button(125, 35, 90, 22, _("Channel UP/SHIFT-DN"));
+            btn_channel_up_dn->tooltip(_("Move Channel Number UP, or DOWN on SHIFT click"));
+            btn_channel_up_dn->callback((Fl_Callback*)cb_btn_channel_up_dn);
+
+            btn_tx_selection = new Fl_Button(5, 60, 60, 22, _("TX Destination"));
             btn_tx_selection->tooltip(_("TX selection - chooses either MAIN-side or SUB-side transmitter"));
             btn_tx_selection->callback((Fl_Callback*)cb_tx_selection);
+
+            btn_power_off = new Fl_Button(70, 60, 50, 22, _("Power Off"));
+			btn_power_off->tooltip(_("Power off Rig"));
+			btn_power_off->callback((Fl_Callback*)cb_btn_power_off);
+
+    		btn_scan_stop_start = new Fl_Button(125, 60, 90, 22, _("Scan STOP/SHF-START"));
+			btn_scan_stop_start->tooltip(_("Stop Channel Scan/or start on SHIFT click"));
+			btn_scan_stop_start->callback((Fl_Callback*)cb_btn_scan_stop_start);
 
             channel_selector = new Fl_ComboBox(300, 35, 120, 22, _("Channel"));
 			channel_selector->tooltip(_("Select Channel from Programmed Memories"));
@@ -1849,7 +1849,7 @@ Fl_Double_Window *tabs_window()
             label_mem_channel = new Fl_Box(300, 60, 120, 22, _("CHANNEL"));
 			label_mem_channel->tooltip(_("Show Current Channel Number"));
 			label_mem_channel->box(FL_DOWN_BOX);
-			label_mem_channel->color(FL_WHITE);
+			label_mem_channel->color(FL_BACKGROUND_COLOR);
 			label_mem_channel->align(FL_ALIGN_CENTER);
 			label_mem_channel->hide();
 

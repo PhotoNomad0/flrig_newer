@@ -316,6 +316,75 @@ void TRACED(update_vfoAorB, void *d)
 	updateUI((void*)0);
 }
 
+bool memory_mode_init = false;
+bool last_in_memory_mode = false;
+
+/**
+* @brief Initializes FTX-1 memory channels by retrieving and populating channel selector
+*
+* Retrieves the list of memory channels from the transceiver, saves them to storage,
+* and populates the channel selector combo box with channel numbers and names.
+* Each entry is formatted as "channel_number - name", where the name defaults to the
+* channel number if no tag is available.
+*/
+static void init_ftx1_memory_channels()
+{
+	if (channel_selector) {
+		// get list of memories from rig and add to channel selector combo box
+		std::vector<MemoryResponse> memories = selrig->get_memory_channels();
+		saveChannels(memories);
+		channel_selector->show();
+
+		for (size_t i = 0; i < memories.size(); i++) {
+			std::string name = memories[i].Tag.empty() ? memories[i].ChannelNum : memories[i].Tag;
+			int channel = std::stoi(memories[i].ChannelNum);
+			std::string label = std::to_string(channel) + " - " + name;
+			TRACE_STREAM(1, "init_ftx1_memory_channels() - adding channel=" << label );
+			channel_selector->add(label.c_str());
+		}
+	}
+}
+
+std::string lastTag_ = "";
+long long last_memory_channel = -1;
+static char current_memory_tag[20] = "";
+static char current_label_memory[20] = "";
+
+/**
+ * @brief Updates the displayed memory-channel label when the active memory tag changes.
+ *
+ * If the label widget is available and the requested tag differs from the currently
+ * displayed one, this function updates the cached tag, refreshes the widget label,
+ * redraws the label, and remembers the last tag value for later comparisons.
+ *
+ * @param memory_channel_tag The new memory channel tag to display.
+ */
+static void update_label_mem_channel(const std::string &memory_channel_tag)
+{
+    if (!label_mem_channel) return;
+    if (current_memory_tag == memory_channel_tag) return;
+
+    TRACE_STREAM(1, "update_label_mem_channel() - changing label_mem_channel from '" << current_memory_tag << "' to '" << memory_channel_tag << "'" );
+
+    snprintf(current_memory_tag, sizeof(current_memory_tag), "%s", memory_channel_tag.c_str());
+    label_mem_channel->label(current_memory_tag);
+    label_mem_channel->redraw_label();
+    lastTag_ = memory_channel_tag;
+}
+
+static void update_label_memory(const std::string &memory_channel_str)
+{
+    if (!labelMEMORY) return;
+    if (current_label_memory == memory_channel_str) return;
+
+    TRACE_STREAM(1, "update_label_memory() - changing labelMEMORY from '" << current_label_memory << "' to '" << memory_channel_str << "'" );
+
+    snprintf(current_label_memory, sizeof(current_label_memory), "%s", memory_channel_str.c_str());
+    labelMEMORY->label(current_label_memory);
+    labelMEMORY->redraw_label();
+}
+
+
 void read_vfo()
 {
 	if (xcvr_name == rig_K3.name_) {
@@ -325,40 +394,81 @@ void read_vfo()
 
 	if (xcvr_name == rig_FTX1.name_) {
 //     	trace(2,"read_vfo(), rig_FTX1.name_", rig_FTX1.name_.c_str());
-		static char tag_[20];
 		long long memory_channel = 0;
 		std::string memory_channel_tag = "";
 		bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
-		if (in_memory_mode) {
-			if (labelMEMORY) labelMEMORY->show();
-			if (txt_xcvr_synch) txt_xcvr_synch->hide();
-			if (label_mem_channel) label_mem_channel->show();
-// 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel=" << memory_channel );
-			std::string memory_channel_str = std::to_string(memory_channel);
-// 			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
-
-            if (labelMEMORY) {
-                labelMEMORY->label(memory_channel_str.c_str());
-                labelMEMORY->redraw_label();
-			}
-
-			snprintf(tag_, sizeof(tag_), "%s", memory_channel_tag.c_str());
-// 			TRACE_STREAM(1, "read_vfo() - get_current_memory tag_=" << tag_ );
-            if (label_mem_channel) {
-                label_mem_channel->label(tag_);
-                label_mem_channel->redraw_label();
-			}
-            if (channel_selector) channel_selector->show();
-		} else  {
-			labelMEMORY->hide();
-			if (label_mem_channel) {
-                label_mem_channel->label("");
-                label_mem_channel->redraw_label();
-                label_mem_channel->hide();
-			}
-			if (channel_selector) channel_selector->hide();
+		if (!memory_mode_init) {
+    		memory_mode_init = true;
+    		last_in_memory_mode = !in_memory_mode; // force update buttons
 		}
-	}
+
+        if (in_memory_mode != last_in_memory_mode) { // if changed then update controls
+            last_in_memory_mode = in_memory_mode;
+
+    		if (in_memory_mode) {
+                if (btn_channel_up_dn) btn_channel_up_dn->show();
+                if (btn_scan_stop_start) btn_scan_stop_start->show();
+
+                if (labelMEMORY) labelMEMORY->show();
+                if (txt_xcvr_synch) txt_xcvr_synch->hide();
+                if (label_mem_channel) label_mem_channel->show();
+    			TRACE_STREAM(1, "read_vfo() - get_current_memory changed memory_channel=" << memory_channel );
+                std::string memory_channel_str = std::to_string(memory_channel);
+    			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
+
+                update_label_memory(memory_channel_str);
+
+    			init_ftx1_memory_channels();
+
+                TRACE_STREAM(1, "read_vfo() - in memory mode setting label_mem_channel to '" << memory_channel_str);
+                update_label_mem_channel(memory_channel_tag);
+
+                if (channel_selector) channel_selector->show();
+            } else  { // in vfo_mode
+                labelMEMORY->hide();
+                if (label_mem_channel) {
+                    update_label_memory("");
+                    label_mem_channel->hide();
+                }
+
+                if (btn_channel_up_dn) btn_channel_up_dn->hide();
+                if (btn_scan_stop_start) btn_scan_stop_start->hide();
+                if (channel_selector) channel_selector->hide();
+            }
+        }
+
+        if (label_mem_channel) {
+            if (in_memory_mode) {
+              if (memory_channel != last_memory_channel) { // only update if changed
+     			TRACE_STREAM(1, "read_vfo() - memory_channel changed from=" << last_memory_channel << " to " << memory_channel );
+                last_memory_channel = memory_channel;
+
+                if (memory_channel_tag != lastTag_) {
+        			TRACE_STREAM(1, "read_vfo() - memory_channel_tag changed from=''" << lastTag_ << "'' to ''" << memory_channel_tag << "'" );
+
+                    update_label_mem_channel(memory_channel_tag);
+
+                    std::string memory_channel_str = std::to_string(memory_channel);
+                    update_label_memory(memory_channel_str);
+
+                    if (channel_selector) {
+                        std::string current_channel_selection = channel_selector->value();
+                        current_channel_selection = current_channel_selection.substr(
+                            0, current_channel_selection.find(" - ")
+                        );
+                        if (current_channel_selection != memory_channel_str) {
+                            channel_selector->clear_entry();
+                            TRACE_STREAM(1, "read_vfo() - channel_selector was '" << current_channel_selection << "', now channel is '" << memory_channel_str << "', clearing");
+//                             channel_selector->redraw_label();
+                        }
+                    }
+                }
+              }
+            } else { // not in memory mode
+                last_memory_channel = -1;
+            }
+        }
+    }
 
 // transceiver changed ?
 	trace(1,"read_vfo()");
@@ -432,7 +542,8 @@ void TRACED(updateUI, void *)
 
 }
 
-int  last_imode = -1;
+int  last_imode = -1; // for determining when mode has changed
+int lastbw = -1; // for determining when bw has changed
 
 void TRACED(set_Mode_BW_control, void *)
     if (vfo->imode == last_imode) {
@@ -455,6 +566,7 @@ void TRACED(set_Mode_BW_control, void *)
 		return;
 
 	opBW->index(vfo->iBW);
+	lastbw = vfo->iBW;
 	opBW->redraw();
 	opBW->show();
 
@@ -582,8 +694,10 @@ void TRACED(setBWControl, void *)
 		opBW_A->hide();
 		opBW_B->hide();
 
-		if (xcvr_name == rig_KX3.name_ || xcvr_name == rig_K4.name_)
+		if (xcvr_name == rig_KX3.name_ || xcvr_name == rig_K4.name_) {
 			return;
+        }
+
 //		if (vfo->iBW != opBW->index())
 			opBW->index(vfo->iBW);
 		opBW->show();
@@ -599,7 +713,6 @@ void set_Kx_bandwidths(void *)
 	opBW_B->redraw();
 }
 
-int lastbw = -1;
 void TRACED(read_bandwidth)
 	if (xcvr_name == rig_K2.name_ || xcvr_name == rig_K3.name_ ) {
 		vfoA.iBW = vfo->iBW = selrig->get_bwA();//nu_BW;
@@ -626,11 +739,12 @@ void TRACED(read_bandwidth)
 	}
 	rig_trace(1, s.str().c_str());
 	if (lastbw != vfo->iBW) {
+        TRACE_STREAM(1, "read_bandwidth() - bw changed from lastbw=" << lastbw << " to " << vfo->iBW );
+    	Fl::awake(setBWControl);
 		deb_trace(1, s.str().c_str());
 		lastbw = vfo->iBW;
 	}
 
-	Fl::awake(setBWControl);
 	Fl::awake(updateTCI);
 	Fl::awake(updateFLEX1500);
 }

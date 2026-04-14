@@ -2324,21 +2324,17 @@ void TRACED(init_ftx1_tab)
     if (selrig->has_vfo_mem) { // VFO memory control, swap out these buttons
         trace(1, "init_ftx1_tab() - has_vfo_mem support");
         btn_vfo_mem->show();
-        btn_channel_up_dn->show();
-        btn_scan_stop_start->show();
 
-        // get list of memories from rig and add to channel selector combo box
-        std::vector<MemoryResponse> memories = selrig->get_memory_channels();
-        saveChannels(memories);
-        channel_selector->show();
-
-        for (size_t i = 0; i < memories.size(); i++) {
-            std::string name = memories[i].Tag.empty() ? memories[i].ChannelNum : memories[i].Tag;
-            int channel = std::stoi(memories[i].ChannelNum);
-            std::string label = std::to_string(channel) + " - " + name;
-            TRACE_STREAM(1, "init_ftx1_tab() - adding channel=" << label );
-            channel_selector->add(label.c_str());
+        const bool in_memory_mode = selrig->is_in_memory_mode();
+        if (in_memory_mode) {
+            btn_channel_up_dn->show();
+            btn_scan_stop_start->show();
+        } else { // not in memory mode
+            btn_channel_up_dn->hide();
+            btn_scan_stop_start->hide();
         }
+
+    	channel_selector->hide();
     }
 }
 
