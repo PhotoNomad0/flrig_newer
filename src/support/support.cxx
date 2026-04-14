@@ -452,8 +452,15 @@ void read_vfo()
                     update_label_memory(memory_channel_str);
 
                     if (channel_selector) {
-                        channel_selector->label("");
-                        channel_selector->redraw_label();
+                        std::string current_channel_selection = channel_selector->value();
+                        current_channel_selection = current_channel_selection.substr(
+                            0, current_channel_selection.find(" - ")
+                        );
+                        if (current_channel_selection != memory_channel_str) {
+                            channel_selector->clear_entry();
+                            TRACE_STREAM(1, "read_vfo() - channel_selector was '" << current_channel_selection << "', now channel is '" << memory_channel_str << "', clearing");
+//                             channel_selector->redraw_label();
+                        }
                     }
                 }
               }
