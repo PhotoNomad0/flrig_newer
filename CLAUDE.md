@@ -29,6 +29,7 @@ There are no automated tests. Verification is done by running the compiled binar
 **Key subsystems:**
 
 - `src/rigs/` — Rig implementations organized by manufacturer (`yaesu/`, `icom/`, `kenwood/`, `elecraft/`, `tentec/`, `xiegu/`, etc.). The factory/registry is `src/rigs/rigs.cxx`.
+- `src/include/` - Header files for all source files. (for specific rigs see`yaesu/`, and `rigbase.h` generic for all rigs)
 - `src/UI/` — FLTK UI definitions (`.fl` files and generated headers). Main panels are `rigpanel`, `meters_dialog`, and per-rig panels (K3, K4, KX3).
 - `src/support/` — I/O utilities: `serial.cxx` (serial port), `socket_io.cxx` (TCP/IP), `rig_io.cxx` (higher-level coordination), `status.cxx` (global program state), `threads.cxx` (threading).
 - `src/server/` — XML-RPC server (`xml_server.cxx`, `xmlrpc_rig.cxx`) exposing rig control over the network.
