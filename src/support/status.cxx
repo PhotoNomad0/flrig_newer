@@ -2668,6 +2668,11 @@ void status::UI_laststate()
 		sldr_nb_level->selection_color(btn_slider);
 	}
 
+	if (rx_clarifier_level) {
+		rx_clarifier_level->color(bg_slider);
+		rx_clarifier_level->selection_color(btn_slider);
+	}
+
 	if (spnrPOWER)			spnrPOWER->color(bg_slider);
 	if (spnrPOWER)			spnrPOWER->selection_color(btn_slider);
 
