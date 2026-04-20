@@ -256,6 +256,8 @@ Hspinner *spnr_compression = (Hspinner *)0;
 
 Fl_Group *genericRx = (Fl_Group *)0;
 Fl_Wheel_Value_Slider *sldr_nb_level = (Fl_Wheel_Value_Slider *)0;
+Fl_Wheel_Value_Slider *rx_clarifier_level = (Fl_Wheel_Value_Slider *)0;
+Fl_Light_Button *btn_rx_clarifier = (Fl_Light_Button *)0;
 //Fl_ComboBox *cbo_agc_level = (Fl_ComboBox *)0;
 Hspinner *spnr_bpf_center = (Hspinner *)0;
 
@@ -962,7 +964,7 @@ static void cb_spnr_vox_hang(Hspinner* o, void*) {
 
 static void cb_btn_vox(Fl_Light_Button* o, void*) {
 	progStatus.vox_onoff=o->value();
-cb_vox_onoff();
+    cb_vox_onoff();
 }
 
 static void cb_btn_vox_on_dataport(Fl_Check_Button* o, void*) {
@@ -983,6 +985,14 @@ static void cb_spnr_compression(Hspinner* o, void*) {
 static void cb_sldr_nb_level(Fl_Wheel_Value_Slider* o, void*) {
 	progStatus.nb_level = o->value();
 	cb_nb_level();
+}
+
+static void cb_rx_clarifier_level(Fl_Wheel_Value_Slider* o, void*) {
+	// TODO
+}
+
+static void cb_btn_rx_clarifier(Fl_Light_Button* o, void*) {
+	// TODO
 }
 
 //static void cb_cbo_agc_level(Fl_ComboBox* o, void*) {

@@ -1914,6 +1914,177 @@ std::vector<std::string>& RIG_FTX1::bwtable(int n)
     return bandwidths_;
 }
 
+/**
+ * Sets the RX clarifier state (on/off) for the current VFO.
+ *
+ * @param on true to enable RX clarifier, false to disable
+ *
+ * This function controls the receive clarifier state using the CF (Clarifier) command.
+ * The command format varies based on which VFO is currently active:
+ * - "CF000x0000;" for VFO A (when inuse != onB)
+ * - "CF100x0000;" for VFO B (when inuse == onB)
+ *
+ * where 'x' is:
+ * - '1' to enable RX clarifier
+ * - '0' to disable RX clarifier
+ *
+ * The function constructs the appropriate command based on the active VFO and the on parameter,
+ * sends it to the transceiver, and logs the operation for tracing purposes.
+ *
+ * @note This function does not verify if the command was successful
+ * @note The clarifier offset value is set to "0000" (no offset) in this command
+ */
+void RIG_FTX1::set_rx_clarifier_state(bool on)
+{
+	if (inuse == onB)
+		cmd = rsp = "CF100";
+	else
+		cmd = rsp = "CF000";
+    const char state = !on ? '0' : '1';
+	cmd += state;
+	cmd += '0000;';
+	sendCommand(cmd);
+	showresp(WARN, ASC, "set_rx_clarifier_state", cmd, replystr);
+}
+
+/**
+ * Retrieves the RX clarifier state for the current VFO.
+ *
+ * @return true if RX clarifier is enabled, false if disabled
+ *
+ * This function queries the transceiver to determine if the receive clarifier is active
+ * by sending the CF (Clarifier) command. The command format varies based on which VFO
+ * is currently active:
+ * - "CF000;" for VFO A (when inuse != onB)
+ * - "CF100;" for VFO B (when inuse == onB)
+ *
+ * The transceiver responds with "CFx0y0000;" where:
+ * - 'x' is the VFO selector (0 for VFO A, 1 for VFO B)
+ * - 'y' is the clarifier state ('0' = enabled, '1' = disabled)
+ * - The remaining digits represent the clarifier offset value
+ *
+ * The function parses the response to extract the state character at position 5 and
+ * returns true if it equals '0' (clarifier enabled).
+ *
+ * @note The function waits up to 100ms for a response with maximum 11 characters
+ * @note Returns false if parsing fails or clarifier is disabled
+ */
+bool RIG_FTX1::get_rx_clarifier_state()
+{
+	if (inuse == onB)
+		cmd = rsp = "CF100";
+	else
+		cmd = rsp = "CF000";
+	cmd += ';';
+	wait_char(';', 11, 100, "get_rx_clarifier_state", ASC);
+
+	gett("get_rx_clarifier_state()");
+
+	bool clarifier_on = false;
+
+	size_t p = replystr.rfind(rsp);
+	if (p != std::string::npos && p + 10 < replystr.length()) {
+		int state = replystr[p+5];
+		clarifier_on = state == '0';
+	}
+	return clarifier_on;
+}
+
+/**
+ * Sets the RX clarifier offset value for the current VFO.
+ *
+ * @param level The clarifier offset in Hz, range -9999 to +9999
+ *
+ * This function sets the receive clarifier offset using the CF (Clarifier) command.
+ * The command format varies based on which VFO is currently active:
+ * - "CF001±nnnn;" for VFO A (when inuse != onB)
+ * - "CF101±nnnn;" for VFO B (when inuse == onB)
+ *
+ * where:
+ * - '±' is the sign character ('+' for positive, '-' for negative offsets)
+ * - 'nnnn' is the absolute offset value as a 4-digit zero-padded decimal number
+ *
+ * The level parameter is clamped to the range -9999 to +9999 Hz. The function
+ * converts the signed value to sign-magnitude format for transmission.
+ *
+ * @note This function does not verify if the command was successful
+ * @note The offset is applied to the receive frequency only
+ */
+void RIG_FTX1::set_rx_clarifier_value(int level)
+{
+    int val = level;
+	if (inuse == onB)
+		cmd = rsp = "CF101";
+	else
+		cmd = rsp = "CF001";
+
+    if (val > 9999) {
+        val = 9999;
+    } else if (val < -9999) {
+       val = -9999;
+    }
+
+    char sign = '+';
+    if (val < 0) {
+        sign = '-';
+    }
+    cmd += sign;
+
+    char level_str[5];
+    std::snprintf(level_str, sizeof(level_str), "%04d", val);
+
+	cmd += level_str;
+	cmd += ';';
+	sendCommand(cmd);
+	showresp(WARN, ASC, "set_rx_clarifier_value", cmd, replystr);
+}
+
+/**
+ * Retrieves the RX clarifier offset value for the current VFO.
+ *
+ * @return The clarifier offset in Hz, range -9999 to +9999
+ *
+ * This function queries the transceiver for the current receive clarifier offset
+ * by sending the CF (Clarifier) command. The command format varies based on which
+ * VFO is currently active:
+ * - "CF001;" for VFO A (when inuse != onB)
+ * - "CF101;" for VFO B (when inuse == onB)
+ *
+ * The transceiver responds with "CFx01±nnnn;" where:
+ * - 'x' is the VFO selector (0 for VFO A, 1 for VFO B)
+ * - '±' is the sign character at position 5 ('+' or '-')
+ * - 'nnnn' is the absolute offset value starting at position 6
+ *
+ * The function parses the response to extract the sign and magnitude, then
+ * combines them to return the signed offset value.
+ *
+ * @note The function waits up to 100ms for a response with maximum 11 characters
+ * @note Returns 0 if parsing fails or if the clarifier offset is not set
+ */
+int RIG_FTX1::get_rx_clarifier_value()
+{
+	if (inuse == onB)
+		cmd = rsp = "CF101";
+	else
+		cmd = rsp = "CF001";
+	cmd += ';';
+	wait_char(';', 11, 100, "get_rx_clarifier_value", ASC);
+
+	gett("get_rx_clarifier_value()");
+
+	int clarifier_value = 0;
+
+	size_t p = replystr.rfind(rsp);
+	if (p != std::string::npos && p + 10 < replystr.length()) {
+		int val = atoi(&replystr[p+6]);
+    	if (replystr[p+5] == '-') val = -val;
+        clarifier_value = val;
+
+        TRACE_STREAM(1, "get_rx_clarifier_value() replystr='" << replystr << "', val =" << val);
+	}
+	return clarifier_value;
+}
+
 void RIG_FTX1::set_modeA(int val)
 {
 	modeA = val;
