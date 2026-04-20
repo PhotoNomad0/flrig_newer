@@ -314,7 +314,8 @@ RIG_FTX1::RIG_FTX1() {
 	has_ptt_control =
 	has_tune_control =
 	has_xcvr_auto_on_off =
-    has_vfo_mem = true;
+    has_vfo_mem =
+    has_clarifier = true;
 
 // derived specific
 	atten_state = 0;

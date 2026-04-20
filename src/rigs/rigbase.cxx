@@ -209,7 +209,8 @@ rigbase::rigbase()
 	can_synch_clock =
 	has_a2b =
 	has_vfoAB =
-	has_vfo_mem = false;
+	has_vfo_mem =
+	has_clarifier = false;
 
 	data_type = DT_BINARY;
 

@@ -366,6 +366,8 @@ public:
 
 	bool has_vfo_mem;
 
+	bool has_clarifier;
+
 // Icom Xcvr
 	bool ICOMrig;
 	bool ICOMmainsub;

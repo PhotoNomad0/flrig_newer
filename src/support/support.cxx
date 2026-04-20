@@ -4796,6 +4796,24 @@ void cbNoise()
 	update_noise( (void*)0 );
 }
 
+void cb_rx_clarifier_level_()
+{
+	if (!selrig->has_clarifier) return;
+	int set = 0;
+
+	trace(1, "cb_rx_clarifier_level_()");
+	set = rx_clarifier_level->value();
+	TRACE_STREAM(1, "cb_rx_clarifier_level_(): rx_clarifier_level->value()=" << set);
+
+	int ev = Fl::event();
+	if (ev == FL_LEAVE || ev == FL_ENTER) return;
+	if (ev == FL_DRAG || ev == FL_PUSH) {
+		return;
+	}
+	guard_lock lock(&mutex_serial, "100");
+	selrig->set_rx_clarifier_value(set);
+}
+
 
 /**
  * @brief Callback handler for noise blanker level control
