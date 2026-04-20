@@ -1943,9 +1943,10 @@ void RIG_FTX1::set_rx_clarifier_state(bool on)
 		cmd = rsp = "CF000";
     const char state = !on ? '0' : '1';
 	cmd += state;
-	cmd += '0000;';
+	cmd += "0000;";
 	sendCommand(cmd);
 	showresp(WARN, ASC, "set_rx_clarifier_state", cmd, replystr);
+//     TRACE_STREAM(1, "set_rx_clarifier_state(): cmd=" << cmd << ", replystr=" << replystr << ", on=" << on);
 }
 
 /**
@@ -1985,8 +1986,9 @@ bool RIG_FTX1::get_rx_clarifier_state()
 
 	size_t p = replystr.rfind(rsp);
 	if (p != std::string::npos && p + 10 < replystr.length()) {
-		int state = replystr[p+5];
-		clarifier_on = state == '0';
+		char state = replystr[p+5];
+		clarifier_on = state != '0';
+//         TRACE_STREAM(1, "get_rx_clarifier_state(): clarifier_on=" << clarifier_on << ", replystr=" << replystr << ", state=" << state);
 	}
 	return clarifier_on;
 }
@@ -2028,6 +2030,7 @@ void RIG_FTX1::set_rx_clarifier_value(int level)
     char sign = '+';
     if (val < 0) {
         sign = '-';
+        val = -val;
     }
     cmd += sign;
 
@@ -2036,6 +2039,7 @@ void RIG_FTX1::set_rx_clarifier_value(int level)
 
 	cmd += level_str;
 	cmd += ';';
+// 	TRACE_STREAM(1, "set_rx_clarifier_value(): level=" << level << ", cmd=" << cmd);
 	sendCommand(cmd);
 	showresp(WARN, ASC, "set_rx_clarifier_value", cmd, replystr);
 }

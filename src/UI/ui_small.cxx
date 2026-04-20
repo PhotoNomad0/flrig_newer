@@ -1715,8 +1715,8 @@ Fl_Double_Window *tabs_window()
 			sldr_nb_level->when(FL_WHEN_CHANGED);
 			sldr_nb_level->value(progStatus.nb_level);
 
-			rx_clarifier_level = new Fl_Wheel_Value_Slider(115, 35, 100, 22, _("NB level"));
-			rx_clarifier_level->tooltip(_("Noise Blanker level"));
+			rx_clarifier_level = new Fl_Wheel_Value_Slider(115, 35, 100, 22, _("RX Clarifier"));
+			rx_clarifier_level->tooltip(_("RX Clarifier level"));
 			rx_clarifier_level->type(5);
 			rx_clarifier_level->box(FL_THIN_DOWN_BOX);
 			rx_clarifier_level->color(FL_BACKGROUND_COLOR);
@@ -1733,7 +1733,7 @@ Fl_Double_Window *tabs_window()
 			rx_clarifier_level->when(FL_WHEN_CHANGED);
 			rx_clarifier_level->value(0);
 
-            btn_rx_clarifier = new Fl_Light_Button(115, 75, 50, 18, _("RX CLAR"));
+            btn_rx_clarifier = new Fl_Light_Button(140, 72, 50, 18, _("RX CLAR"));
             btn_rx_clarifier->tooltip(_("RX Clarifier On/Off"));
             btn_rx_clarifier->down_box(FL_THIN_DOWN_BOX);
             btn_rx_clarifier->labelsize(12);

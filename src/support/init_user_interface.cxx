@@ -1260,6 +1260,23 @@ void TRACED(init_Generic_Tabs)
 		poll_compression->deactivate();
 		poll_compression->value( progStatus.poll_compression = 0 ); }
 
+    if (selrig->has_clarifier) {
+        rx_clarifier_level->show();
+        btn_rx_clarifier->show();
+        int min = -100;
+        int max = 100;
+        int step = 1;
+        selrig->get_clarifier_min_max_step(min, max, step);
+    	TRACE_STREAM(1, "selrig->get_clarifier_min_max_step(): min=" << min << ", max=" << max << ", step=" << step);
+        rx_clarifier_level->minimum(min);
+        rx_clarifier_level->maximum(max);
+        rx_clarifier_level->step(step);
+        rx_clarifier_level->value(progStatus.nb_level);
+    } else {
+        rx_clarifier_level->hide();
+        btn_rx_clarifier->hide();
+        TRACE_STREAM(1, "no selrig->has_clarifier");
+    }
 }
 
 void TRACED(initTabs)

@@ -623,6 +623,10 @@ int no_, noval_;
 		min = 0; max = 100; step = 1; }
 	virtual void get_nb_min_max_step(double &min, double &max, double &step) {
 		min = 0; max = 100; step = 1; }
+    virtual void get_clarifier_min_max_step(int &min, int &max, int &step) {
+        min = -9999; max = 9999; step = 100; }
+    virtual void get_clarifier_min_max_step(double &min, double &max, double &step) {
+        min = -9999; max = 9999; step = 100; }
 
 int nr_, nrval_;
 	virtual void set_noise_reduction(int val) {nr_ = val;}

@@ -144,6 +144,7 @@ int inhibit_power = 0;
 int inhibit_mic = 0;
 int inhibit_rfgain = 0;
 int inhibit_squelch = 0;
+int inhibit_clarifier_level = 0;
 
 struct SLIDER {
 enum {NOTCH, SHIFT, INNER, OUTER, LOCK, VOLUME, MIC, POWER, SQUELCH, RFGAIN, NB_LEVEL, NR, NR_VAL};
@@ -466,6 +467,19 @@ void read_vfo()
               }
             } else { // not in memory mode
                 last_memory_channel = -1;
+            }
+        }
+
+        if (selrig->has_clarifier) {
+            bool state = selrig->get_rx_clarifier_state();
+            btn_rx_clarifier->value(state ? 1 : 0);
+            if (inhibit_clarifier_level > 0) {
+                inhibit_clarifier_level--;
+            } else {
+                int level = selrig->get_rx_clarifier_value();
+                rx_clarifier_level->value(level);
+                rx_clarifier_level->activate();
+                rx_clarifier_level->redraw();
             }
         }
     }
@@ -4820,6 +4834,7 @@ void cb_rx_clarifier_level_()
 	int ev = Fl::event();
 	if (ev == FL_LEAVE || ev == FL_ENTER) return;
 	if (ev == FL_DRAG || ev == FL_PUSH) {
+    	inhibit_clarifier_level = 1;
 		return;
 	}
 	guard_lock lock(&mutex_serial, "100");
@@ -4850,6 +4865,7 @@ void TRACED(cb_rx_clarifier_state_, void *d)
 	TRACE_STREAM(1, "cb_rx_clarifier_state_(): selrig->get_rx_clarifier_state()" << set);
 
 	guard_lock lock(&mutex_serial, "101");
+	inhibit_clarifier_level = 1;
 	selrig->set_rx_clarifier_state(!set); // toggle
 }
 
