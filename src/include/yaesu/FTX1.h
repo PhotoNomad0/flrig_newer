@@ -140,9 +140,9 @@ public:
 	void get_nb_min_max_step(double &min, double &max, double &step) {
 		min = 1; max = 10; step = 1; }
 	void get_clarifier_min_max_step(int &min, int &max, int &step) {
-		min = -9999; max = 9999; step = 100; }
+		min = -9999; max = 9999; step = 200; }
 	void get_clarifier_min_max_step(double &min, double &max, double &step) {
-		min = -9999; max = 9999; step = 100; }
+		min = -9999; max = 9999; step = 200; }
 	void set_nb_level(int val);
 	int  get_nb_level();
     const char *nb_label();
