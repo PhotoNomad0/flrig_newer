@@ -4796,6 +4796,18 @@ void cbNoise()
 	update_noise( (void*)0 );
 }
 
+/**
+ * @brief Sets the receive clarifier level value
+ *
+ * Handles the UI callback for the RX clarifier level control (slider/spinner).
+ * Updates the transceiver's RX clarifier offset value after validating the event type.
+ * Ignores mouse enter/leave events and sets inhibit flag during drag operations
+ * to prevent excessive serial port updates.
+ *
+ * @note Requires selrig->has_clarifier to be true
+ * @note Thread-safe via mutex_serial guard lock
+ * @see setIFshift() for similar control pattern
+ */
 void cb_rx_clarifier_level_()
 {
 	if (!selrig->has_clarifier) return;
@@ -4814,6 +4826,32 @@ void cb_rx_clarifier_level_()
 	selrig->set_rx_clarifier_value(set);
 }
 
+/**
+ * @brief Toggles the receive clarifier on/off state
+ *
+ * Callback handler for the RX clarifier enable/disable button.
+ * Reads the current clarifier state from the transceiver and toggles it.
+ * The shift parameter (from widget callback data) is currently unused but
+ * reserved for potential future shift-key modifier detection.
+ *
+ * @param d Callback data pointer (reinterpret_cast to size_t for shift detection)
+ * @note Requires selrig->has_clarifier to be true
+ * @note Thread-safe via mutex_serial guard lock
+ * @see cb_rx_clarifier_level_() for value control
+ */
+void TRACED(cb_rx_clarifier_state_, void *d)
+	if (!selrig->has_clarifier) return;
+
+	size_t shift = reinterpret_cast<size_t>(d);
+	bool shifted = (shift != 0);
+	TRACE_STREAM(1, "cb_rx_clarifier_state_(): shifted=" << shifted);
+
+	bool set = selrig->get_rx_clarifier_state();
+	TRACE_STREAM(1, "cb_rx_clarifier_state_(): selrig->get_rx_clarifier_state()" << set);
+
+	guard_lock lock(&mutex_serial, "101");
+	selrig->set_rx_clarifier_state(!set); // toggle
+}
 
 /**
  * @brief Callback handler for noise blanker level control
