@@ -795,6 +795,10 @@ double vfo_;
 	virtual void change_channel(bool channel_up) {}
 	virtual void scan_operation(bool start) {}
 	virtual bool is_in_memory_mode() { return false; }
+	virtual void set_rx_clarifier_state(bool start) {}
+	virtual bool get_rx_clarifier_state() { return false; }
+	virtual void set_rx_clarifier_value(int level) {}
+	virtual int get_rx_clarifier_value() { return 0; }
 
 	virtual bool read_rx_dual() { return false; }
 	virtual void set_rx_dual(bool dual) {}
