@@ -4834,7 +4834,7 @@ void cb_rx_clarifier_level_()
 	int ev = Fl::event();
 	if (ev == FL_LEAVE || ev == FL_ENTER) return;
 	if (ev == FL_DRAG || ev == FL_PUSH) {
-    	inhibit_clarifier_level = 1;
+    	inhibit_clarifier_level = 2;
 		return;
 	}
 	guard_lock lock(&mutex_serial, "100");
@@ -4865,8 +4865,10 @@ void TRACED(cb_rx_clarifier_state_, void *d)
 	TRACE_STREAM(1, "cb_rx_clarifier_state_(): selrig->get_rx_clarifier_state()" << set);
 
 	guard_lock lock(&mutex_serial, "101");
-	inhibit_clarifier_level = 1;
-	selrig->set_rx_clarifier_state(!set); // toggle
+	inhibit_clarifier_level = 2;
+	bool newState = !set;
+	selrig->set_rx_clarifier_state(newState); // toggle
+	btn_rx_clarifier->value(newState ? 1 : 0); // update button
 }
 
 /**
