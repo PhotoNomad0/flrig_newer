@@ -385,6 +385,8 @@ static void update_label_memory(const std::string &memory_channel_str)
     labelMEMORY->redraw_label();
 }
 
+bool last_rx_clarifier_state = false;
+int last_rx_clarifier_level = 0;
 
 void read_vfo()
 {
@@ -471,15 +473,24 @@ void read_vfo()
         }
 
         if (selrig->has_clarifier) {
-            bool state = selrig->get_rx_clarifier_state();
-            btn_rx_clarifier->value(state ? 1 : 0);
             if (inhibit_clarifier_level > 0) {
                 inhibit_clarifier_level--;
             } else {
+                bool state = selrig->get_rx_clarifier_state();
+                btn_rx_clarifier->value(state ? 1 : 0);
+                if (state != last_rx_clarifier_state) {
+                    TRACE_STREAM(1, "read_vfo(): clarifier state changed to =" << state << ", last state was =" << last_rx_clarifier_state);
+                    last_rx_clarifier_state = state;
+                }
+
                 int level = selrig->get_rx_clarifier_value();
                 rx_clarifier_level->value(level);
                 rx_clarifier_level->activate();
                 rx_clarifier_level->redraw();
+                if (level != last_rx_clarifier_level) {
+                    TRACE_STREAM(1, "read_vfo(): clarifier level changed to =" << level << ", last level was =" << last_rx_clarifier_level);
+                    last_rx_clarifier_level = level;
+                }
             }
         }
     }
@@ -4266,16 +4277,22 @@ void TRACED(synchronize_now)
 }
 
 void vfo_mem_toggle( void *) {
+	guard_lock lock(&mutex_serial, "103");
+
 	trace(1, "VFO memory toggle()");
 	selrig->vfo_mem_toggle();
 }
 
 void power_off( void *) {
+	guard_lock lock(&mutex_serial, "104");
+
 	trace(1, "power_off()");
 	selrig->power(false);
 }
 
 void scan_stop_start(void *) {
+	guard_lock lock(&mutex_serial, "105");
+
 	trace(1, "scan_stop_start()");
 	selrig->change_channel(false);
 }
@@ -4291,6 +4308,8 @@ void TRACED(power_off_now)
 }
 
 void TRACED(channel_up_down_now, void *d)
+	guard_lock lock(&mutex_serial, "106");
+
 	size_t shift = reinterpret_cast<size_t>(d);
 	bool shift_down = (shift != 0);
 	TRACE_STREAM(1, "channel_up_down_now(): shift_down=" << shift_down);
@@ -4298,6 +4317,8 @@ void TRACED(channel_up_down_now, void *d)
 }
 
 void TRACED(scan_stop_start_now, void *d)
+	guard_lock lock(&mutex_serial, "107");
+
 	size_t shift = reinterpret_cast<size_t>(d);
 	bool shift_start = (shift != 0);
 	TRACE_STREAM(1, "scan_stop_start_now(): shift_start=" << shift_start);
@@ -4305,6 +4326,8 @@ void TRACED(scan_stop_start_now, void *d)
 }
 
 void TRACED(rx_selection_now, void *d)
+	guard_lock lock(&mutex_serial, "108");
+
 	TRACE_STREAM(1, "rx_selection_now() - called");
 	bool dual_rx = selrig->read_rx_dual();
 // 	TRACE_STREAM(1, "rx_selection_now() - currently dual_rx=" << dual_rx << ", toggling");
@@ -4321,6 +4344,8 @@ void TRACED(rx_selection_now, void *d)
 }
 
 void TRACED(tx_selection_now, void *d)
+	guard_lock lock(&mutex_serial, "109");
+
 	TRACE_STREAM(1, "tx_selection_now() - called");
 	bool main_side_tx = selrig->read_tx_destination();
 // 	TRACE_STREAM(1, "tx_selection_now() - currently main_side_tx=" << main_side_tx << ", toggling");
@@ -4825,13 +4850,13 @@ void cbNoise()
 void set_rx_clarifier_level()
 {
 	if (!selrig->has_clarifier) return;
-	int set = 0;
+	int currentLevel = 0;
 
 	guard_lock lock(&mutex_serial, "100");
 
 	trace(1, "set_rx_clarifier_level()");
-	set = rx_clarifier_level->value();
-	TRACE_STREAM(1, "set_rx_clarifier_level(): rx_clarifier_level->value()=" << set);
+	currentLevel = rx_clarifier_level->value();
+	TRACE_STREAM(1, "set_rx_clarifier_level(): rx_clarifier_level->value()=" << currentLevel);
 
 	int ev = Fl::event();
 	if (ev == FL_LEAVE || ev == FL_ENTER) return;
@@ -4839,7 +4864,7 @@ void set_rx_clarifier_level()
     	inhibit_clarifier_level = 2;
 		return;
 	}
-	selrig->set_rx_clarifier_value(set);
+	selrig->set_rx_clarifier_value(currentLevel);
 }
 
 /**
@@ -4859,6 +4884,7 @@ void TRACED(set_rx_clarifier_state, void *d)
 	if (!selrig->has_clarifier) return;
 
 	guard_lock lock(&mutex_serial, "101");
+	inhibit_clarifier_level = 1;
 
 // 	size_t shift = reinterpret_cast<size_t>(d);
 // 	bool shifted = (shift != 0);
@@ -4867,7 +4893,7 @@ void TRACED(set_rx_clarifier_state, void *d)
 	bool currentState = selrig->get_rx_clarifier_state();
 	TRACE_STREAM(1, "set_rx_clarifier_state(): RX clarifier state currently" << currentState);
 
-	inhibit_clarifier_level = 2;
+
 	bool newState = !currentState;
 	selrig->set_rx_clarifier_state(newState); // toggle
 	btn_rx_clarifier->value(newState ? 1 : 0); // update button
