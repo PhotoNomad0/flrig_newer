@@ -4822,14 +4822,16 @@ void cbNoise()
  * @note Thread-safe via mutex_serial guard lock
  * @see setIFshift() for similar control pattern
  */
-void cb_rx_clarifier_level_()
+void set_rx_clarifier_level()
 {
 	if (!selrig->has_clarifier) return;
 	int set = 0;
 
-	trace(1, "cb_rx_clarifier_level_()");
+	guard_lock lock(&mutex_serial, "100");
+
+	trace(1, "set_rx_clarifier_level()");
 	set = rx_clarifier_level->value();
-	TRACE_STREAM(1, "cb_rx_clarifier_level_(): rx_clarifier_level->value()=" << set);
+	TRACE_STREAM(1, "set_rx_clarifier_level(): rx_clarifier_level->value()=" << set);
 
 	int ev = Fl::event();
 	if (ev == FL_LEAVE || ev == FL_ENTER) return;
@@ -4837,7 +4839,6 @@ void cb_rx_clarifier_level_()
     	inhibit_clarifier_level = 2;
 		return;
 	}
-	guard_lock lock(&mutex_serial, "100");
 	selrig->set_rx_clarifier_value(set);
 }
 
@@ -4852,23 +4853,37 @@ void cb_rx_clarifier_level_()
  * @param d Callback data pointer (reinterpret_cast to size_t for shift detection)
  * @note Requires selrig->has_clarifier to be true
  * @note Thread-safe via mutex_serial guard lock
- * @see cb_rx_clarifier_level_() for value control
+ * @see set_rx_clarifier_level() for value control
  */
-void TRACED(cb_rx_clarifier_state_, void *d)
+void TRACED(set_rx_clarifier_state, void *d)
 	if (!selrig->has_clarifier) return;
 
-	size_t shift = reinterpret_cast<size_t>(d);
-	bool shifted = (shift != 0);
-	TRACE_STREAM(1, "cb_rx_clarifier_state_(): shifted=" << shifted);
-
-	bool set = selrig->get_rx_clarifier_state();
-	TRACE_STREAM(1, "cb_rx_clarifier_state_(): selrig->get_rx_clarifier_state()" << set);
-
 	guard_lock lock(&mutex_serial, "101");
+
+// 	size_t shift = reinterpret_cast<size_t>(d);
+// 	bool shifted = (shift != 0);
+// 	TRACE_STREAM(1, "set_rx_clarifier_state(): shifted=" << shifted);
+
+	bool currentState = selrig->get_rx_clarifier_state();
+	TRACE_STREAM(1, "set_rx_clarifier_state(): RX clarifier state currently" << currentState);
+
 	inhibit_clarifier_level = 2;
-	bool newState = !set;
+	bool newState = !currentState;
 	selrig->set_rx_clarifier_state(newState); // toggle
 	btn_rx_clarifier->value(newState ? 1 : 0); // update button
+	
+	bool updatedState = selrig->get_rx_clarifier_state();
+	
+	if (updatedState != newState) {
+    	TRACE_STREAM(1, "set_rx_clarifier_state(): RX clarifier state is still " << updatedState << ", tried to set to " << newState << ". Trying again");
+    	selrig->set_rx_clarifier_state(newState); // toggle
+    	
+    	// verify state
+    	updatedState = selrig->get_rx_clarifier_state();
+    	if (updatedState != newState) {
+        	TRACE_STREAM(1, "set_rx_clarifier_state(): FAILED - RX clarifier state is still " << updatedState << ", tried to set to " << newState);
+    	}
+	}
 }
 
 /**

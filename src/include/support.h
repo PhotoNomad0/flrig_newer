@@ -213,8 +213,8 @@ extern void cb_bpf_center();
 extern void cb_special();
 extern void cb_nb_level();
 
-extern void cb_rx_clarifier_level_();
-extern void cb_rx_clarifier_state_(void*);
+extern void set_rx_clarifier_level();
+extern void set_rx_clarifier_state(void*);
 
 extern void setFocus();
 

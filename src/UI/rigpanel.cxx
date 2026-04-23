@@ -988,14 +988,14 @@ static void cb_sldr_nb_level(Fl_Wheel_Value_Slider* o, void*) {
 }
 
 static void cb_rx_clarifier_level(Fl_Wheel_Value_Slider* o, void*) {
-	cb_rx_clarifier_level_();
+	set_rx_clarifier_level();
 }
 
 static void cb_btn_rx_clarifier(Fl_Light_Button* o, void*) {
 	bool shift = (((Fl::event_state() & FL_SHIFT) == FL_SHIFT) ||
 		(Fl::event_button() == FL_RIGHT_MOUSE));
 	size_t shift_ = shift ? 1 : 0;
-    cb_rx_clarifier_state_((void *) shift_);
+    set_rx_clarifier_state((void *) shift_);
 }
 
 //static void cb_cbo_agc_level(Fl_ComboBox* o, void*) {
