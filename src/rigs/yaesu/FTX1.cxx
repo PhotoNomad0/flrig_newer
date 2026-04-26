@@ -382,6 +382,21 @@ void RIG_FTX1::set_xcvr_auto_off()
 	}
 }
 
+/**
+ * Toggles between VFO mode and Memory mode.
+ *
+ * This function sends the VM (VFO/Memory) command to the transceiver to toggle
+ * between VFO mode and Memory mode. The command "VM;" is sent without parameters,
+ * which causes the transceiver to switch between the two modes.
+ *
+ * In VFO mode, the transceiver operates on a variable frequency that can be tuned
+ * freely within the band. In Memory mode, the transceiver recalls a stored channel
+ * with preset frequency, mode, and other settings.
+ *
+ * @note This function does not verify if the command was successful
+ * @note The actual mode after toggle depends on the current state of the transceiver
+ * @note Use is_in_memory_mode() to verify the current operating mode after toggling
+ */
 void RIG_FTX1::vfo_mem_toggle()
 {
 	sendCommand("VM;");
@@ -499,6 +514,27 @@ void RIG_FTX1::scan_operation(bool start)
 	}
 }
 
+/**
+ * Controls the power state of the transceiver.
+ *
+ * @param on true to power on the transceiver, false to power off
+ *
+ * This function sends the PS (Power Switch) command to the transceiver to
+ * control its power state. The command format is:
+ * - "PS1;" to power on the transceiver
+ * - "PS0;" to power off the transceiver
+ *
+ * The function constructs the appropriate command based on the on parameter,
+ * sends it to the transceiver, and logs the operation using sett() for
+ * tracing purposes with either "power on" or "power off" message.
+ *
+ * @note When powering on, the transceiver may take several seconds to become
+ *       fully operational and respond to commands
+ * @note When powering off, the transceiver will not respond to subsequent
+ *       commands until powered back on
+ * @note This function does not verify if the command was successful or wait
+ *       for the power state transition to complete
+ */
 void RIG_FTX1::power(bool on)
 {
 	cmd = on ? "PS1;" : "PS0;";
@@ -1537,6 +1573,31 @@ int RIG_FTX1::get_attenuator()
 	return atten_state;
 }
 
+/**
+ * Retrieves the AGC (Automatic Gain Control) setting for the current VFO.
+ *
+ * @return The current AGC level (0-4):
+ *         - 0: AGC (default/auto)
+ *         - 1: FST (fast)
+ *         - 2: MED (medium)
+ *         - 3: SLO (slow)
+ *         - 4: AUT (auto)
+ *
+ * This function queries the transceiver for the AGC setting using the GT command.
+ * The command format varies based on which VFO is currently active:
+ * - "GT0;" for VFO A (when inuse != onB)
+ * - "GT1;" for VFO B (when inuse == onB)
+ *
+ * The transceiver responds with "GTxn;" where:
+ * - 'x' is the VFO selector (0 for VFO A, 1 for VFO B)
+ * - 'n' is the AGC level (0-4)
+ *
+ * The function parses the response to extract the AGC value and ensures it
+ * doesn't exceed the maximum value of 4.
+ *
+ * @note The function waits up to 100ms for a response with maximum 5 characters
+ * @note Returns the previous agcval if parsing fails
+ */
 int RIG_FTX1::get_agc()
 {
 	if (inuse == onB)
@@ -1563,6 +1624,27 @@ int RIG_FTX1::get_agc()
 	return agcval;
 }
 
+/**
+ * Calculates the next AGC (Automatic Gain Control) level in sequence.
+ *
+ * @return The next AGC level (0-4):
+ *         - Returns 1 if current level is 0 or less (wrap from off to first level)
+ *         - Returns current level + 1 if current level is less than 4
+ *         - Returns 0 if current level is 4 or higher (wrap to off)
+ *
+ * This function implements a circular progression through AGC levels:
+ * 0 -> 1 -> 2 -> 3 -> 4 -> 0 -> ...
+ *
+ * The progression corresponds to these AGC settings:
+ * - 0: AGC (default/auto)
+ * - 1: FST (fast)
+ * - 2: MED (medium)
+ * - 3: SLO (slow)
+ * - 4: AUT (auto)
+ *
+ * @note This function only calculates the next value; it does not apply it to the transceiver
+ * @note Use incr_agc() to both calculate and apply the next AGC level
+ */
 int RIG_FTX1::next_agc()
 {
     int new_agc = 0;
@@ -1576,6 +1658,26 @@ int RIG_FTX1::next_agc()
     return new_agc;
 }
 
+/**
+ * Increments the AGC level to the next setting and applies it to the transceiver.
+ *
+ * @return The new AGC level after incrementing (0-4)
+ *
+ * This function combines the calculation of the next AGC level with immediate
+ * application to the transceiver. It performs a three-step operation:
+ * 1. Calls next_agc() to determine the next AGC level in the sequence
+ * 2. Updates the internal agcval state variable with the new level
+ * 3. Sends the new AGC setting to the transceiver via set_agc()
+ *
+ * The AGC levels cycle through the sequence: 0 -> 1 -> 2 -> 3 -> 4 -> 0
+ * corresponding to: AGC -> FST -> MED -> SLO -> AUT -> AGC
+ *
+ * This is typically called when the user clicks an AGC increment button or
+ * similar UI control that steps through AGC settings.
+ *
+ * @note The new AGC value is both stored internally and transmitted to the radio
+ * @note This is a convenience function that combines next_agc() and set_agc()
+ */
 int RIG_FTX1::incr_agc()
 {
 	agcval = this->next_agc();
@@ -1585,6 +1687,30 @@ int RIG_FTX1::incr_agc()
 	return agcval;
 }
 
+/**
+ * Sets the AGC (Automatic Gain Control) level on the transceiver.
+ *
+ * @param val The desired AGC level (0-4):
+ *            - 0: AGC (default/auto)
+ *            - 1: FST (fast)
+ *            - 2: MED (medium)
+ *            - 3: SLO (slow)
+ *            - 4: AUT (auto)
+ *
+ * This function configures the AGC setting using the GT (Gain Time) command.
+ * The command format varies based on which VFO is currently active:
+ * - "GT0n;" for VFO A (when inuse != onB)
+ * - "GT1n;" for VFO B (when inuse == onB)
+ *
+ * where 'n' is the AGC level character ('0' through '4').
+ *
+ * The function clamps the input value to the maximum of 4 to prevent invalid
+ * settings. The clamped value is stored in the agcval member variable and
+ * transmitted to the transceiver.
+ *
+ * @note Values greater than 4 are automatically clamped to 4
+ * @note The function does not verify if the command was successful
+ */
 void RIG_FTX1::set_agc(int val)
 {
 	if (inuse == onB)
@@ -1604,12 +1730,45 @@ void RIG_FTX1::set_agc(int val)
 	showresp(WARN, ASC, "SET agc", cmd, replystr);
 }
 
+/**
+ * Returns the human-readable label for the current AGC setting.
+ *
+ * @return A C-string pointer to the AGC mode label:
+ *         - "AGC" for level 0 (default/auto)
+ *         - "FST" for level 1 (fast)
+ *         - "MED" for level 2 (medium)
+ *         - "SLO" for level 3 (slow)
+ *         - "AUT" for level 4 (auto)
+ *
+ * This function provides a text representation of the current AGC mode for
+ * display in the user interface. The returned string is a static constant
+ * from the agcstrs array and should not be modified or freed.
+ *
+ * @note The function uses the current agcval member variable as the index
+ * @note No bounds checking is performed; ensure agcval is in range 0-4
+ */
 static const char *agcstrs[] = {"AGC", "FST", "MED", "SLO", "AUT"};
 const char *RIG_FTX1::agc_label()
 {
 	return agcstrs[agcval];
 }
 
+/**
+ * Returns the current AGC level value.
+ *
+ * @return The current AGC level (0-4):
+ *         - 0: AGC (default/auto)
+ *         - 1: FST (fast)
+ *         - 2: MED (medium)
+ *         - 3: SLO (slow)
+ *         - 4: AUT (auto)
+ *
+ * This is a simple accessor function that returns the internally stored
+ * AGC value without querying the transceiver. Use get_agc() if you need
+ * to retrieve the current setting from the radio.
+ *
+ * @note This returns the cached value in agcval, not a fresh read from the radio
+ */
 int  RIG_FTX1::agc_val()
 {
 	return (agcval);
@@ -2540,7 +2699,31 @@ const char *RIG_FTX1::nb_label() {
     }
 }
 
-// this is for setting the noise blanker NB analog level.  Combines val with nb_state to send to radio
+/**
+ * Sets the noise blanker (NB) analog level.
+ *
+ * @param val The desired NB level (0 to 10)
+ *
+ * This function configures the noise blanker level by combining the level value
+ * with the current nb_state to send to the transceiver. The command format is:
+ * - "NL00nn;" for VFO A (when inuse != onB)
+ * - "NL10nn;" for VFO B (when inuse == onB)
+ *
+ * where 'nn' is the level value as a 2-digit zero-padded decimal number.
+ *
+ * The function performs the following operations:
+ * 1. Clamps the input value to the valid range (0-10)
+ * 2. Stores the clamped value in nb_level
+ * 3. If nb_state is 0 (off) or the level is 0, sets newVal to 0 and updates the UI label to "NB" (inactive)
+ * 4. Otherwise, uses the requested level and updates the UI label to show the current NB setting (active)
+ * 5. Formats the level as a 2-digit string and constructs the NL command
+ * 6. Sends the command to the transceiver
+ *
+ * @note Values less than 0 are clamped to 0
+ * @note Values greater than 10 are clamped to 10
+ * @note The noise_blanker_label() function is called to update the UI display
+ * @note When nb_state is 0, the level is forced to 0 regardless of the input value
+ */
 void RIG_FTX1::set_nb_level(int val) // 0 to 10
 {
     nb_level = val;
@@ -2577,7 +2760,36 @@ void RIG_FTX1::set_nb_level(int val) // 0 to 10
 }
 
 
-// this is for getting the noise blanker NB analog level
+/**
+ * Retrieves the noise blanker (NB) analog level from the transceiver.
+ *
+ * @return The current NB level (0-10), or nb_state if parsing fails
+ *
+ * This function queries the transceiver for the current noise blanker level
+ * by sending the NL (Noise Level) command. The command format is:
+ * - "NL0;" for VFO A (when inuse != onB)
+ * - "NL1;" for VFO B (when inuse == onB)
+ *
+ * The transceiver responds with "NLxnn;" where:
+ * - 'x' is the VFO selector (0 for VFO A, 1 for VFO B)
+ * - 'nn' is the NB level as a 2-digit decimal number (00-10)
+ *
+ * The function performs the following operations:
+ * 1. Sends the NL query command for the active VFO
+ * 2. Parses the 2-digit level value from the response
+ * 3. Clamps the level to maximum of 10 if needed
+ * 4. Updates nb_level with the current value
+ * 5. If level > 0: Sets nb_state to 1 (on) if it was 0, updates UI label to show active NB
+ * 6. If level == 0: Sets nb_state to 0 (off), ensures nb_level has a valid saved value (≥1), updates UI label to show inactive NB
+ *
+ * The function maintains the distinction between nb_level (the saved level setting)
+ * and nb_state (whether NB is currently on/off). When NB is toggled on, it uses
+ * the last saved nb_level value.
+ *
+ * @note The function waits up to 100ms for a response with maximum 7 characters
+ * @note Returns nb_state if parsing fails
+ * @note Performs sanity checks to ensure nb_level is at least 1 when NB is off
+ */
 int RIG_FTX1::get_nb_level()
 {
   	if (inuse == onB)
@@ -2635,7 +2847,33 @@ int RIG_FTX1::get_nb_level()
  	return nb_level;
 }
 
-// this is for setting the noise blanker (NB) state
+/**
+ * Sets the noise blanker (NB) state (on/off).
+ *
+ * @param b true to enable noise blanker, false to disable
+ *
+ * This function controls the noise blanker state by updating nb_state and
+ * sending the appropriate level command to the transceiver. The function
+ * manages the interaction between the on/off state and the level setting:
+ *
+ * When b is false (turning NB off):
+ * - Sets nb_state to 0
+ * - Updates the UI label to "NB" (inactive)
+ * - Sends level 0 to the transceiver via set_nb_level()
+ *
+ * When b is true (turning NB on):
+ * - Sets nb_state to 1
+ * - Ensures level is at least 1 (performs sanity check)
+ * - Sends the current nb_level to the transceiver via set_nb_level()
+ *
+ * The function preserves the last used nb_level value when toggling NB on/off,
+ * so that re-enabling NB restores the previous level setting rather than
+ * defaulting to a fixed value.
+ *
+ * @note The actual command transmission to the transceiver is handled by set_nb_level()
+ * @note The nb_level value is preserved when toggling off, allowing it to be restored when toggling on
+ * @note If nb_level is less than 1 when enabling NB, it is automatically set to 1
+ */
 void RIG_FTX1::set_noise(bool b) // b==0 is off
  {
      int level = nb_level;
@@ -2665,7 +2903,22 @@ void RIG_FTX1::set_noise(bool b) // b==0 is off
     this->set_nb_level(level); // send new level (and nb_state) to radio
  }
 
- // this is for the noise blanker NB - boolean true if on
+/**
+ * Retrieves the noise blanker (NB) state.
+ *
+ * @return The NB state: 1 if on, 0 if off
+ *
+ * This function queries the transceiver for the current noise blanker state
+ * by calling get_nb_level(), which updates both nb_level and nb_state based
+ * on the transceiver's response. The function then returns the nb_state value.
+ *
+ * The nb_state represents whether the noise blanker is currently active:
+ * - 0: Noise blanker is off
+ * - 1: Noise blanker is on
+ *
+ * @note This function is a wrapper around get_nb_level() that extracts only the on/off state
+ * @note The actual level value can be retrieved separately using get_nb_level()
+ */
  int RIG_FTX1::get_noise()
  {
  	gett("get_noise()");
@@ -2863,7 +3116,25 @@ int RIG_FTX1::get_break_in()
 	return progStatus.break_in;
 }
 
-// DNR - called by NR slider
+/**
+ * Sets the noise reduction value for the transceiver.
+ *
+ * @param val The noise reduction level (0-15, where 0 = off)
+ *
+ * This function configures the Digital Noise Reduction (DNR) level using the RL0 command.
+ * The command format is "RL0nn;" where 'nn' is the noise reduction level as a 2-digit
+ * zero-padded decimal number.
+ *
+ * If the noise reduction is toggled off (m_noise_reduction_on is false), the function
+ * forces the value to 0 regardless of the input parameter, ensuring the DNR is disabled.
+ *
+ * The function constructs the RL0 command with the appropriate level value, sends it to
+ * the transceiver, and logs the operation for debugging purposes.
+ *
+ * @note This function is called by the NR slider control in the UI
+ * @note The actual value sent depends on the m_noise_reduction_on state
+ * @note Valid range is typically 0-15, where higher values provide more noise reduction
+ */
 void RIG_FTX1::set_noise_reduction_val(int val)
 {
     if (!m_noise_reduction_on) {
@@ -2875,7 +3146,26 @@ void RIG_FTX1::set_noise_reduction_val(int val)
 	sett("set_noise_reduction_val");
 }
 
-// DNR - NR slider value
+/**
+ * Retrieves the current noise reduction level from the transceiver.
+ *
+ * @return The current noise reduction level (0-15, where 0 = off)
+ *
+ * This function queries the transceiver for the current Digital Noise Reduction (DNR)
+ * level by sending the RL0 command. The transceiver responds with "RL0nn;" where 'nn'
+ * is the noise reduction level as a 2-digit decimal number.
+ *
+ * The function parses the response string to extract the numeric value at positions
+ * [p+3, p+4] where p is the position of "RL0" in the reply. If parsing fails or the
+ * response is invalid, the function returns 0.
+ *
+ * This value represents the slider position in the UI and is used to synchronize the
+ * UI state with the transceiver's actual setting.
+ *
+ * @note This function is called by the NR slider control to read the current setting
+ * @note The function waits up to 100ms for a response with maximum 6 characters
+ * @note Returns 0 if the response cannot be parsed or NR is disabled
+ */
 int RIG_FTX1::get_noise_reduction_val()
 {
 	int val = 0;
@@ -2888,7 +3178,33 @@ int RIG_FTX1::get_noise_reduction_val()
 	return val;
 }
 
-// DNR - called by NR toggle button
+/**
+ * Sets the noise reduction state (on/off) with intelligent level management.
+ *
+ * @param val The desired state: 0 to disable noise reduction, non-zero to enable
+ *
+ * This function controls the Digital Noise Reduction (DNR) on/off state using the RL0
+ * command, with special logic to manage the interaction between the toggle button and
+ * the level slider:
+ *
+ * When enabling NR (val > 0):
+ * 1. Sets m_noise_reduction_on to true
+ * 2. Queries the current NR level from the transceiver
+ * 3. If already non-zero (NR already on), returns immediately without sending a command
+ * 4. If currently zero, sends RL001; to enable NR at minimum level (1)
+ *
+ * When disabling NR (val == 0):
+ * 1. Sets m_noise_reduction_on to false
+ * 2. Sends RL000; to disable NR
+ *
+ * This approach prevents unnecessary commands when NR is already in the desired state
+ * and ensures that enabling NR always starts at a visible level (1) rather than staying
+ * at zero.
+ *
+ * @note This function is called by the NR toggle button control in the UI
+ * @note The function preserves the user's selected level when toggling on/off
+ * @note Minimum NR level when enabling is 1 to provide immediate feedback
+ */
 void RIG_FTX1::set_noise_reduction(int val)
 {
     int newValue = val;
@@ -2908,7 +3224,23 @@ void RIG_FTX1::set_noise_reduction(int val)
 	sett("set_noise_reduction_on/off");
 }
 
-// DNR - value for NR toggle button
+/**
+ * Retrieves the noise reduction on/off state from the transceiver.
+ *
+ * @return 1 if noise reduction is enabled (level > 0), 0 if disabled
+ *
+ * This function determines the Digital Noise Reduction (DNR) on/off state by querying
+ * the current noise reduction level from the transceiver. The NR is considered "on"
+ * if the level value is greater than zero, and "off" if the level is zero.
+ *
+ * The function calls get_noise_reduction_val() to retrieve the current level and
+ * returns a boolean-style integer (0 or 1) representing the state. This value is
+ * used to synchronize the NR toggle button state in the UI.
+ *
+ * @note This function is called by the NR toggle button control to read the current state
+ * @note The threshold for "on" is any value greater than 0 (level 1-15)
+ * @note Returns 0 only when the noise reduction level is exactly 0
+ */
 int  RIG_FTX1::get_noise_reduction()
 {
 	return get_noise_reduction_val() > 0 ? 1 : 0; // any value but zero is on
