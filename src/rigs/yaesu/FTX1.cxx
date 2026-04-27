@@ -913,7 +913,7 @@ std::vector<MemoryResponse> RIG_FTX1::get_memory_range(int start_channel, int en
     for (long long ch = start_channel; ch <= end_channel; ++ch) {
         try {
             char ch_buf[6] = {0};
-            std::snprintf(ch_buf, sizeof(ch_buf), "%05d", ch);
+            std::snprintf(ch_buf, sizeof(ch_buf), "%05lld", ch);
 
             MemoryResponse memory;
             if (!get_memory_config(ch_buf, memory)) {
@@ -3134,7 +3134,7 @@ int RIG_FTX1::get_break_in()
  * @note This function is called by the NR slider control in the UI
  * @note The actual value sent depends on the m_noise_reduction_on state
  * @note Valid range is typically 0-15, where higher values provide more noise reduction
- */
+ */ 
 void RIG_FTX1::set_noise_reduction_val(int val)
 {
     if (!m_noise_reduction_on) {

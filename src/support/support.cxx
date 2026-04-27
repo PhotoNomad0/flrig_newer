@@ -388,6 +388,107 @@ static void update_label_memory(const std::string &memory_channel_str)
 bool last_rx_clarifier_state = false;
 int last_rx_clarifier_level = 0;
 
+static void read_ftx1_memory_and_clarifier()
+{
+//     	trace(2,"read_vfo(), rig_FTX1.name_", rig_FTX1.name_.c_str());
+	long long memory_channel = 0;
+	std::string memory_channel_tag = "";
+	bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
+	if (!memory_mode_init) {
+		memory_mode_init = true;
+		last_in_memory_mode = !in_memory_mode; // force update buttons
+	}
+
+	if (in_memory_mode != last_in_memory_mode) { // if changed then update controls
+		last_in_memory_mode = in_memory_mode;
+
+		if (in_memory_mode) {
+			if (btn_channel_up_dn) btn_channel_up_dn->show();
+			if (btn_scan_stop_start) btn_scan_stop_start->show();
+
+			if (labelMEMORY) labelMEMORY->show();
+			if (txt_xcvr_synch) txt_xcvr_synch->hide();
+			if (label_mem_channel) label_mem_channel->show();
+			TRACE_STREAM(1, "read_vfo() - get_current_memory changed memory_channel=" << memory_channel);
+			std::string memory_channel_str = std::to_string(memory_channel);
+			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag);
+
+			update_label_memory(memory_channel_str);
+
+			init_ftx1_memory_channels();
+
+			TRACE_STREAM(1, "read_vfo() - in memory mode setting label_mem_channel to '" << memory_channel_str);
+			update_label_mem_channel(memory_channel_tag);
+
+			if (channel_selector) channel_selector->show();
+		} else  { // in vfo_mode
+			labelMEMORY->hide();
+			if (label_mem_channel) {
+				update_label_memory("");
+				label_mem_channel->hide();
+			}
+
+			if (btn_channel_up_dn) btn_channel_up_dn->hide();
+			if (btn_scan_stop_start) btn_scan_stop_start->hide();
+			if (channel_selector) channel_selector->hide();
+		}
+	}
+
+	if (label_mem_channel) {
+		if (in_memory_mode) {
+			if (memory_channel != last_memory_channel) { // only update if changed
+				TRACE_STREAM(1, "read_vfo() - memory_channel changed from=" << last_memory_channel << " to " << memory_channel);
+				last_memory_channel = memory_channel;
+
+				if (memory_channel_tag != lastTag_) {
+					TRACE_STREAM(1, "read_vfo() - memory_channel_tag changed from=''" << lastTag_ << "'' to ''" << memory_channel_tag << "'");
+
+					update_label_mem_channel(memory_channel_tag);
+
+					std::string memory_channel_str = std::to_string(memory_channel);
+					update_label_memory(memory_channel_str);
+
+					if (channel_selector) {
+						std::string current_channel_selection = channel_selector->value();
+						current_channel_selection = current_channel_selection.substr(
+							0, current_channel_selection.find(" - ")
+						);
+						if (current_channel_selection != memory_channel_str) {
+							channel_selector->clear_entry();
+							TRACE_STREAM(1, "read_vfo() - channel_selector was '" << current_channel_selection << "', now channel is '" << memory_channel_str << "', clearing");
+//                             channel_selector->redraw_label();
+						}
+					}
+				}
+			}
+		} else { // not in memory mode
+			last_memory_channel = -1;
+		}
+	}
+
+	if (selrig->has_clarifier) {
+		if (inhibit_clarifier_level > 0) {
+			inhibit_clarifier_level--;
+		} else {
+			bool state = selrig->get_rx_clarifier_state();
+			btn_rx_clarifier->value(state ? 1 : 0);
+			if (state != last_rx_clarifier_state) {
+				TRACE_STREAM(1, "read_vfo(): clarifier state changed to =" << state << ", last state was =" << last_rx_clarifier_state);
+				last_rx_clarifier_state = state;
+			}
+
+			int level = selrig->get_rx_clarifier_value();
+			rx_clarifier_level->value(level);
+			rx_clarifier_level->activate();
+			rx_clarifier_level->redraw();
+			if (level != last_rx_clarifier_level) {
+				TRACE_STREAM(1, "read_vfo(): clarifier level changed to =" << level << ", last level was =" << last_rx_clarifier_level);
+				last_rx_clarifier_level = level;
+			}
+		}
+	}
+}
+
 void read_vfo()
 {
 	if (xcvr_name == rig_K3.name_) {
@@ -396,104 +497,8 @@ void read_vfo()
 	}
 
 	if (xcvr_name == rig_FTX1.name_) {
-//     	trace(2,"read_vfo(), rig_FTX1.name_", rig_FTX1.name_.c_str());
-		long long memory_channel = 0;
-		std::string memory_channel_tag = "";
-		bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
-		if (!memory_mode_init) {
-    		memory_mode_init = true;
-    		last_in_memory_mode = !in_memory_mode; // force update buttons
-		}
-
-        if (in_memory_mode != last_in_memory_mode) { // if changed then update controls
-            last_in_memory_mode = in_memory_mode;
-
-    		if (in_memory_mode) {
-                if (btn_channel_up_dn) btn_channel_up_dn->show();
-                if (btn_scan_stop_start) btn_scan_stop_start->show();
-
-                if (labelMEMORY) labelMEMORY->show();
-                if (txt_xcvr_synch) txt_xcvr_synch->hide();
-                if (label_mem_channel) label_mem_channel->show();
-    			TRACE_STREAM(1, "read_vfo() - get_current_memory changed memory_channel=" << memory_channel );
-                std::string memory_channel_str = std::to_string(memory_channel);
-    			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
-
-                update_label_memory(memory_channel_str);
-
-    			init_ftx1_memory_channels();
-
-                TRACE_STREAM(1, "read_vfo() - in memory mode setting label_mem_channel to '" << memory_channel_str);
-                update_label_mem_channel(memory_channel_tag);
-
-                if (channel_selector) channel_selector->show();
-            } else  { // in vfo_mode
-                labelMEMORY->hide();
-                if (label_mem_channel) {
-                    update_label_memory("");
-                    label_mem_channel->hide();
-                }
-
-                if (btn_channel_up_dn) btn_channel_up_dn->hide();
-                if (btn_scan_stop_start) btn_scan_stop_start->hide();
-                if (channel_selector) channel_selector->hide();
-            }
-        }
-
-        if (label_mem_channel) {
-            if (in_memory_mode) {
-              if (memory_channel != last_memory_channel) { // only update if changed
-     			TRACE_STREAM(1, "read_vfo() - memory_channel changed from=" << last_memory_channel << " to " << memory_channel );
-                last_memory_channel = memory_channel;
-
-                if (memory_channel_tag != lastTag_) {
-        			TRACE_STREAM(1, "read_vfo() - memory_channel_tag changed from=''" << lastTag_ << "'' to ''" << memory_channel_tag << "'" );
-
-                    update_label_mem_channel(memory_channel_tag);
-
-                    std::string memory_channel_str = std::to_string(memory_channel);
-                    update_label_memory(memory_channel_str);
-
-                    if (channel_selector) {
-                        std::string current_channel_selection = channel_selector->value();
-                        current_channel_selection = current_channel_selection.substr(
-                            0, current_channel_selection.find(" - ")
-                        );
-                        if (current_channel_selection != memory_channel_str) {
-                            channel_selector->clear_entry();
-                            TRACE_STREAM(1, "read_vfo() - channel_selector was '" << current_channel_selection << "', now channel is '" << memory_channel_str << "', clearing");
-//                             channel_selector->redraw_label();
-                        }
-                    }
-                }
-              }
-            } else { // not in memory mode
-                last_memory_channel = -1;
-            }
-        }
-
-        if (selrig->has_clarifier) {
-            if (inhibit_clarifier_level > 0) {
-                inhibit_clarifier_level--;
-            } else {
-                bool state = selrig->get_rx_clarifier_state();
-                btn_rx_clarifier->value(state ? 1 : 0);
-                if (state != last_rx_clarifier_state) {
-                    TRACE_STREAM(1, "read_vfo(): clarifier state changed to =" << state << ", last state was =" << last_rx_clarifier_state);
-                    last_rx_clarifier_state = state;
-                }
-
-                int level = selrig->get_rx_clarifier_value();
-                rx_clarifier_level->value(level);
-                rx_clarifier_level->activate();
-                rx_clarifier_level->redraw();
-                if (level != last_rx_clarifier_level) {
-                    TRACE_STREAM(1, "read_vfo(): clarifier level changed to =" << level << ", last level was =" << last_rx_clarifier_level);
-                    last_rx_clarifier_level = level;
-                }
-            }
-        }
-    }
+		read_ftx1_memory_and_clarifier();
+	}
 
 // transceiver changed ?
 	trace(1,"read_vfo()");
