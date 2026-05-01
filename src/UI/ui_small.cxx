@@ -1291,6 +1291,7 @@ Fl_Double_Window *tabs_window()
 		tab_ft991_bands->end();
 }
 
+        // FTX-1 extension
 		tab_ftx1_bands = new Fl_Group(0, 24, small_mainW, gph - 24, _("Band"));
 {
 			btn_ftx1_select_1 = new Fl_Button(4, 30, 60, 18, _("1.8"));
@@ -1715,7 +1716,7 @@ Fl_Double_Window *tabs_window()
 			sldr_nb_level->when(FL_WHEN_CHANGED);
 			sldr_nb_level->value(progStatus.nb_level);
 
-        // FTX-1 extensiong
+        // FTX-1 extension
 
 			rx_clarifier_level = new Fl_Wheel_Value_Slider(115, 35, 100, 22, _("RX Clarifier"));
 			rx_clarifier_level->tooltip(_("RX Clarifier level"));

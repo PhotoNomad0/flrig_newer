@@ -120,7 +120,8 @@ int meter_image = SWR_IMAGE;
 
 bool xcvr_online = false;
 
-std::vector<MemoryResponse> memories;
+// FTX-1 extension
+ std::vector<MemoryResponse> memories;
 
 // meter values passed to display functions
 
@@ -145,7 +146,7 @@ int inhibit_mic = 0;
 int inhibit_rfgain = 0;
 int inhibit_squelch = 0;
 
-// FTX-1 extensiong
+// FTX-1 extension
 int inhibit_clarifier_level = 0;
 
 struct SLIDER {
@@ -319,6 +320,8 @@ void TRACED(update_vfoAorB, void *d)
 	updateUI((void*)0);
 }
 
+// FTX-1 extension
+
 bool memory_mode_init = false;
 bool last_in_memory_mode = false;
 
@@ -387,7 +390,7 @@ static void update_label_memory(const std::string &memory_channel_str)
     labelMEMORY->redraw_label();
 }
 
-// FTX-1 extensiong
+// FTX-1 extension
 bool last_rx_clarifier_state = false;
 int last_rx_clarifier_level = 0;
 
@@ -575,7 +578,8 @@ void TRACED(updateUI, void *)
 
 }
 
-int  last_imode = -1; // for determining when mode has changed
+// FTX-1 extension
+ int  last_imode = -1; // for determining when mode has changed
 int lastbw = -1; // for determining when bw has changed
 
 void TRACED(set_Mode_BW_control, void *)
@@ -910,6 +914,7 @@ void read_auto_notch()
 	}
 }
 
+// FTX-1 extension
 const char *last_nb_label = "";
 int last_nb_level = -1;
 
@@ -2415,6 +2420,8 @@ void TRACED ( updateBandwidthControl, void *d )
 //		sldrOUTER->redraw();
 //	}
 }
+
+// FTX-1 extension
 
 void saveChannels(std::vector<MemoryResponse> memories_) {
 	memories = memories_;
@@ -4284,6 +4291,8 @@ void TRACED(synchronize_now)
 	Fl::add_timeout(0, synchronize);
 }
 
+// FTX-1 extension
+
 void vfo_mem_toggle( void *) {
 	guard_lock lock(&mutex_serial, "103");
 
@@ -4843,7 +4852,7 @@ void cbNoise()
 	update_noise( (void*)0 );
 }
 
-// FTX-1 extensiong
+// FTX-1 extension
 
 /**
  * @brief Sets the receive clarifier level value

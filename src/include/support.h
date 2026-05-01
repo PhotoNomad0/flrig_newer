@@ -212,12 +212,11 @@ extern void cb_line_out();
 extern void cb_bpf_center();
 extern void cb_special();
 extern void cb_nb_level();
+extern void setFocus();
 
-// FTX-1 extensiong
+// FTX-1 extension
 extern void set_rx_clarifier_level();
 extern void set_rx_clarifier_state(void*);
-
-extern void setFocus();
 
 // callbacks for tt550 transceiver
 extern void cb_tt550_line_out();
@@ -319,6 +318,8 @@ extern void break_in_label(const char *);
 extern void enable_yaesu_bandselect(int btn_num, bool enable = true);
 
 extern void synchronize_now();
+
+// FTX-1 extension
 extern void vfo_mem_toggle_now();
 extern void power_off_now();
 extern void channel_up_down_now(void *);

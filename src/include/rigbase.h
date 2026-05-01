@@ -67,6 +67,7 @@ extern const char *szbtnlabel;
 
 struct meterpair {float mtr; float val;};
 
+// FTX-1 extension
 struct MemoryResponse {
     std::string ChannelNum;  // channel number (5 bytes)
     std::string Frequency;  // frequency (9 bytes)
@@ -364,9 +365,8 @@ public:
 
 	bool has_voltmeter;
 
+    // FTX-1 extension
 	bool has_vfo_mem;
-
-    // FTX-1 extensiong
 	bool has_clarifier;
 
 // Icom Xcvr
@@ -625,7 +625,7 @@ int no_, noval_;
 	virtual void get_nb_min_max_step(double &min, double &max, double &step) {
 		min = 0; max = 100; step = 1; }
 
-    // FTX-1 extensiong
+    // FTX-1 extension
     virtual void get_clarifier_min_max_step(int &min, int &max, int &step) {
         min = -9999; max = 9999; step = 100; }
     virtual void get_clarifier_min_max_step(double &min, double &max, double &step) {
@@ -798,24 +798,22 @@ double vfo_;
 	virtual void set_special(int v) {}
 	virtual void set_band_selection(int v) {}
 	virtual void get_band_selection(int v) {}
+
+    // FTX-1 extension
 	virtual void vfo_mem_toggle() {}
 	virtual void power_off() {}
 	virtual void power(bool on) {}
 	virtual void change_channel(bool channel_up) {}
 	virtual void scan_operation(bool start) {}
 	virtual bool is_in_memory_mode() { return false; }
-
-    // FTX-1 extensiong
 	virtual void set_rx_clarifier_state(bool start) {}
 	virtual bool get_rx_clarifier_state() { return false; }
 	virtual void set_rx_clarifier_value(int level) {}
 	virtual int get_rx_clarifier_value() { return 0; }
-
 	virtual bool read_rx_dual() { return false; }
 	virtual void set_rx_dual(bool dual) {}
 	virtual bool read_tx_destination() { return false; }
 	virtual void set_tx_destination(bool sub_side) {}
-
     virtual std::vector<MemoryResponse> get_memory_channels() { return std::vector<MemoryResponse>(); }
 	virtual bool get_current_memory(long long &memory_channel, std::string &memory_channel_tag) { return false; }
 	virtual void select_channel(int channel) {}

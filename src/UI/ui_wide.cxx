@@ -582,6 +582,7 @@ CTRL  click: FreqB -> FreqA\
 				btnPTT->labelsize(12);
 				btnPTT->callback((Fl_Callback*)cb_btnPTT);
 
+// FTX-1 extension
 				labelMEMORY = new Fl_Box(
 					btnPTT->x() + btnPTT->w(), ypos,
 					btn_K3_swapAB->w() - 16, btnAswapB->h(), _("MEMORY"));

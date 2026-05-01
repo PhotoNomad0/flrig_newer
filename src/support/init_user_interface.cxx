@@ -779,6 +779,8 @@ void TRACED(init_Generic_Tabs)
 		hidden_tabs->add(genericSpeech);
 		hidden_tabs->add(genericRx);
 		hidden_tabs->add(genericMisc);
+		
+        // FTX-1 extension
         if (selrig->name_ == rig_FTX1.name_) {
             hidden_tabs->add(ftx1_tab);
             ftx1_tab->redraw();
@@ -786,6 +788,7 @@ void TRACED(init_Generic_Tabs)
         } else {
             ftx1_tab->hide();
         }
+
 		hidden_tabs->add(genericAux);
 		hidden_tabs->add(genericRXB);
 		hidden_tabs->add(genericUser_1);
@@ -1108,6 +1111,7 @@ void TRACED(init_Generic_Tabs)
 		genericMisc->show();
 	}
 
+    // FTX-1 extension
     if (selrig->name_ == rig_FTX1.name_) {
         tabsGeneric->add(ftx1_tab);
         ftx1_tab->redraw();
@@ -1260,7 +1264,7 @@ void TRACED(init_Generic_Tabs)
 		poll_compression->deactivate();
 		poll_compression->value( progStatus.poll_compression = 0 ); }
 
-    // FTX-1 extensiong
+    // FTX-1 extension
     if (selrig->has_clarifier) {
         rx_clarifier_level->show();
         btn_rx_clarifier->show();
@@ -2107,6 +2111,7 @@ P1/E1  on/on");
 			btnPreamp->tooltip("On/Off/Level");
 		}
 
+    // FTX-1 extension
     if (selrig->name_ == rig_FTX1.name_) {
         btnPreamp->label("IPO");
         btnPreamp->redraw_label();

@@ -210,7 +210,7 @@ rigbase::rigbase()
 	has_a2b =
 	has_vfoAB =
 	has_vfo_mem =
-	has_clarifier = false; // FTX-1 extensiong
+	has_clarifier = false; // FTX-1 extension
 
 	data_type = DT_BINARY;
 

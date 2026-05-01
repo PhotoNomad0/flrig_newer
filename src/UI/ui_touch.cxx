@@ -1076,6 +1076,7 @@ CTRL  click: FreqB -> FreqA\
 
 			tab_ft991_bands->end();
 
+// FTX-1 extension
 			tab_ftx1_bands = new Fl_Group(xpos, ypos+tabh, W, tabb, _("Band"));
 
 				btn_ftx1_select_1 = new Fl_Button(xpos+4, by, 50, bh, _("1.8"));
