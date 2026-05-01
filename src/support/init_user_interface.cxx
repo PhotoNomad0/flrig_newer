@@ -1260,6 +1260,7 @@ void TRACED(init_Generic_Tabs)
 		poll_compression->deactivate();
 		poll_compression->value( progStatus.poll_compression = 0 ); }
 
+    // FTX-1 extensiong
     if (selrig->has_clarifier) {
         rx_clarifier_level->show();
         btn_rx_clarifier->show();

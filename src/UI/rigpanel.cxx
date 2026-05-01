@@ -256,8 +256,11 @@ Hspinner *spnr_compression = (Hspinner *)0;
 
 Fl_Group *genericRx = (Fl_Group *)0;
 Fl_Wheel_Value_Slider *sldr_nb_level = (Fl_Wheel_Value_Slider *)0;
+
+// FTX-1 extensiong
 Fl_Wheel_Value_Slider *rx_clarifier_level = (Fl_Wheel_Value_Slider *)0;
 Fl_Light_Button *btn_rx_clarifier = (Fl_Light_Button *)0;
+
 //Fl_ComboBox *cbo_agc_level = (Fl_ComboBox *)0;
 Hspinner *spnr_bpf_center = (Hspinner *)0;
 
@@ -987,6 +990,7 @@ static void cb_sldr_nb_level(Fl_Wheel_Value_Slider* o, void*) {
 	cb_nb_level();
 }
 
+// FTX-1 extensiong
 static void cb_rx_clarifier_level(Fl_Wheel_Value_Slider* o, void*) {
 	set_rx_clarifier_level();
 }

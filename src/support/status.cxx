@@ -2668,6 +2668,7 @@ void status::UI_laststate()
 		sldr_nb_level->selection_color(btn_slider);
 	}
 
+    // FTX-1 extensiong
 	if (rx_clarifier_level) {
 		rx_clarifier_level->color(bg_slider);
 		rx_clarifier_level->selection_color(btn_slider);

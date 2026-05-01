@@ -1715,6 +1715,8 @@ Fl_Double_Window *tabs_window()
 			sldr_nb_level->when(FL_WHEN_CHANGED);
 			sldr_nb_level->value(progStatus.nb_level);
 
+        // FTX-1 extensiong
+
 			rx_clarifier_level = new Fl_Wheel_Value_Slider(115, 35, 100, 22, _("RX Clarifier"));
 			rx_clarifier_level->tooltip(_("RX Clarifier level"));
 			rx_clarifier_level->type(5);

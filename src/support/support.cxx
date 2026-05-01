@@ -144,6 +144,8 @@ int inhibit_power = 0;
 int inhibit_mic = 0;
 int inhibit_rfgain = 0;
 int inhibit_squelch = 0;
+
+// FTX-1 extensiong
 int inhibit_clarifier_level = 0;
 
 struct SLIDER {
@@ -385,6 +387,7 @@ static void update_label_memory(const std::string &memory_channel_str)
     labelMEMORY->redraw_label();
 }
 
+// FTX-1 extensiong
 bool last_rx_clarifier_state = false;
 int last_rx_clarifier_level = 0;
 
@@ -4839,6 +4842,8 @@ void cbNoise()
 
 	update_noise( (void*)0 );
 }
+
+// FTX-1 extensiong
 
 /**
  * @brief Sets the receive clarifier level value

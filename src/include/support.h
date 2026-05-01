@@ -213,6 +213,7 @@ extern void cb_bpf_center();
 extern void cb_special();
 extern void cb_nb_level();
 
+// FTX-1 extensiong
 extern void set_rx_clarifier_level();
 extern void set_rx_clarifier_state(void*);
 

@@ -123,7 +123,7 @@ static const char *vdata[] = {
 static int FTX1_wvals_PSK[] = {
 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18, 19, 20, 21, WVALS_LIMIT };
 
-static const int FTX1_wvals_AMFM[] = { 0, WVALS_LIMIT }; // generic for only one acceptable value
+static const int FTX1_wvals_AMFM[] = { 0, WVALS_LIMIT }; // used for settings with only one acceptable value
 
 static std::vector<std::string>FTX1_widths_AMwide;
 static const char *vamw[] = { "9000" };
@@ -160,7 +160,7 @@ static std::vector<std::string>FTX1_pre_labels;
 static const char *vFTX1_pre_labels[] = { "IPO", "Amp 1", "Amp 2" };
 
 static std::vector<std::string>FTX1_nb_labels;
-static const char *vFTX1_nb_labels[] = { "NB off", "NB 1", "NB 2", "NB 3", "NB 4", "NB 5", "NB 6", "NB 7", "NB 8", "NB 8", "NB 10" };
+static const char *vFTX1_nb_labels[] = { "NB off", "NB 1", "NB 2", "NB 3", "NB 4", "NB 5", "NB 6", "NB 7", "NB 8", "NB 8", "NB 10" }; // all possible values of NB
 //----------------------------------------------------------------------
 
 static GUI rig_widgets[]= {

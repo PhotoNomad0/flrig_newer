@@ -366,6 +366,7 @@ public:
 
 	bool has_vfo_mem;
 
+    // FTX-1 extensiong
 	bool has_clarifier;
 
 // Icom Xcvr
@@ -623,6 +624,8 @@ int no_, noval_;
 		min = 0; max = 100; step = 1; }
 	virtual void get_nb_min_max_step(double &min, double &max, double &step) {
 		min = 0; max = 100; step = 1; }
+
+    // FTX-1 extensiong
     virtual void get_clarifier_min_max_step(int &min, int &max, int &step) {
         min = -9999; max = 9999; step = 100; }
     virtual void get_clarifier_min_max_step(double &min, double &max, double &step) {
@@ -801,6 +804,8 @@ double vfo_;
 	virtual void change_channel(bool channel_up) {}
 	virtual void scan_operation(bool start) {}
 	virtual bool is_in_memory_mode() { return false; }
+
+    // FTX-1 extensiong
 	virtual void set_rx_clarifier_state(bool start) {}
 	virtual bool get_rx_clarifier_state() { return false; }
 	virtual void set_rx_clarifier_value(int level) {}
