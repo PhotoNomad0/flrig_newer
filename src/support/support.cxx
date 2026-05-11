@@ -393,11 +393,30 @@ static void update_label_memory(const std::string &memory_channel_str)
 // FTX-1 extension
 bool last_rx_clarifier_state = false;
 int last_rx_clarifier_level = 0;
+const int CHECK_INTERVAL = 5;
+int check_interval_count = 0;
+bool dual_rx_last_init = false;
+bool dual_rx_last = false;
+bool main_side_tx_init = false;
+bool main_side_tx_last = false;
 
 static void read_ftx1_memory_and_clarifier()
 {
 //     	trace(2,"read_vfo(), rig_FTX1.name_", rig_FTX1.name_.c_str());
-	long long memory_channel = 0;
+    if (++check_interval_count > CHECK_INTERVAL) {
+        check_interval_count = 0;
+        bool dual_rx = selrig->read_rx_dual();
+        if (!dual_rx_last_init || (dual_rx != dual_rx_last)) {
+            update_rx_selection_label(dual_rx);
+        }
+
+        bool main_side_tx = selrig->read_tx_destination();
+        if (!main_side_tx_init || (main_side_tx != main_side_tx_last)) {
+            update_tx_selection_label(dual_rx);
+        }
+    }
+
+    long long memory_channel = 0;
 	std::string memory_channel_tag = "";
 	bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
 	if (!memory_mode_init) {
@@ -4314,6 +4333,20 @@ void scan_stop_start(void *) {
 	selrig->change_channel(false);
 }
 
+static void update_rx_selection_label(bool dual_rx)
+{
+    const char *rx_srce = dual_rx ? "Dual Receiver" : "Single Receiver";
+    btn_rx_selection->label(rx_srce);
+    btn_rx_selection->redraw_label();
+}
+
+static void update_tx_selection_label(bool main_side_tx)
+{
+    const char *tx_dest = main_side_tx ? "Main-Side TX" : "Sub-Side TX";
+    btn_tx_selection->label(tx_dest);
+    btn_tx_selection->redraw_label();
+}
+
 void TRACED(vfo_mem_toggle_now)
 	Fl::remove_timeout(vfo_mem_toggle);
 	Fl::add_timeout(0, vfo_mem_toggle);
@@ -4355,9 +4388,7 @@ void TRACED(rx_selection_now, void *d)
 	} else {
 	    TRACE_STREAM(1, "rx_selection_now() - dual_rx toggled to " << dual_rx_new << "");
 	}
-	const char *rx_srce = dual_rx_new ? "Dual Receiver" : "Single Receiver";
-    btn_rx_selection->label(rx_srce);
-    btn_rx_selection->redraw_label();
+    update_rx_selection_label(dual_rx_new);
 }
 
 void TRACED(tx_selection_now, void *d)
@@ -4373,9 +4404,7 @@ void TRACED(tx_selection_now, void *d)
     } else {
         TRACE_STREAM(1, "tx_selection_nows() - main_side_tx toggled to " << main_side_tx_new << "");
     }
-    const char *tx_dest = main_side_tx_new ? "Main-Side TX" : "Sub-Side TX";
-    btn_tx_selection->label(tx_dest);
-    btn_tx_selection->redraw_label();
+    update_tx_selection_label(main_side_tx_new);
 }
 
 void TRACED(start_commands)
@@ -4916,13 +4945,13 @@ void TRACED(set_rx_clarifier_state, void *d)
 	bool newState = !currentState;
 	selrig->set_rx_clarifier_state(newState); // toggle
 	btn_rx_clarifier->value(newState ? 1 : 0); // update button
-	
+
 	bool updatedState = selrig->get_rx_clarifier_state();
-	
+
 	if (updatedState != newState) {
     	TRACE_STREAM(1, "set_rx_clarifier_state(): RX clarifier state is still " << updatedState << ", tried to set to " << newState << ". Trying again");
     	selrig->set_rx_clarifier_state(newState); // toggle
-    	
+
     	// verify state
     	updatedState = selrig->get_rx_clarifier_state();
     	if (updatedState != newState) {
