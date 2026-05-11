@@ -120,7 +120,8 @@ int meter_image = SWR_IMAGE;
 
 bool xcvr_online = false;
 
-std::vector<MemoryResponse> memories;
+// FTX-1 extension
+ std::vector<MemoryResponse> memories;
 
 // meter values passed to display functions
 
@@ -144,6 +145,9 @@ int inhibit_power = 0;
 int inhibit_mic = 0;
 int inhibit_rfgain = 0;
 int inhibit_squelch = 0;
+
+// FTX-1 extension
+int inhibit_clarifier_level = 0;
 
 struct SLIDER {
 enum {NOTCH, SHIFT, INNER, OUTER, LOCK, VOLUME, MIC, POWER, SQUELCH, RFGAIN, NB_LEVEL, NR, NR_VAL};
@@ -316,6 +320,8 @@ void TRACED(update_vfoAorB, void *d)
 	updateUI((void*)0);
 }
 
+// FTX-1 extension
+
 bool memory_mode_init = false;
 bool last_in_memory_mode = false;
 
@@ -384,6 +390,110 @@ static void update_label_memory(const std::string &memory_channel_str)
     labelMEMORY->redraw_label();
 }
 
+// FTX-1 extension
+bool last_rx_clarifier_state = false;
+int last_rx_clarifier_level = 0;
+
+static void read_ftx1_memory_and_clarifier()
+{
+//     	trace(2,"read_vfo(), rig_FTX1.name_", rig_FTX1.name_.c_str());
+	long long memory_channel = 0;
+	std::string memory_channel_tag = "";
+	bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
+	if (!memory_mode_init) {
+		memory_mode_init = true;
+		last_in_memory_mode = !in_memory_mode; // force update buttons
+	}
+
+	if (in_memory_mode != last_in_memory_mode) { // if changed then update controls
+		last_in_memory_mode = in_memory_mode;
+
+		if (in_memory_mode) {
+			if (btn_channel_up_dn) btn_channel_up_dn->show();
+			if (btn_scan_stop_start) btn_scan_stop_start->show();
+
+			if (labelMEMORY) labelMEMORY->show();
+			if (txt_xcvr_synch) txt_xcvr_synch->hide();
+			if (label_mem_channel) label_mem_channel->show();
+			TRACE_STREAM(1, "read_vfo() - get_current_memory changed memory_channel=" << memory_channel);
+			std::string memory_channel_str = std::to_string(memory_channel);
+			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag);
+
+			update_label_memory(memory_channel_str);
+
+			init_ftx1_memory_channels();
+
+			TRACE_STREAM(1, "read_vfo() - in memory mode setting label_mem_channel to '" << memory_channel_str);
+			update_label_mem_channel(memory_channel_tag);
+
+			if (channel_selector) channel_selector->show();
+		} else  { // in vfo_mode
+			labelMEMORY->hide();
+			if (label_mem_channel) {
+				update_label_memory("");
+				label_mem_channel->hide();
+			}
+
+			if (btn_channel_up_dn) btn_channel_up_dn->hide();
+			if (btn_scan_stop_start) btn_scan_stop_start->hide();
+			if (channel_selector) channel_selector->hide();
+		}
+	}
+
+	if (label_mem_channel) {
+		if (in_memory_mode) {
+			if (memory_channel != last_memory_channel) { // only update if changed
+				TRACE_STREAM(1, "read_vfo() - memory_channel changed from=" << last_memory_channel << " to " << memory_channel);
+				last_memory_channel = memory_channel;
+
+				if (memory_channel_tag != lastTag_) {
+					TRACE_STREAM(1, "read_vfo() - memory_channel_tag changed from=''" << lastTag_ << "'' to ''" << memory_channel_tag << "'");
+
+					update_label_mem_channel(memory_channel_tag);
+
+					std::string memory_channel_str = std::to_string(memory_channel);
+					update_label_memory(memory_channel_str);
+
+					if (channel_selector) {
+						std::string current_channel_selection = channel_selector->value();
+						current_channel_selection = current_channel_selection.substr(
+							0, current_channel_selection.find(" - ")
+						);
+						if (current_channel_selection != memory_channel_str) {
+							channel_selector->clear_entry();
+							TRACE_STREAM(1, "read_vfo() - channel_selector was '" << current_channel_selection << "', now channel is '" << memory_channel_str << "', clearing");
+//                             channel_selector->redraw_label();
+						}
+					}
+				}
+			}
+		} else { // not in memory mode
+			last_memory_channel = -1;
+		}
+	}
+
+	if (selrig->has_clarifier) {
+		if (inhibit_clarifier_level > 0) {
+			inhibit_clarifier_level--;
+		} else {
+			bool state = selrig->get_rx_clarifier_state();
+			btn_rx_clarifier->value(state ? 1 : 0);
+			if (state != last_rx_clarifier_state) {
+				TRACE_STREAM(1, "read_vfo(): clarifier state changed to =" << state << ", last state was =" << last_rx_clarifier_state);
+				last_rx_clarifier_state = state;
+			}
+
+			int level = selrig->get_rx_clarifier_value();
+			rx_clarifier_level->value(level);
+			rx_clarifier_level->activate();
+			rx_clarifier_level->redraw();
+			if (level != last_rx_clarifier_level) {
+				TRACE_STREAM(1, "read_vfo(): clarifier level changed to =" << level << ", last level was =" << last_rx_clarifier_level);
+				last_rx_clarifier_level = level;
+			}
+		}
+	}
+}
 
 void read_vfo()
 {
@@ -393,82 +503,8 @@ void read_vfo()
 	}
 
 	if (xcvr_name == rig_FTX1.name_) {
-//     	trace(2,"read_vfo(), rig_FTX1.name_", rig_FTX1.name_.c_str());
-		long long memory_channel = 0;
-		std::string memory_channel_tag = "";
-		bool in_memory_mode = selrig->get_current_memory(memory_channel, memory_channel_tag);
-		if (!memory_mode_init) {
-    		memory_mode_init = true;
-    		last_in_memory_mode = !in_memory_mode; // force update buttons
-		}
-
-        if (in_memory_mode != last_in_memory_mode) { // if changed then update controls
-            last_in_memory_mode = in_memory_mode;
-
-    		if (in_memory_mode) {
-                if (btn_channel_up_dn) btn_channel_up_dn->show();
-                if (btn_scan_stop_start) btn_scan_stop_start->show();
-
-                if (labelMEMORY) labelMEMORY->show();
-                if (txt_xcvr_synch) txt_xcvr_synch->hide();
-                if (label_mem_channel) label_mem_channel->show();
-    			TRACE_STREAM(1, "read_vfo() - get_current_memory changed memory_channel=" << memory_channel );
-                std::string memory_channel_str = std::to_string(memory_channel);
-    			TRACE_STREAM(1, "read_vfo() - get_current_memory memory_channel_str=" << memory_channel_str << ", memory_channel_tag=" << memory_channel_tag );
-
-                update_label_memory(memory_channel_str);
-
-    			init_ftx1_memory_channels();
-
-                TRACE_STREAM(1, "read_vfo() - in memory mode setting label_mem_channel to '" << memory_channel_str);
-                update_label_mem_channel(memory_channel_tag);
-
-                if (channel_selector) channel_selector->show();
-            } else  { // in vfo_mode
-                labelMEMORY->hide();
-                if (label_mem_channel) {
-                    update_label_memory("");
-                    label_mem_channel->hide();
-                }
-
-                if (btn_channel_up_dn) btn_channel_up_dn->hide();
-                if (btn_scan_stop_start) btn_scan_stop_start->hide();
-                if (channel_selector) channel_selector->hide();
-            }
-        }
-
-        if (label_mem_channel) {
-            if (in_memory_mode) {
-              if (memory_channel != last_memory_channel) { // only update if changed
-     			TRACE_STREAM(1, "read_vfo() - memory_channel changed from=" << last_memory_channel << " to " << memory_channel );
-                last_memory_channel = memory_channel;
-
-                if (memory_channel_tag != lastTag_) {
-        			TRACE_STREAM(1, "read_vfo() - memory_channel_tag changed from=''" << lastTag_ << "'' to ''" << memory_channel_tag << "'" );
-
-                    update_label_mem_channel(memory_channel_tag);
-
-                    std::string memory_channel_str = std::to_string(memory_channel);
-                    update_label_memory(memory_channel_str);
-
-                    if (channel_selector) {
-                        std::string current_channel_selection = channel_selector->value();
-                        current_channel_selection = current_channel_selection.substr(
-                            0, current_channel_selection.find(" - ")
-                        );
-                        if (current_channel_selection != memory_channel_str) {
-                            channel_selector->clear_entry();
-                            TRACE_STREAM(1, "read_vfo() - channel_selector was '" << current_channel_selection << "', now channel is '" << memory_channel_str << "', clearing");
-//                             channel_selector->redraw_label();
-                        }
-                    }
-                }
-              }
-            } else { // not in memory mode
-                last_memory_channel = -1;
-            }
-        }
-    }
+		read_ftx1_memory_and_clarifier();
+	}
 
 // transceiver changed ?
 	trace(1,"read_vfo()");
@@ -542,7 +578,8 @@ void TRACED(updateUI, void *)
 
 }
 
-int  last_imode = -1; // for determining when mode has changed
+// FTX-1 extension
+ int  last_imode = -1; // for determining when mode has changed
 int lastbw = -1; // for determining when bw has changed
 
 void TRACED(set_Mode_BW_control, void *)
@@ -877,6 +914,7 @@ void read_auto_notch()
 	}
 }
 
+// FTX-1 extension
 const char *last_nb_label = "";
 int last_nb_level = -1;
 
@@ -2382,6 +2420,8 @@ void TRACED ( updateBandwidthControl, void *d )
 //		sldrOUTER->redraw();
 //	}
 }
+
+// FTX-1 extension
 
 void saveChannels(std::vector<MemoryResponse> memories_) {
 	memories = memories_;
@@ -4251,17 +4291,25 @@ void TRACED(synchronize_now)
 	Fl::add_timeout(0, synchronize);
 }
 
+// FTX-1 extension
+
 void vfo_mem_toggle( void *) {
+	guard_lock lock(&mutex_serial, "103");
+
 	trace(1, "VFO memory toggle()");
 	selrig->vfo_mem_toggle();
 }
 
 void power_off( void *) {
+	guard_lock lock(&mutex_serial, "104");
+
 	trace(1, "power_off()");
 	selrig->power(false);
 }
 
 void scan_stop_start(void *) {
+	guard_lock lock(&mutex_serial, "105");
+
 	trace(1, "scan_stop_start()");
 	selrig->change_channel(false);
 }
@@ -4277,6 +4325,8 @@ void TRACED(power_off_now)
 }
 
 void TRACED(channel_up_down_now, void *d)
+	guard_lock lock(&mutex_serial, "106");
+
 	size_t shift = reinterpret_cast<size_t>(d);
 	bool shift_down = (shift != 0);
 	TRACE_STREAM(1, "channel_up_down_now(): shift_down=" << shift_down);
@@ -4284,6 +4334,8 @@ void TRACED(channel_up_down_now, void *d)
 }
 
 void TRACED(scan_stop_start_now, void *d)
+	guard_lock lock(&mutex_serial, "107");
+
 	size_t shift = reinterpret_cast<size_t>(d);
 	bool shift_start = (shift != 0);
 	TRACE_STREAM(1, "scan_stop_start_now(): shift_start=" << shift_start);
@@ -4291,6 +4343,8 @@ void TRACED(scan_stop_start_now, void *d)
 }
 
 void TRACED(rx_selection_now, void *d)
+	guard_lock lock(&mutex_serial, "108");
+
 	TRACE_STREAM(1, "rx_selection_now() - called");
 	bool dual_rx = selrig->read_rx_dual();
 // 	TRACE_STREAM(1, "rx_selection_now() - currently dual_rx=" << dual_rx << ", toggling");
@@ -4307,6 +4361,8 @@ void TRACED(rx_selection_now, void *d)
 }
 
 void TRACED(tx_selection_now, void *d)
+	guard_lock lock(&mutex_serial, "109");
+
 	TRACE_STREAM(1, "tx_selection_now() - called");
 	bool main_side_tx = selrig->read_tx_destination();
 // 	TRACE_STREAM(1, "tx_selection_now() - currently main_side_tx=" << main_side_tx << ", toggling");
@@ -4796,6 +4852,84 @@ void cbNoise()
 	update_noise( (void*)0 );
 }
 
+// FTX-1 extension
+
+/**
+ * @brief Sets the receive clarifier level value
+ *
+ * Handles the UI callback for the RX clarifier level control (slider/spinner).
+ * Updates the transceiver's RX clarifier offset value after validating the event type.
+ * Ignores mouse enter/leave events and sets inhibit flag during drag operations
+ * to prevent excessive serial port updates.
+ *
+ * @note Requires selrig->has_clarifier to be true
+ * @note Thread-safe via mutex_serial guard lock
+ * @see setIFshift() for similar control pattern
+ */
+void set_rx_clarifier_level()
+{
+	if (!selrig->has_clarifier) return;
+	int currentLevel = 0;
+
+	guard_lock lock(&mutex_serial, "100");
+
+	trace(1, "set_rx_clarifier_level()");
+	currentLevel = rx_clarifier_level->value();
+	TRACE_STREAM(1, "set_rx_clarifier_level(): rx_clarifier_level->value()=" << currentLevel);
+
+	int ev = Fl::event();
+	if (ev == FL_LEAVE || ev == FL_ENTER) return;
+	if (ev == FL_DRAG || ev == FL_PUSH) {
+    	inhibit_clarifier_level = 2;
+		return;
+	}
+	selrig->set_rx_clarifier_value(currentLevel);
+}
+
+/**
+ * @brief Toggles the receive clarifier on/off state
+ *
+ * Callback handler for the RX clarifier enable/disable button.
+ * Reads the current clarifier state from the transceiver and toggles it.
+ * The shift parameter (from widget callback data) is currently unused but
+ * reserved for potential future shift-key modifier detection.
+ *
+ * @param d Callback data pointer (reinterpret_cast to size_t for shift detection)
+ * @note Requires selrig->has_clarifier to be true
+ * @note Thread-safe via mutex_serial guard lock
+ * @see set_rx_clarifier_level() for value control
+ */
+void TRACED(set_rx_clarifier_state, void *d)
+	if (!selrig->has_clarifier) return;
+
+	guard_lock lock(&mutex_serial, "101");
+	inhibit_clarifier_level = 1;
+
+// 	size_t shift = reinterpret_cast<size_t>(d);
+// 	bool shifted = (shift != 0);
+// 	TRACE_STREAM(1, "set_rx_clarifier_state(): shifted=" << shifted);
+
+	bool currentState = selrig->get_rx_clarifier_state();
+	TRACE_STREAM(1, "set_rx_clarifier_state(): RX clarifier state currently" << currentState);
+
+
+	bool newState = !currentState;
+	selrig->set_rx_clarifier_state(newState); // toggle
+	btn_rx_clarifier->value(newState ? 1 : 0); // update button
+	
+	bool updatedState = selrig->get_rx_clarifier_state();
+	
+	if (updatedState != newState) {
+    	TRACE_STREAM(1, "set_rx_clarifier_state(): RX clarifier state is still " << updatedState << ", tried to set to " << newState << ". Trying again");
+    	selrig->set_rx_clarifier_state(newState); // toggle
+    	
+    	// verify state
+    	updatedState = selrig->get_rx_clarifier_state();
+    	if (updatedState != newState) {
+        	TRACE_STREAM(1, "set_rx_clarifier_state(): FAILED - RX clarifier state is still " << updatedState << ", tried to set to " << newState);
+    	}
+	}
+}
 
 /**
  * @brief Callback handler for noise blanker level control

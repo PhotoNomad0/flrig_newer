@@ -106,6 +106,8 @@ extern Fl_Button *btn_KX3_swapAB;
 extern Fl_Button *btn_KX3_A2B;
 extern Fl_Light_Button *btnB;
 extern Fl_Box *labelMEMORY;
+
+// FTX-1 extension
 extern Fl_Box *label_mem_channel;
 extern Fl_ComboBox *channel_selector;
 extern Fl_Button *btn_rx_selection;
@@ -224,6 +226,7 @@ extern Fl_Button *btn_ft991_select_13;
 extern Fl_PL_tone *choice_ft991_tTONE;
 extern Fl_PL_tone *choice_ft991_rTONE;
 
+// FTX-1 extension
 extern Fl_Group  *tab_ftx1_bands;
 extern Fl_Button *btn_ftx1_select_1;
 extern Fl_Button *btn_ftx1_select_2;
@@ -349,18 +352,23 @@ extern Fl_Light_Button *btnCompON;
 extern Hspinner *spnr_compression;
 extern Fl_Group *genericRx;
 extern Fl_Wheel_Value_Slider *sldr_nb_level;
-//extern Fl_ComboBox *cbo_agc_level;
-extern Hspinner *spnr_bpf_center;
-extern Fl_Check_Button *btn_use_bpf_center;
-extern Fl_Group *genericMisc;
+
+// FTX-1 extension
 extern Fl_Group *ftx1_tab;
-extern Hspinner *spnr_vfo_adj;
-extern Hspinner *spnr_line_out;
-extern Fl_Light_Button *btnSpecial;
+extern Fl_Wheel_Value_Slider *rx_clarifier_level;
+extern Fl_Light_Button *btn_rx_clarifier;
 extern Fl_Button *btn_vfo_mem;
 extern Fl_Button *btn_power_off;
 extern Fl_Button *btn_channel_up_dn;
 extern Fl_Button *btn_scan_stop_start;
+
+//extern Fl_ComboBox *cbo_agc_level;
+extern Hspinner *spnr_bpf_center;
+extern Fl_Check_Button *btn_use_bpf_center;
+extern Fl_Group *genericMisc;
+extern Hspinner *spnr_vfo_adj;
+extern Hspinner *spnr_line_out;
+extern Fl_Light_Button *btnSpecial;
 extern Fl_Check_Button *btn_ext_tuner;
 extern Fl_Check_Button *btn_xcvr_auto_on;
 extern Fl_Check_Button *btn_xcvr_auto_off;

@@ -2628,8 +2628,11 @@ void status::UI_laststate()
 	if (btn_vox)			btn_vox->selection_color(btn_lt_color);
 	if (btnCompON)			btnCompON->selection_color(btn_lt_color);
 	if (btnSpecial)			btnSpecial->selection_color(btn_lt_color);
+
+// FTX-1 extension
     if (btn_vfo_mem)        btn_vfo_mem->selection_color(btn_lt_color);
     if (btn_ext_tuner)      btn_ext_tuner->selection_color(btn_lt_color);
+
 	if (btn_tt550_vox)		btn_tt550_vox->selection_color(btn_lt_color);
 	if (btn_tt550_CompON)	btn_tt550_CompON->selection_color(btn_lt_color);
 	if (btnAGC)				btnAGC->selection_color(btn_lt_color);
@@ -2666,6 +2669,12 @@ void status::UI_laststate()
 	if (sldr_nb_level) {
 		sldr_nb_level->color(bg_slider);
 		sldr_nb_level->selection_color(btn_slider);
+	}
+
+    // FTX-1 extension
+	if (rx_clarifier_level) {
+		rx_clarifier_level->color(bg_slider);
+		rx_clarifier_level->selection_color(btn_slider);
 	}
 
 	if (spnrPOWER)			spnrPOWER->color(bg_slider);

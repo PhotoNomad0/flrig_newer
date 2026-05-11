@@ -139,6 +139,13 @@ public:
 		min = 1; max = 10; step = 1; }
 	void get_nb_min_max_step(double &min, double &max, double &step) {
 		min = 1; max = 10; step = 1; }
+		
+    // FTX-1 extension
+	void get_clarifier_min_max_step(int &min, int &max, int &step) {
+		min = -10000; max = 10000; step = 200; }
+	void get_clarifier_min_max_step(double &min, double &max, double &step) {
+		min = -10000; max = 10000; step = 200; }
+
 	void set_nb_level(int val);
 	int  get_nb_level();
     const char *nb_label();
@@ -185,6 +192,12 @@ public:
 	virtual void scan_operation(bool start);
 	virtual bool is_in_memory_mode();
 	virtual void power(bool on);
+
+    // FTX-1 extension
+    virtual void set_rx_clarifier_state(bool start);
+    virtual bool get_rx_clarifier_state();
+    virtual void set_rx_clarifier_value(int level);
+    virtual int get_rx_clarifier_value();
 
 	virtual bool read_rx_dual();
 	virtual void set_rx_dual(bool dual);
