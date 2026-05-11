@@ -423,11 +423,15 @@ static void read_ftx1_memory_and_clarifier()
         bool dual_rx = selrig->read_rx_dual();
         if (!dual_rx_last_init || (dual_rx != dual_rx_last)) {
             update_rx_selection_label(dual_rx);
+            dual_rx_last = dual_rx;
+            dual_rx_last_init = true;
         }
 
         bool main_side_tx = selrig->read_tx_destination();
         if (!main_side_tx_init || (main_side_tx != main_side_tx_last)) {
             update_tx_selection_label(main_side_tx);
+            main_side_tx_last = main_side_tx;
+            main_side_tx_init = true;
         }
     }
 
