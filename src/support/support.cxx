@@ -390,10 +390,25 @@ static void update_label_memory(const std::string &memory_channel_str)
     labelMEMORY->redraw_label();
 }
 
+static void update_rx_selection_label(bool dual_rx)
+{
+    const char *rx_srce = dual_rx ? "Dual Receiver" : "Single Receiver";
+    btn_rx_selection->label(rx_srce);
+    btn_rx_selection->redraw_label();
+}
+
+static void update_tx_selection_label(bool main_side_tx)
+{
+    const char *tx_dest = main_side_tx ? "Main-Side TX" : "Sub-Side TX";
+    btn_tx_selection->label(tx_dest);
+    btn_tx_selection->redraw_label();
+}
+
+
 // FTX-1 extension
 bool last_rx_clarifier_state = false;
 int last_rx_clarifier_level = 0;
-const int CHECK_INTERVAL = 5;
+const int CHECK_INTERVAL = 6;
 int check_interval_count = 0;
 bool dual_rx_last_init = false;
 bool dual_rx_last = false;
@@ -412,7 +427,7 @@ static void read_ftx1_memory_and_clarifier()
 
         bool main_side_tx = selrig->read_tx_destination();
         if (!main_side_tx_init || (main_side_tx != main_side_tx_last)) {
-            update_tx_selection_label(dual_rx);
+            update_tx_selection_label(main_side_tx);
         }
     }
 
@@ -4331,20 +4346,6 @@ void scan_stop_start(void *) {
 
 	trace(1, "scan_stop_start()");
 	selrig->change_channel(false);
-}
-
-static void update_rx_selection_label(bool dual_rx)
-{
-    const char *rx_srce = dual_rx ? "Dual Receiver" : "Single Receiver";
-    btn_rx_selection->label(rx_srce);
-    btn_rx_selection->redraw_label();
-}
-
-static void update_tx_selection_label(bool main_side_tx)
-{
-    const char *tx_dest = main_side_tx ? "Main-Side TX" : "Sub-Side TX";
-    btn_tx_selection->label(tx_dest);
-    btn_tx_selection->redraw_label();
 }
 
 void TRACED(vfo_mem_toggle_now)
