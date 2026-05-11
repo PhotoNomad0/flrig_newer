@@ -390,18 +390,33 @@ static void update_label_memory(const std::string &memory_channel_str)
     labelMEMORY->redraw_label();
 }
 
+bool dual_rx_last_init = false;
+bool dual_rx_last = false;
+bool main_side_tx_init = false;
+bool main_side_tx_last = false;
+
 static void update_rx_selection_label(bool dual_rx)
 {
-    const char *rx_srce = dual_rx ? "Dual Receiver" : "Single Receiver";
-    btn_rx_selection->label(rx_srce);
-    btn_rx_selection->redraw_label();
+    if (!dual_rx_last_init || (dual_rx != dual_rx_last)) {
+        dual_rx_last = dual_rx;
+        dual_rx_last_init = true;
+
+        const char *rx_srce = dual_rx ? "Dual Receiver" : "Single Receiver";
+        btn_rx_selection->label(rx_srce);
+        btn_rx_selection->redraw_label();
+    }
 }
 
 static void update_tx_selection_label(bool main_side_tx)
 {
-    const char *tx_dest = main_side_tx ? "Main-Side TX" : "Sub-Side TX";
-    btn_tx_selection->label(tx_dest);
-    btn_tx_selection->redraw_label();
+    if (!main_side_tx_init || (main_side_tx != main_side_tx_last)) {
+        main_side_tx_last = main_side_tx;
+        main_side_tx_init = true;
+
+        const char *tx_dest = main_side_tx ? "Main-Side TX" : "Sub-Side TX";
+        btn_tx_selection->label(tx_dest);
+        btn_tx_selection->redraw_label();
+    }
 }
 
 
@@ -410,10 +425,6 @@ bool last_rx_clarifier_state = false;
 int last_rx_clarifier_level = 0;
 const int CHECK_INTERVAL = 6;
 int check_interval_count = 0;
-bool dual_rx_last_init = false;
-bool dual_rx_last = false;
-bool main_side_tx_init = false;
-bool main_side_tx_last = false;
 
 static void read_ftx1_memory_and_clarifier()
 {
@@ -421,18 +432,10 @@ static void read_ftx1_memory_and_clarifier()
     if (++check_interval_count > CHECK_INTERVAL) {
         check_interval_count = 0;
         bool dual_rx = selrig->read_rx_dual();
-        if (!dual_rx_last_init || (dual_rx != dual_rx_last)) {
-            update_rx_selection_label(dual_rx);
-            dual_rx_last = dual_rx;
-            dual_rx_last_init = true;
-        }
+        update_rx_selection_label(dual_rx);
 
         bool main_side_tx = selrig->read_tx_destination();
-        if (!main_side_tx_init || (main_side_tx != main_side_tx_last)) {
-            update_tx_selection_label(main_side_tx);
-            main_side_tx_last = main_side_tx;
-            main_side_tx_init = true;
-        }
+        update_tx_selection_label(main_side_tx);
     }
 
     long long memory_channel = 0;
