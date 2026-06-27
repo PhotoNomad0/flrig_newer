@@ -5,3 +5,10 @@ config.status
 Makefile
 src/stamp-h1
 src/config.h
+*.o
+src/fileselector/.dirstamp
+*.dylib
+src/flrig-2.0.10/flrig-2.0.10.app
+.dirstamp
+src/flrig-2.0.10.dmg
+src/flrig
