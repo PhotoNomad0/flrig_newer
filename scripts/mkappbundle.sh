@@ -65,7 +65,70 @@ function bundle()
 	cd "$appname/Contents"
 
 	copy_libs "MacOS/$binary"
+    cd -
+    sign_bundle "$appname"
+}
 
+function sign_bundle()
+{
+	app="$1"
+
+	sign_identity="${CODESIGN_IDENTITY:--}"
+
+	echo "codesigning $app"
+
+	if test "x$sign_identity" = "x-"; then
+		echo "  using ad-hoc signature"
+
+		sign_file() {
+			codesign --force --sign "$sign_identity" "$1"
+		}
+
+		sign_app() {
+			codesign --force --deep --sign "$sign_identity" "$1"
+		}
+	else
+		echo "  using Developer ID: $sign_identity"
+
+		sign_file() {
+			codesign \
+				--force \
+				--options runtime \
+				--timestamp \
+				--sign "$sign_identity" \
+				"$1"
+		}
+
+		sign_app() {
+			codesign \
+				--force \
+				--deep \
+				--options runtime \
+				--timestamp \
+				--sign "$sign_identity" \
+				"$1"
+		}
+	fi
+
+	# Frameworks
+	if test -d "$app/Contents/Frameworks"; then
+		find "$app/Contents/Frameworks" \
+			-type f \
+			\( -name "*.dylib" -o -name "*.so" \) \
+			-print0 |
+		while IFS= read -r -d '' file; do
+			sign_file "$file"
+		done
+	fi
+
+	# Main app
+	sign_file "$app/Contents/MacOS/$binary"
+
+	# Whole Bundle
+	sign_app "$app"
+
+	echo "verifying signature..."
+	codesign --verify --deep --strict --verbose=2 "$app"
 }
 
 #=======================================================================
